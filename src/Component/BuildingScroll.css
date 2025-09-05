@@ -1,0 +1,1595 @@
+
+
+/* ------------------------------
+    Hero Section / Landing Page
+------------------------------ */
+.container {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  
+}
+.content {
+  min-height: 500vh;
+  width: 100%;
+  background-image: url("/copy_3_cropped.jpg");
+ 
+  --bg-crop-left: 0%;
+  background-size: cover;
+
+  background-position: left center !important;
+ 
+  background-attachment: scroll;
+  will-change: background-position;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Background wrapper using an <img> (GPU-accelerated transform & object-position) */
+.bg-wrapper {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bg-image {
+  position: absolute; 
+  top: 0;
+  left: 0;
+  width: 110%;      
+  height: 110%;     
+  object-fit: cover;
+  transform: translateZ(0);
+}
+
+
+
+
+.content.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+@font-face {
+  font-family: FONT1;
+  src: url("./bodoni-six-itc-bold-italic-os-5871d33e4dc4a.ttf");
+  font-display: swap;
+}
+@font-face {
+  font-family: FONT2;
+  src: url("./BRITTANYSIGNATURE.TTF");
+}
+@font-face {
+  font-family: FONT3;
+  src: url("./GIAZA.OTF");
+  font-display: swap;
+}
+
+
+
+
+
+/* ------------------------------
+    Hero Text Cards
+------------------------------ */
+.card, .card_2, .card_3, .card_4, .card_5 {
+  color: rgb(255, 255, 255);
+  padding: 30px 40px;
+  position: absolute;
+  left: 58%;
+  font-family: FONT1;
+  font-size: 3rem;
+  font-weight: 900;
+  opacity: 1;
+  max-width: 40%;
+}
+
+.card_1 { top: 235%; }
+.card_2 { top: 170%; }
+.card_3 { top: 140%; }
+.card_4 { top: 0%; }
+.card_5 { top: -67%; }
+
+.gold-number {
+  font-family: FONT3;
+  font-size: 12rem;
+  text-align: center;
+  font-weight: 900;
+  color: transparent;
+  background-image: linear-gradient(to right, #D4AF37, #EBD58A, #D4AF37);
+  -webkit-background-clip: text;
+  background-clip: text;
+  display: block;
+  margin: 0;
+  text-shadow:
+    -2px -2px 0 #D4AF37,
+    2px -2px 0 #EBD58A,
+    -2px 2px 0 #A67C30,
+    2px 2px 0 #7A5B2B,
+    -4px -4px 0 #EBD58A,
+    4px -4px 0 #D4AF37,
+    -4px 4px 0 #7A5B2B,
+    4px 4px 0 #5C431F,
+    0 0 20px rgba(255, 235, 175, 0.8),
+    0 0 40px rgba(255, 235, 175, 0.6),
+    0 0 60px rgba(255, 235, 175, 0.4);
+}
+
+.card-label {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+  padding-top: 30px;
+}
+
+.letter {
+  display: inline-block;
+}
+
+.card-paragraph {
+  font-family: FONT1;
+  font-weight: 400;
+  font-size: 2.3rem;
+  text-align: center;
+}
+
+
+.top-right-image {
+  position: fixed;
+  top: 20px;
+  right: 30px;
+  width: 250px;
+  height: auto;  /* maintain aspect ratio */
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  margin: 0;     /* remove default spacing */
+  padding: 0;
+  display: block; /* ensures no inline spacing around img */
+}
+
+
+/* ------------------------------
+    Scroll-to-Gallery Button
+------------------------------ */
+.scroll-to-gallery-btn {
+  position: absolute;
+  top: 265%;
+  left: 50%;
+  background: rgba(192, 160, 98, 0.2); 
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(192, 160, 98, 0.8); 
+  transform: translateX(-50%);
+  color: #000000;
+  padding: 20px 60px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 5px;
+  z-index: 10;
+  overflow: hidden;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.scroll-to-gallery-btn span {
+  position: relative;
+  z-index: 2; 
+}
+
+.scroll-to-gallery-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(192, 160, 98, 0.8); 
+  height: 100%;
+  border-radius: 5px; 
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  z-index: 1;
+}
+
+.scroll-to-gallery-btn:hover::before {
+  transform: scaleX(1);
+}
+
+
+/* ------------------------------
+    Music Button
+------------------------------ */
+.music-toggle-btn {
+  position: fixed;
+  bottom: 89px;
+  left: 10%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  background: black;
+  color: #fff;
+  cursor: pointer;
+  z-index: 20;
+}
+
+/* ------------------------------
+    Single Image Gallery
+------------------------------ */
+
+.single-image-gallery-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  z-index: 100;
+  background-color: transparent;
+}
+
+.gallery-item {
+  opacity: 1;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Add this to contain the oversized image */
+}
+
+
+.single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image {
+  width: 105vw;
+  height: 105vh;
+  object-fit: cover;
+  flex-shrink: 0; /* Prevent image from shrinking */
+  opacity: 1;
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sec-gallery-image { z-index: 101; }
+.third-gallery-image { z-index: 103; }
+.fourth-gallery-image { z-index: 105; }
+
+/* ------------------------------
+    Text Overlays
+------------------------------ */
+
+.single-image-text-overlay,
+.sec-image-text-overlay,
+.third-image-text-overlay,
+.fourth-image-text-overlay {
+  position: absolute;
+  padding: 20px;
+  color: #f3f3f3;
+  z-index: 102;
+  opacity: 0; /* Initially hidden */
+}
+
+.single-image-text-overlay .word,
+.sec-image-text-overlay .word,
+.third-image-text-overlay .word,
+.fourth-image-text-overlay .word {
+  opacity: 0; /* Words are initially hidden */
+  transform: translateY(20px);
+}
+
+/* Specific text overlay positioning */
+.single-image-text-overlay {
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  width: 25%;
+}
+
+.sec-image-text-overlay {
+  bottom: 5%;
+  right: 5%;
+  width: 40%;
+  text-align: right;
+}
+
+
+.third-image-text-overlay {
+  bottom: 5%;
+  left: 5%;
+  width: 40%;
+  text-align: left;
+  color: #fff;
+  z-index: 110;
+}
+/* 
+.fourth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  text-align: center;
+  color: #fff;
+  z-index: 111;
+} */
+
+/* .fourth-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 700px;
+} */
+
+/* .single-image-text-overlay h2,
+.sec-image-text-overlay h2,
+.third-image-text-overlay h2,
+.fourth-image-text-overlay h2 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  font-family: FONT1;
+  margin-bottom: 1rem;
+}
+
+.single-image-text-overlay p,
+.sec-image-text-overlay p,
+.third-image-text-overlay p,
+.fourth-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 700px;
+} */
+
+
+/* Example: Img 2 heading larger, paragraph smaller */
+/* Img2 overlay (mirror of Img1 but on right side) */
+.sec-image-text-overlay {
+  position: absolute;
+  top: 50%;                 /* vertical center */
+  right: 5%;                /* anchor to right side */
+  transform: translateY(-50%);
+  width: 25%;               /* match Img1’s width */
+  text-align: right;        /* align text flush to the right */
+  color: #fff;
+  z-index: 102;
+}
+
+/* Heading for Img2 */
+.sec-image-text-overlay h2 {
+  font-size: 3rem;
+  color: #ffffff;
+  max-width: 530px;         /* custom heading width */
+  margin-left: auto;        /* align width block to the right */
+}
+
+/* Paragraph for Img2 */
+.sec-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 500px;         /* custom paragraph width (like Img1) */
+  margin-left: auto;        /* keep aligned with right side */
+}
+/* Img3 overlay (like Img1 but custom widths) */
+.third-image-text-overlay {
+  position: absolute;
+  top: 55%;
+  left: 2%;
+  transform: translateY(-50%);
+  width: 42%;           /* expanded width */
+  text-align: left;
+  color: #fff;
+  z-index: 110;
+}
+
+.third-image-text-overlay h2 {
+  font-size: 2.5rem;
+  color: #ffffff;
+  max-width: 100%;   font-family: FONT1;      /* allow full container width */
+}
+
+.third-image-text-overlay p {
+  font-size: 1.5rem;
+  font-family: FONT1;
+  max-width: 600px;      /* keep paragraph readable */
+}
+/* Container */
+.fourth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  right: 3%;
+  transform: translateY(-50%);
+  width: 60%;
+  text-align: right;     /* everything aligns right */
+  color: #eee5e5;
+  z-index: 110;
+}
+
+/* Common rule for h2 + p */
+
+
+/* .building-img{
+  height: 300px;
+  width: 300px;
+} */
+
+
+/* Container holds everything and is the reference for absolute positioning */
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: white;
+}
+
+/* New styles for the logo, text, and button on the building image */
+
+
+/* .sub-heading {
+  position: absolute;
+  top: 15%; 
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-size: 1.5rem; 
+  text-align: center;
+} */
+
+
+
+
+.building-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 50vh 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.landing-logo {
+  position: absolute;
+  top: 15%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  width: 300px; 
+  z-index: 10;
+  height: 300px;
+}
+.sub-heading {
+    position: absolute;
+    top: 23%;
+    left: 50%;  font-family: FONT1;
+    color: rgb(132, 120, 90);
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    font-size: 1.5rem; /* Adjust font size as needed */
+    text-align: center;
+}
+.explore-btn {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 20px 60px;
+  background: rgba(192, 160, 98, 0.2); 
+  backdrop-filter: blur(15px);
+  color: #000000; /* keep text black */
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid rgba(192, 160, 98, 0.8);
+  cursor: pointer;
+  border-radius: 5px;
+  overflow: hidden;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.explore-btn span {
+  position: relative;
+  z-index: 2; /* above the ::before overlay */
+}
+
+.explore-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(192, 160, 98, 0.8); 
+  border-radius: 5px; 
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  z-index: 1; /* BELOW the text */
+}
+
+.explore-btn:hover::before {
+  transform: scaleX(1); /* golden hover expands, but text stays black on top */
+}
+
+
+
+
+/* ... all other existing styles ... */
+
+.cloud-image {
+  position: absolute;
+  top: 40%;           
+  left: 50%;
+  transform: translateX(-50%) scale(1.05); 
+  width: 120%;
+  opacity: 0.85;      
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 10;        
+  filter: drop-shadow(0 25px 40px rgba(0,0,0,0.2)) blur(0.8px); 
+}
+
+
+
+/* .cloud-image {
+  position: absolute;
+  top: 40%;         
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  opacity: 0.7;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 5;
+} */
+
+
+
+
+/* ------------------------------
+    Music Button
+------------------------------ */
+.music-toggle-btn {
+  position: fixed;
+  bottom: 89px;
+  left: 10%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  background: black;
+  color: #fff;
+  cursor: pointer;
+  z-index: 20;
+}
+
+/* ------------------------------
+    Single Image Gallery
+------------------------------ */
+
+.single-image-gallery-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  z-index: 100;
+  background-color: transparent;
+}
+
+.gallery-item {
+  opacity: 1;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Add this to contain the oversized image */
+}
+
+
+.single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image {
+  width: 105vw;
+  height: 105vh;
+  object-fit: cover;
+  flex-shrink: 0; /* Prevent image from shrinking */
+  opacity: 1;
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sec-gallery-image { z-index: 101; }
+.third-gallery-image { z-index: 103; }
+.fourth-gallery-image { z-index: 105; }
+
+/* ------------------------------
+    Text Overlays
+------------------------------ */
+
+.single-image-text-overlay,
+.sec-image-text-overlay,
+.third-image-text-overlay,
+.fourth-image-text-overlay {
+  position: absolute;
+  padding: 20px;
+  color: #fff;
+  z-index: 102;
+  opacity: 0; /* Initially hidden */
+}
+
+.single-image-text-overlay .word,
+.sec-image-text-overlay .word,
+.third-image-text-overlay .word,
+.fourth-image-text-overlay .word {
+  opacity: 0; /* Words are initially hidden */
+  transform: translateY(20px);
+}
+
+/* Specific text overlay positioning */
+.single-image-text-overlay {
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  width: 25%;
+}
+
+
+
+
+.third-image-text-overlay {
+  bottom: 5%;
+  left: 5%;
+  width: 40%;
+  text-align: left;
+  color: #fff;
+  z-index: 110;
+}
+/* 
+.fourth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  text-align: center;
+  color: #fff;
+  z-index: 111;
+} */
+
+/* .fourth-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 700px;
+} */
+
+.single-image-text-overlay h2,
+.sec-image-text-overlay h2,
+.third-image-text-overlay h2,
+.fourth-image-text-overlay h2 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  font-family: FONT1;
+  margin-bottom: 1rem;
+}
+
+.single-image-text-overlay p,
+.sec-image-text-overlay p,
+.third-image-text-overlay p,
+.fourth-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 700px;
+}
+
+.sec-image-text-overlay {
+  position: absolute;
+  top: 50%;                 /* vertical center */
+  right: 5%;                /* anchor to right side */
+  transform: translateY(-50%);
+  width: 25%;               /* match Img1’s width */
+  text-align: right;        /* align text flush to the right */
+  color: #fff;
+  z-index: 102;
+}
+
+/* Heading for Img2 */
+.sec-image-text-overlay h2 {
+  font-size: 3rem;
+  color: #ffffff;
+  max-width: 530px;         /* custom heading width */
+  margin-left: auto;        /* align width block to the right */
+}
+
+/* Paragraph for Img2 */
+.sec-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 500px;         /* custom paragraph width (like Img1) */
+  margin-left: auto;        /* keep aligned with right side */
+}
+/* Img3 overlay (like Img1 but custom widths) */
+.third-image-text-overlay {
+  position: absolute;
+  top: 55%;
+  left: 2%;
+  transform: translateY(-50%);
+  width: 42%;           /* expanded width */
+  text-align: left;
+  color: #fff;
+  z-index: 110;
+}
+
+.third-image-text-overlay h2 {
+  font-size: 2.5rem;
+  color: #ffffff;
+  max-width: 100%;   font-family: FONT1;      /* allow full container width */
+}
+
+.third-image-text-overlay p {
+  font-size: 1.5rem;
+  font-family: FONT1;
+  max-width: 600px;      /* keep paragraph readable */
+}
+/* Container */
+.fourth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  right: 3%;
+  transform: translateY(-50%);
+  width: 60%;
+  text-align: right;     /* everything aligns right */
+  color: #e8e3e3;
+  z-index: 110;
+}
+
+/* Common rule for h2 + p */
+.fourth-image-text-overlay h2,
+.fourth-image-text-overlay p {
+  max-width: 800px;      /* same width for both */
+  margin-left: auto;     /* push to right */
+  margin-right: 0;
+  text-align: right;     /* same alignment */
+}
+
+
+
+/* Container holds everything and is the reference for absolute positioning */
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: white;
+}
+
+
+
+.building-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 50vh 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.landing-logo {
+  position: absolute;
+  top: 15%; /* Position the top edge at the vertical center */
+  left: 50%; /* Position the left edge at the horizontal center */
+  transform: translate(-50%, -50%); /* Shift the element back by half of its size to truly center it */
+  width: 300px; /* Adjust size as needed */
+  z-index: 10;
+  height: 300px;
+}
+
+
+
+
+/* ------------------------------
+    Music Button
+------------------------------ */
+.music-toggle-btn {
+  position: fixed;
+  bottom: 89px;
+  left: 10%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  background: black;
+  color: #fff;
+  cursor: pointer;
+  z-index: 20;
+}
+
+/* ------------------------------
+    Single Image Gallery
+------------------------------ */
+
+.single-image-gallery-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  z-index: 100;
+  background-color: transparent;
+}
+
+.gallery-item {
+  opacity: 1;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Add this to contain the oversized image */
+}
+
+
+.single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image {
+  width: 105vw;
+  height: 105vh;
+  object-fit: cover;
+  flex-shrink: 0; /* Prevent image from shrinking */
+  opacity: 1;
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sec-gallery-image { z-index: 101; }
+.third-gallery-image { z-index: 103; }
+.fourth-gallery-image { z-index: 105; }
+
+/* ------------------------------
+    Text Overlays
+------------------------------ */
+
+.single-image-text-overlay,
+.sec-image-text-overlay,
+.third-image-text-overlay,
+.fourth-image-text-overlay {
+  position: absolute;
+  padding: 20px;
+  color: #fff;
+  z-index: 102;
+  opacity: 0; /* Initially hidden */
+}
+
+.single-image-text-overlay .word,
+.sec-image-text-overlay .word,
+.third-image-text-overlay .word,
+.fourth-image-text-overlay .word {
+  opacity: 0; /* Words are initially hidden */
+  transform: translateY(20px);
+}
+
+/* Specific text overlay positioning */
+.single-image-text-overlay {
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  width: 25%;
+}
+
+.sec-image-text-overlay {
+  bottom: 5%;
+  right: 5%;
+  width: 40%;
+  text-align: right;
+}
+
+/* .third-image-text-overlay {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  text-align: center;
+}
+
+.fourth-image-text-overlay {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  text-align: center;
+} */
+
+.third-image-text-overlay {
+  bottom: 5%;
+  left: 5%;
+  width: 40%;
+  text-align: left;
+  color: #fff;
+  z-index: 110;
+}
+/* 
+.fourth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  text-align: center;
+  color: #fff;
+  z-index: 111;
+} */
+
+/* .fourth-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 700px;
+} */
+
+.single-image-text-overlay h2,
+.sec-image-text-overlay h2,
+.third-image-text-overlay h2,
+.fourth-image-text-overlay h2 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  font-family: FONT1;
+  margin-bottom: 1rem;
+}
+
+.single-image-text-overlay p,
+.sec-image-text-overlay p,
+.third-image-text-overlay p,
+.fourth-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 700px;
+}
+
+
+/* Example: Img 2 heading larger, paragraph smaller */
+/* Img2 overlay (mirror of Img1 but on right side) */
+.sec-image-text-overlay {
+  position: absolute;
+  top: 50%;                 /* vertical center */
+  right: 5%;                /* anchor to right side */
+  transform: translateY(-50%);
+  width: 25%;               /* match Img1’s width */
+  text-align: right;        /* align text flush to the right */
+  color: #fff;
+  z-index: 102;
+}
+
+/* Heading for Img2 */
+.sec-image-text-overlay h2 {
+  font-size: 3rem;
+  color: #ffffff;
+  max-width: 530px;         /* custom heading width */
+  margin-left: auto;        /* align width block to the right */
+}
+
+/* Paragraph for Img2 */
+.sec-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 500px;         /* custom paragraph width (like Img1) */
+  margin-left: auto;        /* keep aligned with right side */
+}
+/* Img3 overlay (like Img1 but custom widths) */
+.third-image-text-overlay {
+  position: absolute;
+  top: 55%;
+  left: 2%;
+  transform: translateY(-50%);
+  width: 42%;           /* expanded width */
+  text-align: left;
+  color: #fff;
+  z-index: 110;
+}
+
+.third-image-text-overlay h2 {
+  font-size: 2.5rem;
+  color: #ffffff;
+  max-width: 100%;   font-family: FONT1;      /* allow full container width */
+}
+
+.third-image-text-overlay p {
+  font-size: 1.5rem;
+  font-family: FONT1;
+  max-width: 600px;      /* keep paragraph readable */
+}
+/* Container */
+.fourth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  right: 3%;
+  transform: translateY(-50%);
+  width: 60%;
+  text-align: right;     /* everything aligns right */
+  color: #fff;
+  z-index: 110;
+}
+
+/* Common rule for h2 + p */
+.fourth-image-text-overlay h2,
+.fourth-image-text-overlay p {
+  max-width: 800px;      /* same width for both */
+  margin-left: auto;     /* push to right */
+  margin-right: 0;
+  text-align: right;     /* same alignment */
+}
+
+
+/* Container holds everything and is the reference for absolute positioning */
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: white;
+}
+
+
+
+.building-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 50vh 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.landing-logo {
+  position: absolute;
+  top: 15%; /* Position the top edge at the vertical center */
+  left: 50%; /* Position the left edge at the horizontal center */
+  transform: translate(-50%, -50%); /* Shift the element back by half of its size to truly center it */
+  width: 300px; /* Adjust size as needed */
+  z-index: 10;
+  height: 300px;
+}
+
+
+/* ... all other existing styles ... */
+
+/* .cloud-image {
+  position: fixed;
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  opacity: 0.7;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 1;
+} */
+
+
+
+
+.gold-number {
+  font-family: FONT3;
+  font-size: 12rem;
+  text-align: center;
+  font-weight: 900;
+  color: transparent;
+  background-image: linear-gradient(to right, #D4AF37, #EBD58A, #D4AF37);
+  -webkit-background-clip: text;
+  background-clip: text;
+  display: block;
+  margin: 0;
+  text-shadow:
+    -2px -2px 0 #D4AF37,
+    2px -2px 0 #EBD58A,
+    -2px 2px 0 #A67C30,
+    2px 2px 0 #7A5B2B,
+    -4px -4px 0 #EBD58A,
+    4px -4px 0 #D4AF37,
+    -4px 4px 0 #7A5B2B,
+    4px 4px 0 #5C431F,
+    0 0 20px rgba(255, 235, 175, 0.8),
+    0 0 40px rgba(255, 235, 175, 0.6),
+    0 0 60px rgba(255, 235, 175, 0.4);
+}
+
+.card-label {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+  padding-top: 30px;
+}
+
+.letter {
+  display: inline-block;
+}
+
+.card-paragraph {
+  font-family: FONT1;
+  font-weight: 400;
+  font-size: 2.3rem;
+  text-align: center;
+}
+
+
+
+
+/* ------------------------------
+    Music Button
+------------------------------ */
+.music-toggle-btn {
+  position: fixed;
+  bottom: 89px;
+  left: 10%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  background: black;
+  color: #fff;
+  cursor: pointer;
+  z-index: 20;
+}
+
+/* ------------------------------
+    Single Image Gallery
+------------------------------ */
+
+.single-image-gallery-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  z-index: 100;
+  background-color: transparent;
+}
+
+.gallery-item {
+  opacity: 1;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Add this to contain the oversized image */
+}
+
+
+.single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image {
+  width: 105vw;
+  height: 105vh;
+  object-fit: cover;
+  flex-shrink: 0; /* Prevent image from shrinking */
+  opacity: 1;
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sec-gallery-image { z-index: 101; }
+.third-gallery-image { z-index: 103; }
+.fourth-gallery-image { z-index: 105; }
+
+/* ------------------------------
+    Text Overlays
+------------------------------ */
+
+.single-image-text-overlay,
+.sec-image-text-overlay,
+.third-image-text-overlay,
+.fourth-image-text-overlay {
+  position: absolute;
+  padding: 20px;
+  color: #fff;
+  z-index: 102;
+  opacity: 0; /* Initially hidden */
+}
+
+.single-image-text-overlay .word,
+.sec-image-text-overlay .word,
+.third-image-text-overlay .word,
+.fourth-image-text-overlay .word {
+  opacity: 0; /* Words are initially hidden */
+  transform: translateY(20px);
+}
+
+/* Specific text overlay positioning */
+.single-image-text-overlay {
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  width: 25%;
+}
+
+.sec-image-text-overlay {
+  bottom: 5%;
+  right: 5%;
+  width: 40%;
+  text-align: right;
+}
+
+
+
+.third-image-text-overlay {
+  bottom: 5%;
+  left: 5%;
+  width: 40%;
+  text-align: left;
+  color: #fff;
+  z-index: 110;
+}
+
+.single-image-text-overlay h2,
+.sec-image-text-overlay h2,
+.third-image-text-overlay h2,
+.fourth-image-text-overlay h2 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  font-family: FONT1;
+  margin-bottom: 1rem;
+}
+
+.single-image-text-overlay p,
+.sec-image-text-overlay p,
+.third-image-text-overlay p,
+.fourth-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 700px;
+}
+
+
+/* Example: Img 2 heading larger, paragraph smaller */
+/* Img2 overlay (mirror of Img1 but on right side) */
+.sec-image-text-overlay {
+  position: absolute;
+  top: 50%;                 /* vertical center */
+  right: 5%;                /* anchor to right side */
+  transform: translateY(-50%);
+  width: 25%;               /* match Img1’s width */
+  text-align: right;        /* align text flush to the right */
+  color: #fff;
+  z-index: 102;
+}
+
+/* Heading for Img2 */
+.sec-image-text-overlay h2 {
+  font-size: 3rem;
+  color: #ffffff;
+  max-width: 530px;         /* custom heading width */
+  margin-left: auto;        /* align width block to the right */
+}
+
+/* Paragraph for Img2 */
+.sec-image-text-overlay p {
+  font-size: 1.7rem;
+  font-family: FONT1;
+  max-width: 500px;         /* custom paragraph width (like Img1) */
+  margin-left: auto;        /* keep aligned with right side */
+}
+/* Img3 overlay (like Img1 but custom widths) */
+.third-image-text-overlay {
+  position: absolute;
+  top: 55%;
+  left: 2%;
+  transform: translateY(-50%);
+  width: 42%;           /* expanded width */
+  text-align: left;
+  color: #fff;
+  z-index: 110;
+}
+
+.third-image-text-overlay h2 {
+  font-size: 2.5rem;
+  color: #ffffff;
+  max-width: 100%;   font-family: FONT1;      /* allow full container width */
+}
+
+.third-image-text-overlay p {
+  font-size: 1.5rem;
+  font-family: FONT1;
+  max-width: 600px;      /* keep paragraph readable */
+}
+/* Container */
+.fourth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  right: 3%;
+  transform: translateY(-50%);
+  width: 60%;
+  text-align: right;     /* everything aligns right */
+  color: #fff;
+  z-index: 110;
+}
+.fourth-image-text-overlayy {
+  position: absolute;
+  top: 50%;
+right: 3%; /* start from right */
+  transform: translateY(-50%);
+  color: white;
+  text-align: left;font-family: FONT1;
+  opacity: 0;
+    max-width: 430px;
+  pointer-events: none;
+}
+
+
+/* Common rule for h2 + p */
+.fourth-image-text-overlay h2,
+.fourth-image-text-overlay p {
+  max-width: 800px;      /* same width for both */
+  margin-left: auto;     /* push to right */
+  margin-right: 0;
+  text-align: right;     /* same alignment */
+}
+
+
+
+/* Container holds everything and is the reference for absolute positioning */
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: white;
+}
+
+
+
+.building-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 50vh 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+/* .landing-logo {
+  position: absolute;
+  top: 45%; 
+  left: 53%; 
+  transform: translate(-50%, -50%); 
+  width: 300px; 
+  z-index: 10;
+  height: 300px;
+} */
+
+
+/* ... all other existing styles ... */
+
+/* .cloud-image {
+  position: fixed;
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  opacity: 0.7;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 1;
+} */
+
+
+
+.fifth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  color: rgb(243, 240, 240);
+  text-align: left;  max-width: 550px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fifth-image-text-overlay h2 {
+   font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px; font-family: FONT1;
+  line-height: 1.2;
+}
+
+.fifth-image-text-overlay p {
+  font-size: 1.7rem;
+  font-weight: 400;
+  line-height: 1.5; font-family: FONT1;
+  max-width: 400px;
+}
+
+.sixth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+right: 1%; /* start from right */
+  transform: translateY(-50%);
+  color: white;
+  text-align: left;font-family: FONT1;
+  opacity: 0;
+    max-width: 650px;
+  pointer-events: none;
+}
+
+
+
+.sixth-image-text-overlay h2 {
+   font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px; font-family: FONT1;
+  line-height: 1.2;
+}
+
+.seventh-image-text-overlay p {
+  text-align: left;   /* Align text to left */
+  margin-left: 0;     /* Remove extra spacing if any */
+  font-size: 1.2rem;
+}
+
+.seventh-image-text-overlay {
+  position: absolute;
+top: 43%;         /* closer to the bottom */
+  right: 8%;
+  text-align: right;
+  color: rgb(83, 68, 68);  /* change to white if needed for visibility */
+  max-width: 40%;
+  z-index: 20;
+  line-height: 1.4;     /* improves readability */
+}
+
+.seventh-image-text-overlay h2 {
+  font-size: 1.5rem;
+  font-weight: bold;font-family: FONT1;
+  margin-bottom: 0.5rem; /* reduce space to fit line */
+  position: relative;
+}
+
+/* Line between heading and paragraph */
+.seventh-image-text-overlay h2::after {
+  content: "";
+  display: block;
+  width: 100%;           /* final width of the line */
+  height: 2px;          /* thickness */
+  background-color: rgb(225, 161, 0);  /* color */
+ margin: 1rem 0 0 auto;  /* increase top margin to add space */
+
+  /* Animation setup */
+  transform: scaleX(0);          /* start with zero width */
+  transform-origin: left;        /* grow from left to right */
+  transition: transform 1s ease-out;  /* smooth grow animation */
+}
+
+/* When overlay has .show class, animate the line */
+.seventh-image-text-overlay.show h2::after {
+  transform: scaleX(1);          /* final width */
+}
+
+
+
+.seventh-gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.eighth-gallery-image {
+  width: 110%;         /* full width of its container */
+  height: 100vh;       /* full viewport height */
+  object-fit: cover;   /* cover the container without distortion */
+  display: block;
+}
+.eighth-image-text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 50px 60px;       /* increase padding for bigger box */
+  border-radius: 12px;
+  text-align: center;
+  max-width: 90%;           /* increase width from 80% to 90% */
+  min-width: 400px;         /* optional: set a minimum width */
+  min-height: 350px;        /* increase minimum height */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+
+.eighth-image-text-overlay h2 {
+  margin-bottom: 15px;
+  font-size: 2rem;
+  color: #000;        font-family: FONT1;      /* black text */
+}
+
+.eighth-image-text-overlay p {
+  font-size: 1.2rem;
+  color: #333;font-family: FONT1;
+}
+.eighth-image-text-overlay {
+  position: absolute;
+  top: -100%; /* start above the image */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 30px 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 80%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 10;
+  opacity: 0; /* start invisible */
+  
+  /* Animation */
+  animation: slideDown 1.2s ease forwards; /* forwards keeps final state */
+  animation-delay: 0.2s; /* optional delay */
+}
+
+/* Keyframes for top to bottom slide */
+@keyframes slideDown {
+  0% {
+    top: -100%;
+    opacity: 0;
+  }
+  100% {
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
+}
+/* Hide scrollbar but allow scrolling */
+html, body {
+  overflow: auto;       /* scrolling still works */
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* For Firefox */
+html {
+  scrollbar-width: none;  /* hides scrollbar */
+}
+
+/* For Chrome, Safari, Edge, Opera */
+html::-webkit-scrollbar {
+  display: none;          /* hides scrollbar */
+}
