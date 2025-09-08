@@ -1,8 +1,4 @@
 
-
-
-
-
 import React, { useEffect, useRef, useState } from "react";
 import "./BuildingScroll.css";
 import gsap from "gsap";
@@ -106,13 +102,20 @@ const BuildingScroll = () => {
 
     const smoother = ScrollSmoother.get();
     if (!smoother) return;
-
     smoother.paused(true); // pause manual scrolling
-
     // Timeline to sync animations
+    // const tl = gsap.timeline({
+    //   onComplete: () => smoother.paused(false)
+    // });
+
+
     const tl = gsap.timeline({
-      onComplete: () => smoother.paused(false)
-    });
+  onComplete: () => {
+    smoother.paused(false);
+    cloudCanMove = false; // 👈 stop cloud movement
+    gsap.set(cloudRef.current, { x: 0, y: 0 }); // 👈 fix cloud position
+  }
+});
 
     // Animate center logo, heading, and button
     tl.to([headingRef.current, exploreBtnRef.current, logoRef.current], {
@@ -126,7 +129,6 @@ const BuildingScroll = () => {
         gsap.to(topRightRef.current, { opacity: 1, duration: 0.5 });
       }
     }, 0);
-
     // Start auto-scroll at the same time
     tl.to(smoother, {
       scrollTop: 1000, // scroll distance
@@ -134,7 +136,7 @@ const BuildingScroll = () => {
       ease: "power3.inOut"
     }, 0);
   };
-
+  
   const handleGalleryClick = () => {
     clickSound.current.currentTime = 0;
     clickSound.current.play();
@@ -168,8 +170,11 @@ const BuildingScroll = () => {
       console.log("Parallax: working");
     }
 
-    let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
-    const speed = 0.015;
+    // let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
+    // const speed = 0.015;
+let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
+const speed = 0.015;
+let cloudCanMove = true; // 👈 add this
 
     const moveBackground = () => {
       currentX += (mouseX - currentX) * speed;
@@ -182,12 +187,19 @@ const BuildingScroll = () => {
       });
 
       // Animate clouds
-      if (cloud) {
-        gsap.set(cloud, {
-          x: currentX * 80,
-          y: currentY * 30
-        });
-      }
+      // if (cloud) {
+      //   gsap.set(cloud, {
+      //     x: currentX * 80,
+      //     y: currentY * 30
+      //   });
+      // }
+// Animate clouds
+if (cloud && cloudCanMove) { // 👈 add the condition
+  gsap.set(cloud, {
+    x: currentX * 80,
+    y: currentY * 30
+  });
+}
 
       requestAnimationFrame(moveBackground);
     };
@@ -401,12 +413,14 @@ galleryItems.forEach((item, idx) => {
 
   return (
     <>
-      <img
-        src="/clouds/Cloud-tint-8.png"
-        alt="Clouds"
-        className="cloud-image"
-        ref={cloudRef}
-      />
+   <img
+  src="/clouds/Cloud-tint-8.png"
+  alt="Clouds"
+  className="cloud-image"
+  ref={cloudRef}
+  data-speed="0"   // 👈 Add this
+/>
+
 
       <div className="bg-wrapper" aria-hidden="true">
         <img
@@ -590,13 +604,48 @@ ref={galleryItemRef7}
 
           </div>
         )}
+<div
+  style={{
+    position: "fixed",
+    bottom: "20px",
+    left: "55px",       // move to left
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    zIndex: 1000,
+    cursor: "pointer",
+  }}
+  onClick={handleMusicToggle}
+>
+  <img
+    src="/icons8-audio-wave.gif"
+    alt="Audio Wave"
+    className="audio-wave-gif"
+    style={{ width: "40px", height: "40px" }} // same width & height
+  />
+ <span
+  style={{
+    color: "#000000ff",
+    fontWeight: "bold",
+    fontSize: "40px",
+    lineHeight: "40px",
+    fontFamily: "FONT4",
+  }}
+>
+  Sound
+</span>
 
-        <button className="music-toggle-btn" style={{ bottom: "20px" }} onClick={handleMusicToggle}>
+</div>
+
+        {/* <button className="music-toggle-btn" style={{ bottom: "20px" }} onClick={handleMusicToggle}>
           {musicPlaying ? "Pause Music" : "Play Music"}
-        </button>
+        </button> */}
       </div>
     </>
   );
 };
 
 export default BuildingScroll;
+
+
+
