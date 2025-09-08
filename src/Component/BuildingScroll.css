@@ -1,3 +1,111 @@
+/* ------------------------------
+   Responsive Media Queries
+------------------------------ */
+
+/* @media (max-width: 1200px) {
+  .container {
+    height: auto;
+    min-height: 100vh;
+  }
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    font-size: 2.2rem;
+    max-width: 60%;
+    left: 50%;
+    padding: 1.25rem 4rem;
+    backdrop-filter: blur(1.5rem);
+    border: 0.125rem solid rgba(192, 160, 98, 0.8);
+    border-radius: 0.5rem;
+    height: 200px;
+  }
+}
+
+@media (max-width: 992px) {
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    font-size: 1.7rem;
+    max-width: 80%;
+    left: 45%;
+    padding: 15px 10px;
+  }
+  .landing-logo {
+    width: 150px;
+    height: 150px;
+  }
+  .sub-heading {
+    font-size: 1.1rem;
+  }
+    .sub-heading {
+      font-size: 0.9rem;
+      top: 18%;
+}
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0;
+  }
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    font-size: 1.1rem;
+    max-width: 95%;
+    left: 5%;
+    padding: 10px 5px;
+    position: static;
+  }
+  .landing-logo {
+    width: 100px;
+    height: 100px;
+    top: 10%;
+  }
+  .sub-heading {
+    font-size: 0.9rem;
+    top: 18%;
+  }
+  .sub-heading {
+      font-size: 0.7rem;
+      top: 12%;
+    }
+  .explore-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    top: 25%;
+  }
+  .top-right-image {
+    width: 120px;
+    right: 10px;
+    top: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0;
+  }
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    font-size: 0.8rem;
+    max-width: 100%;
+    left: 0;
+    padding: 5px 2px;
+    position: static;
+  }
+  .landing-logo {
+    width: 60px;
+    height: 60px;
+    top: 8%;
+  }
+  .sub-heading {
+    font-size: 0.7rem;
+    top: 12%;
+  }
+  .explore-btn {
+    padding: 8px 10px;
+    font-size: 0.7rem;
+    top: 20%;
+  }
+  .top-right-image {
+    width: 80px;
+    right: 5px;
+    top: 5px;
+  }
+} */
 
 /* ------------------------------
     Hero Section / Landing Page
@@ -73,17 +181,18 @@
     Hero Text Cards
 ------------------------------ */
 .card, .card_2, .card_3, .card_4, .card_5 {
-  color: rgb(255, 255, 255);
-  padding: 30px 40px;
+  color: #fff;
+  padding: 2rem; /* scale with rems */
   position: absolute;
   left: 58%;
   font-family: FONT1;
-  font-size: 3rem;
+  font-size: clamp(1.2rem, 2.5vw, 3rem); /* scales with viewport */
   font-weight: 900;
   opacity: 1;
   max-width: 40%;
 }
 
+/* Individual card positions (desktop defaults) */
 .card_1 { top: 235%; }
 .card_2 { top: 170%; }
 .card_3 { top: 140%; }
@@ -92,7 +201,7 @@
 
 .gold-number {
   font-family: FONT3;
-  font-size: 12rem;
+  font-size: clamp(3rem, 10vw, 12rem); /* scales from mobile to desktop */
   text-align: center;
   font-weight: 900;
   color: transparent;
@@ -117,12 +226,12 @@
 
 .card-label {
   display: block;
-  font-size: 2.5rem;
+  font-size: clamp(1rem, 2vw, 2.5rem); /* responsive */
   font-weight: 400;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: #fff;
-  padding-top: 30px;
+  padding-top: 1.5rem;
 }
 
 .letter {
@@ -132,23 +241,56 @@
 .card-paragraph {
   font-family: FONT1;
   font-weight: 400;
-  font-size: 2.3rem;
+  font-size: clamp(0.9rem, 2vw, 2.3rem); /* responsive */
   text-align: center;
 }
 
+/* Tablet adjustments */
+@media (max-width: 992px) {
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    max-width: 80%;
+    left: 45%; /* center more */
+    padding: 1.5rem 1rem;
+  }
+}
 
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    position: static; /* stack vertically */
+    max-width: 95%;
+    margin: 1rem auto;
+    text-align: center;
+    padding: 1rem;
+  }
+}
 .top-right-image {
   position: fixed;
   top: 20px;
   right: 30px;
-  width: 250px;
+  width: clamp(100px, 15vw, 250px);
   height: auto;  /* maintain aspect ratio */
   z-index: 999;
   pointer-events: none;
   opacity: 0;
-  margin: 0;     /* remove default spacing */
+  margin: 0;
   padding: 0;
   display: block; /* ensures no inline spacing around img */
+}
+
+/* Optional: adjust spacing on smaller screens */
+@media (max-width: 768px) {
+  .top-right-image {
+    top: 10px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-right-image {
+    top: 8px;
+    right: 10px;
+  }
 }
 
 
@@ -159,35 +301,41 @@
   position: absolute;
   top: 265%;
   left: 50%;
-  background: rgba(192, 160, 98, 0.2); 
-  backdrop-filter: blur(15px);
-  border: 2px solid rgba(192, 160, 98, 0.8); 
   transform: translateX(-50%);
-  color: #000000;
-  padding: 20px 60px;
-  font-size: 1rem;
+  z-index: 10;
+
+  /* Styling */
+  background: rgba(192, 160, 98, 0.2); 
+  border: 2px solid rgba(192, 160, 98, 0.8); 
+  backdrop-filter: blur(15px);
+  color: #000;
   font-weight: 600;
   cursor: pointer;
   border-radius: 5px;
-  z-index: 10;
   overflow: hidden;
   transition: color 0.3s, border-color 0.3s;
+
+  /* Responsive padding & font size */
+  padding: clamp(0.5rem, 2vw, 1.25rem) clamp(1rem, 5vw, 3.75rem);
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
 }
 
+/* Keep span above hover background */
 .scroll-to-gallery-btn span {
   position: relative;
-  z-index: 2; 
+  z-index: 2;
 }
 
+/* Golden hover animation */
 .scroll-to-gallery-btn::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  background: rgba(192, 160, 98, 0.8); 
   height: 100%;
-  border-radius: 5px; 
+  background: rgba(192, 160, 98, 0.8);
+  border-radius: 5px;
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s ease;
@@ -198,6 +346,22 @@
   transform: scaleX(1);
 }
 
+/* Tablet adjustments */
+@media (max-width: 768px) {
+  .scroll-to-gallery-btn {
+    top: auto;         /* don’t rely on 265% */
+    bottom: 5%;        /* place near bottom */
+    position: fixed;   /* stick button so it’s always visible */
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .scroll-to-gallery-btn {
+    font-size: clamp(0.7rem, 3vw, 0.9rem);
+    padding: 0.5rem 1rem;
+  }
+}
 
 /* ------------------------------
     Music Button
@@ -292,14 +456,16 @@
   transform: translateY(-50%);
   width: 29%;
 }
-.single-image-text-overlay h2{
-  font-size: 2.3rem;font-family: FONT1;
+.single-image-text-overlay h2 {
+  font-size: clamp(1.2rem, 2vw, 2.3rem);
+  font-family: FONT1;
   font-weight: lighter;
 }
-.single-image-text-overlay p{
-    font-size: 1.5rem;font-family: FONT4;
-}
 
+.single-image-text-overlay p {
+  font-size: clamp(0.9rem, 1.5vw, 1.5rem);
+  font-family: FONT4;
+}
 
 .third-image-text-overlay {
   bottom: 5%;
@@ -315,7 +481,7 @@
 .sec-image-text-overlay {
   position: absolute;
   top: 50%;
-right: 1%; /* start from right */
+  right: 1%; /* start from right */
   transform: translateY(-50%);
   color: white;
   text-align: left; 
@@ -327,15 +493,16 @@ right: 1%; /* start from right */
 
 
 .sec-image-text-overlay h2 {
-   font-size: 2.3rem;
-   font-weight: lighter;font-family: FONT1;
-  
+  font-size: clamp(1.2rem, 2vw, 2.3rem);
+  font-weight: lighter;
+  font-family: FONT1;
 }
 
-.sec-image-text-overlay  p {
+.sec-image-text-overlay p {
   text-align: left;   /* Align text to left */
-  margin-left: 0; 
-    font-size: 1.5rem;  font-family: FONT4;
+  margin-left: 0;
+  font-size: clamp(0.9rem, 1.5vw, 1.5rem);
+  font-family: FONT4;
 }
 
 /* Img3 overlay (like Img1 but custom widths) */
@@ -351,27 +518,19 @@ right: 1%; /* start from right */
 }
 
 .third-image-text-overlay h2 {
-  font-size: 2.5rem;
-  color: #ffffff;   font-weight: lighter;
-  max-width: 100%;   font-family: FONT1;      /* allow full container width */
+  font-size: clamp(1.4rem, 2.5vw, 2.5rem);
+  color: #ffffff;
+  font-weight: lighter;
+  max-width: 100%;
+  font-family: FONT1; /* allow full container width */
 }
 
 .third-image-text-overlay p {
-  font-size: 1.5rem;
+  font-size: clamp(0.9rem, 1.5vw, 1.5rem);
   font-family: FONT4;
-  max-width: 600px;      /* keep paragraph readable */
+  max-width: 600px; /* keep paragraph readable */
 }
-/* Container */
-/* .fourth-image-text-overlay {
-  position: absolute;
-  top: 10%;
-  right: 3%;
-  transform: translateY(-50%);
-  width: 60%;
-  text-align: right;
-  color: #eee5e5;
-  z-index: 110;
-} */
+
 .fourth-image-text-overlay {
     position: absolute;
     top: 50%;
@@ -385,24 +544,21 @@ right: 1%; /* start from right */
     z-index: 110; 
 }
 
-.fourth-image-text-overlay h2 {   font-weight: lighter;
-    font-size: 2.3rem; /* Adjust as needed */
-    margin: 0 0 1rem 0; /* Space below heading */
-    font-family: FONT1; /* Ensure this font is imported */
+.fourth-image-text-overlay h2 {
+  font-weight: lighter;
+  font-size: clamp(1.2rem, 2vw, 2.3rem); /* responsive */
+  margin: 0 0 1rem 0; /* Space below heading */
+  font-family: FONT1; /* Ensure this font is imported */
 }
 
 .fourth-image-text-overlay p {
-    font-size: 1.2rem; /* Adjusted for better readability */
-
-    font-family: FONT4; /* Ensure this font is imported */
+  font-size: clamp(0.8rem, 1.5vw, 1.2rem); /* responsive */
+  font-family: FONT4; /* Ensure this font is imported */
 }
 /* Common rule for h2 + p */
 
 
-/* .building-img{
-  height: 300px;
-  width: 300px;
-} */
+
 
 
 /* Container holds everything and is the reference for absolute positioning */
@@ -424,7 +580,7 @@ right: 1%; /* start from right */
   justify-content: center;
   align-items: center;
 }
-.landing-logo {
+/* .landing-logo {
   position: absolute;
   top: 15%; 
   left: 50%; 
@@ -432,16 +588,19 @@ right: 1%; /* start from right */
   width: 300px; 
   z-index: 10;
   height: 300px;
-}
+} */
 .sub-heading {
-    position: absolute;
-    top: 23%;
-    left: 50%;  font-family: FONT1;
-    color: rgb(132, 120, 90);
-    transform: translate(-50%, -50%);
-    z-index: 10;
-    font-size: 1.5rem; /* Adjust font size as needed */
-    text-align: center;
+  position: absolute;
+  top: 23%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  font-family: FONT1;
+  color: rgb(132, 120, 90);
+  text-align: center;
+
+  /* Responsive font sizing */
+  font-size: clamp(0.8rem, 2vw, 1.5rem);
 }
 .explore-btn {
   position: absolute;
@@ -449,12 +608,15 @@ right: 1%; /* start from right */
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  padding: 20px 60px;
-  background: rgba(192, 160, 98, 0.2); 
-  backdrop-filter: blur(15px);
-  color: #000000; /* keep text black */
-  font-size: 1rem;
+
+  /* Smaller responsive padding & font size */
+  padding: clamp(0.3rem, 1.5vw, 0.8rem) clamp(0.8rem, 3vw, 2rem);
+  font-size: clamp(0.7rem, 1.5vw, 1rem);
   font-weight: 600;
+
+  background: rgba(192, 160, 98, 0.2);
+  backdrop-filter: blur(15px);
+  color: #000000;
   border: 2px solid rgba(192, 160, 98, 0.8);
   cursor: pointer;
   border-radius: 5px;
@@ -464,26 +626,33 @@ right: 1%; /* start from right */
 
 .explore-btn span {
   position: relative;
-  z-index: 2; /* above the ::before overlay */
+  z-index: 2;
 }
 
 .explore-btn::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
-  background: rgba(192, 160, 98, 0.8); 
-  border-radius: 5px; 
+  background: rgba(192, 160, 98, 0.8);
+  border-radius: 0.5rem;
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s ease;
-  z-index: 1; /* BELOW the text */
+  z-index: 1;
 }
 
 .explore-btn:hover::before {
-  transform: scaleX(1); /* golden hover expands, but text stays black on top */
+  transform: scaleX(1);
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .explore-btn {
+    font-size: clamp(0.6rem, 3vw, 0.8rem);
+    padding: 0.3rem 0.8rem;
+  }
 }
 
 /* ... all other existing styles ... */
@@ -555,15 +724,7 @@ right: 1%; /* start from right */
   justify-content: center;
   align-items: center;
 }
-.landing-logo {
-  position: absolute;
-  top: 15%; /* Position the top edge at the vertical center */
-  left: 50%; /* Position the left edge at the horizontal center */
-  transform: translate(-50%, -50%); /* Shift the element back by half of its size to truly center it */
-  width: 300px; /* Adjust size as needed */
-  z-index: 10;
-  height: 300px;
-}
+
 
 
 
@@ -598,13 +759,16 @@ right: 1%; /* start from right */
 }
 .landing-logo {
   position: absolute;
-  top: 15%; /* Position the top edge at the vertical center */
-  left: 50%; /* Position the left edge at the horizontal center */
-  transform: translate(-50%, -50%); /* Shift the element back by half of its size to truly center it */
-  width: 300px; /* Adjust size as needed */
+  top: 15%; /* keep vertical offset */
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 10;
-  height: 300px;
+
+  /* Responsive sizing */
+  width: clamp(120px, 20vw, 300px);
+  height: clamp(120px, 20vw, 300px);
 }
+
 .card-label {
   display: block;
   font-size: 2.5rem;
@@ -664,13 +828,14 @@ right: 1%; /* start from right */
   pointer-events: none;
 }
 .fifth-image-text-overlay h2 {
-   font-size: 2.5rem;
-    font-weight: lighter;
-font-family: FONT1;
-
+  font-size: clamp(1.4rem, 2.5vw, 2.5rem);
+  font-weight: lighter;
+  font-family: FONT1;
 }
+
 .fifth-image-text-overlay p {
-  font-size: 1.7rem;   font-weight: lighter;
+  font-size: clamp(1rem, 2vw, 1.7rem);
+  font-weight: lighter;
   font-family: FONT4;
   max-width: 400px;
 }
@@ -689,25 +854,21 @@ font-family: FONT1;
 }
 
 .sixth-image-text-overlay h2 {
-    font-size: 2.5rem;
-    font-family: FONT1;   font-weight: lighter;
-
+  font-size: clamp(1.4rem, 2.5vw, 2.5rem);
+  font-family: FONT1;
+  font-weight: lighter;
 }
 
 .sixth-image-text-overlay p {
-    font-size: 1.5rem;   font-weight: lighter;
-    font-family: FONT4;
+  font-size: clamp(0.9rem, 1.5vw, 1.5rem);
+  font-weight: lighter;
+  font-family: FONT4;
+}
 
-}
-.seventh-image-text-overlay p {
-  text-align: left;  
-    font-family: FONT4;
-  font-size: 1.2rem;
-}
 
 .seventh-image-text-overlay {
   position: absolute;
-top: 3%;         /* closer to the bottom */
+  top: 50%;         /* closer to the bottom */
   right: 8%;
   text-align: right;
   color: rgb(83, 68, 68);  /* change to white if needed for visibility */
@@ -717,10 +878,17 @@ top: 3%;         /* closer to the bottom */
 }
 
 .seventh-image-text-overlay h2 {
-  font-size: 1.5rem;
-  font-weight: bold;font-family: FONT1;
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: bold;
+  font-family: FONT1;
   margin-bottom: 0.5rem; /* reduce space to fit line */
   position: relative;
+}
+
+.seventh-image-text-overlay p {
+  text-align: left;
+  font-family: FONT4;
+  font-size: clamp(0.8rem, 1.5vw, 1.2rem);
 }
 
 /* Line between heading and paragraph */
@@ -760,48 +928,48 @@ top: 3%;         /* closer to the bottom */
 }
 .eighth-image-text-overlay {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 50px 60px;       /* increase padding for bigger box */
-  border-radius: 12px;
-  text-align: center;
-  max-width: 90%;           /* increase width from 80% to 90% */
-  min-width: 400px;         /* optional: set a minimum width */
-  min-height: 350px;        /* increase minimum height */
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  z-index: 10;
-}
-
-
-.eighth-image-text-overlay h2 {
-  margin-bottom: 15px;
-  font-size: 2rem;
-  color: #000;        font-family: FONT1;      /* black text */
-}
-
-.eighth-image-text-overlay p {
-  font-size: 1.2rem;
-  color: #333;font-family: FONT1;
-}
-.eighth-image-text-overlay {
-  position: absolute;
   top: -100%; /* start above the image */
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 30px 40px;
+  padding: clamp(20px, 4vw, 50px) clamp(25px, 5vw, 60px);
   border-radius: 12px;
   text-align: center;
-  max-width: 80%;
+  max-width: 90%;
+  min-width: 280px;   /* smaller min for mobile */
+  min-height: 250px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   z-index: 10;
-  opacity: 0; /* start invisible */
-  
+  opacity: 0;
+
   /* Animation */
-  animation: slideDown 1.2s ease forwards; /* forwards keeps final state */
-  animation-delay: 0.2s; /* optional delay */
+  animation: slideDown 1.2s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.eighth-image-text-overlay h2 {
+  margin-bottom: 15px;
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  color: #000;
+  font-family: FONT1;
+}
+
+.eighth-image-text-overlay p {
+  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+  color: #333;
+  font-family: FONT1;
+}
+
+@keyframes slideDown {
+  from {
+    top: -100%;
+    opacity: 0;
+  }
+  to {
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
 }
 
 /* Keyframes for top to bottom slide */

@@ -26,7 +26,7 @@ const splitTextLetters = (text) =>
 const BuildingScroll = () => {
   const cardsRef = useRef([]);
 
-  const [musicPlaying, setMusicPlaying] = useState(false);
+  const [musicPlaying, setMusicPlaying] = useState(true );
   const [showSingleImage, setShowSingleImage] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const prevGalleryIndexRef = useRef(0);
@@ -77,17 +77,31 @@ const BuildingScroll = () => {
 
   const clickSound = useRef(new Audio("/click.mp3"));
 
-  // Autoplay background music
+  // Always play music when user enters (mount)
   useEffect(() => {
     const playMusic = async () => {
       try {
         await bgMusic.current.play();
         setMusicPlaying(true);
       } catch (err) {
-        console.log("Autoplay blocked, user interaction needed", err);
+        // If autoplay blocked, try again on any user interaction
+        const resumeMusic = async () => {
+          try {
+            await bgMusic.current.play();
+            setMusicPlaying(true);
+            window.removeEventListener("click", resumeMusic);
+            window.removeEventListener("keydown", resumeMusic);
+          } catch {}
+        };
+        window.addEventListener("click", resumeMusic);
+        window.addEventListener("keydown", resumeMusic);
       }
     };
     playMusic();
+    return () => {
+      window.removeEventListener("click", playMusic);
+      window.removeEventListener("keydown", playMusic);
+    };
   }, []);
 
   const handleMusicToggle = () => {
@@ -439,8 +453,9 @@ galleryItems.forEach((item, idx) => {
           alt="Top Right Logo"
         />
 
-        <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABARA HILL</p>
+        <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABAR HILL</p>
         <button className="explore-btn" ref={exploreBtnRef} onClick={handleExploreClick}>Explore more</button>
+        
         <img src="/Asset_4.svg" alt="Logo" className="landing-logo" ref={logoRef} />
 
         <div
@@ -467,7 +482,7 @@ galleryItems.forEach((item, idx) => {
               <span className="card-label">{splitTextLetters("PARKING LEVELS")}</span>
             </div>
             <div className="card card_1" ref={(el) => (cardsRef.current[0] = el)}>
-              <span className="card-label">{splitTextLetters("GRAND DOUBLE HEIGHT LOBBY")}</span>
+              <span className="card-label">{splitTextLetters("GRAND DOUBLE HEIGHT  LOBBY")}</span>
             </div>
 
             <button className="scroll-to-gallery-btn" onClick={handleGalleryClick}>
@@ -535,7 +550,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 5 && (
                 <div ref={textRef6} className="sixth-image-text-overlay from-right">
                   <h2>{splitTextWords("A CREATION WORTHY OF PICASSO'S SIGNATURE.")}</h2>
-                  <p>{splitTextWords("THE enterance lounge, a modernist sculpture capturing shifting lights and shadow - echoing Cubist artistry.")}</p>
+                  <p>{splitTextWords("The enterance lounge, a modernist sculpture capturing shifting lights and shadow - echoing Cubist artistry.")}</p>
                 </div>
               )}
             </div>
@@ -608,27 +623,37 @@ ref={galleryItemRef7}
   style={{
     position: "fixed",
     bottom: "20px",
-    left: "55px",       // move to left
+    left: "20px",       // move to left
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "0px",
     zIndex: 1000,
     cursor: "pointer",
   }}
   onClick={handleMusicToggle}
 >
-  <img
-    src="/icons8-audio-wave.gif"
-    alt="Audio Wave"
-    className="audio-wave-gif"
-    style={{ width: "40px", height: "40px" }} // same width & height
-  />
+  {/* Show animated gif only when music is playing, else show static image */}
+  {musicPlaying ? (
+    <img
+      src="/sound.gif"
+      alt="Audio Wave"
+      className="audio-wave-gif"
+      style={{ width: "100px", height: "100px", background: "transparent" }}
+    />
+  ) : (
+    <img
+      src="/icons8-sound-50.png"
+      alt="Audio Wave"
+      className="audio-wave-gif"
+      style={{ width: "100px", height: "100px", background: "transparent" }}
+    />
+  )}
  <span
   style={{
-    color: "#000000ff",
-    fontWeight: "bold",
-    fontSize: "40px",
-    lineHeight: "40px",
+    color: "#dcbd5a",
+    fontWeight: "light",
+    fontSize: "20px",
+    lineHeight: "0",
     fontFamily: "FONT4",
   }}
 >
