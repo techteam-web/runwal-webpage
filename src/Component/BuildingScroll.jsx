@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import "./BuildingScroll.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -15,16 +15,30 @@ const splitTextWords = (text) =>
     </span>
   ));
 
-// Split text into letters for letter-by-letter animation (cards)
-const splitTextLetters = (text) =>
-  text.split("").map((letter, i) => (
-    <span key={i} className="letter" style={{ display: "inline-block" }}>
-      {letter === " " ? "\u00A0" : letter}
-    </span>
+// Split text into letters but keep each word together (no mid-word wrapping)
+const splitTextLetters = (text) => {
+  const words = text.split(" ");
+  return words.map((word, wi) => (
+    <React.Fragment key={wi}>
+      <span className="nowrap-word">
+        {word.split("").map((letter, li) => (
+          <span key={`${wi}-${li}`} className="letter" style={{ display: "inline-block" }}>
+            {letter}
+          </span>
+        ))}
+      </span>
+      {wi < words.length - 1 ? " " : null}
+    </React.Fragment>
   ));
+};
 
 const BuildingScroll = () => {
   const cardsRef = useRef([]);
+
+  // Track whether the explore sequence already ran (prevents multiple triggers)
+  const exploreTriggeredRef = useRef(false);
+  // Control cloud parallax after explore animation completes
+  const cloudCanMoveRef = useRef(true);
 
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [showSingleImage, setShowSingleImage] = useState(false);
@@ -66,8 +80,8 @@ const BuildingScroll = () => {
   const logoRef = useRef(null);
   const contentRef = useRef(null);
   const buildingRef = useRef(null);
-  const centerLogoRef = useRef(null);
   const topRightRef = useRef(null);
+  const landingScreenRef = useRef(null);
 
   // Cloud ref
   const cloudRef = useRef(null);
@@ -76,6 +90,19 @@ const BuildingScroll = () => {
   bgMusic.current.loop = true;
 
   const clickSound = useRef(new Audio("/click.mp3"));
+
+  // Always start at the very top where the Explore button is
+  useEffect(() => {
+    // window scroll (in case ScrollSmoother isn't ready yet)
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+
+    // if a smoother already exists (hot reload), reset it
+    const maybeSmoother = ScrollSmoother.get();
+    if (maybeSmoother) {
+      maybeSmoother.scrollTop(0, true);
+    }
+  }, []);
 
   // Autoplay background music
   useEffect(() => {
@@ -96,47 +123,49 @@ const BuildingScroll = () => {
     setMusicPlaying(!musicPlaying);
   };
 
-  const handleExploreClick = () => {
-    clickSound.current.currentTime = 0;
-    clickSound.current.play();
+const handleExploreClick = useCallback(() => {
+  if (exploreTriggeredRef.current) return; // avoid duplicate runs
+  exploreTriggeredRef.current = true;
+  clickSound.current.currentTime = 0;
+  clickSound.current.play();
 
-    const smoother = ScrollSmoother.get();
-    if (!smoother) return;
-    smoother.paused(true); // pause manual scrolling
-    // Timeline to sync animations
-    // const tl = gsap.timeline({
-    //   onComplete: () => smoother.paused(false)
-    // });
+  const smoother = ScrollSmoother.get();
+  if (!smoother) return;
 
-
-    const tl = gsap.timeline({
-  onComplete: () => {
-    smoother.paused(false);
-    cloudCanMove = false; // 👈 stop cloud movement
-    gsap.set(cloudRef.current, { x: 0, y: 0 }); // 👈 fix cloud position
+  // 👉 Ensure music starts
+  if (!musicPlaying) {
+    bgMusic.current.play();
+    setMusicPlaying(true);
   }
-});
 
-    // Animate center logo, heading, and button
-    tl.to([headingRef.current, exploreBtnRef.current, logoRef.current], {
-      y: -200,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 1,
-      ease: "power2.inOut",
-      onComplete: () => {
-        // Show top-right logo after center logo disappears
-        gsap.to(topRightRef.current, { opacity: 1, duration: 0.5 });
-      }
-    }, 0);
-    // Start auto-scroll at the same time
-    tl.to(smoother, {
-      scrollTop: 1000, // scroll distance
-      duration: 10,    // scroll duration
-      ease: "power3.inOut"
-    }, 0);
-  };
-  
+  smoother.paused(true);
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      smoother.paused(false);
+      cloudCanMoveRef.current = false; // stop further cloud movement
+      gsap.set(cloudRef.current, { x: 0, y: 0 });
+    },
+  });
+
+  tl.to([headingRef.current, exploreBtnRef.current, logoRef.current], {
+    y: -200,
+    opacity: 0,
+    stagger: 0.1,
+    duration: 1,
+    ease: "power2.inOut",
+    onComplete: () => {
+      gsap.to(topRightRef.current, { opacity: 1, duration: 0.5 });
+    },
+  }, 0);
+
+  tl.to(smoother, {
+    scrollTop: 1000,
+    duration: 10,
+    ease: "power3.inOut",
+  }, 0);
+}, [musicPlaying]);
+
   const handleGalleryClick = () => {
     clickSound.current.currentTime = 0;
     clickSound.current.play();
@@ -160,6 +189,13 @@ const BuildingScroll = () => {
       normalizeScroll: true,
     });
 
+    // Force to top after creation to defeat any prior restoration
+    try {
+      smoother.scrollTop(0, true);
+    } catch {
+      // ignore if smoother not ready yet
+    }
+
     const building = buildingRef.current; // parallax background image
     const cloud = cloudRef.current;       // clouds
 
@@ -170,11 +206,8 @@ const BuildingScroll = () => {
       console.log("Parallax: working");
     }
 
-    // let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
-    // const speed = 0.015;
 let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
 const speed = 0.015;
-let cloudCanMove = true; // 👈 add this
 
     const moveBackground = () => {
       currentX += (mouseX - currentX) * speed;
@@ -194,11 +227,13 @@ let cloudCanMove = true; // 👈 add this
       //   });
       // }
 // Animate clouds
-if (cloud && cloudCanMove) { // 👈 add the condition
-  gsap.set(cloud, {
-    x: currentX * 80,
-    y: currentY * 30
-  });
+if (cloud && cloudCanMoveRef.current) {
+gsap.to(cloud, {
+  x: currentX * 50,
+  y: currentY * 30,
+  duration: 0.6,
+  ease: "power2.out"
+});
 }
 
       requestAnimationFrame(moveBackground);
@@ -245,7 +280,46 @@ if (cloud && cloudCanMove) { // 👈 add the condition
       ScrollTrigger.getAll().forEach((st) => st.kill());
       window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [showSingleImage]);
+  }, [showSingleImage, handleExploreClick]);
+
+  // Auto-trigger Explore when the user first scrolls (or uses keys/touch) before clicking the button
+  useEffect(() => {
+    if (showSingleImage) return; // only on landing state
+
+    const trigger = () => {
+      if (!exploreTriggeredRef.current) {
+        handleExploreClick();
+      }
+    };
+
+    const onWheel = (e) => {
+      // Trigger on downward intent; remove check if you want any wheel to trigger
+      if (e.deltaY > 0) trigger();
+    };
+
+    const onKeyDown = (e) => {
+      const code = e.code || e.key;
+      if (["ArrowDown", "PageDown", "Space", " "].includes(code)) trigger();
+    };
+
+    let touched = false;
+    const onTouchStart = () => {
+      if (!touched) {
+        touched = true;
+        trigger();
+      }
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('touchstart', onTouchStart);
+    };
+  }, [showSingleImage, handleExploreClick]);
 
   // Gallery scroll logic
   useEffect(() => {
@@ -266,57 +340,64 @@ if (cloud && cloudCanMove) { // 👈 add the condition
         canScroll = true;
       }, delay);
     };
+
+    const handleKeyDown = (e) => {
+      if (!canScroll) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        setGalleryIndex((prev) => Math.min(prev + 1, 7));
+        canScroll = false;
+        setTimeout(() => canScroll = true, delay);
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setGalleryIndex((prev) => Math.max(prev - 1, 0));
+        canScroll = false;
+        setTimeout(() => canScroll = true, delay);
+      }
+    };
+
+    // Touch support for mobile
+    let touchStartY = 0;
+    let touchStartX = 0;
+
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = (e) => {
+      if (!canScroll) return;
+      const touchEndY = e.changedTouches[0].clientY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const deltaY = touchStartY - touchEndY;
+      const deltaX = touchStartX - touchEndX;
+
+      // Determine if it's a vertical swipe (prioritize vertical for gallery)
+      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
+        if (deltaY > 0) {
+          setGalleryIndex((prev) => Math.min(prev + 1, 7));
+        } else {
+          setGalleryIndex((prev) => Math.max(prev - 1, 0));
+        }
+        canScroll = false;
+        setTimeout(() => canScroll = true, delay);
+      }
+    };
+
     window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
   }, [showSingleImage]);
 
-  // GSAP gallery animation
-//   useEffect(() => {
-//     if (!showSingleImage) return;
-
-//     const galleryItems = [
-//       galleryItemRef1.current,
-//       galleryItemRef2.current,
-//       galleryItemRef3.current,
-//       galleryItemRef4.current,
-//       galleryItemRef5.current,
-//       galleryItemRef6.current,
-//       galleryItemRef7.current,
-//        galleryItemRef8.current, 
-//     ];
-
-//     const prevIndex = prevGalleryIndexRef.current;
-//     const currentIndex = galleryIndex;
-
-//     const currentItem = galleryItems[currentIndex];
-//     if (!currentItem) return;
-
-//     gsap.set(currentItem, { zIndex: 10, display: 'flex', autoAlpha: 1 });
-
-//     if (currentIndex === 0 || currentIndex === 4 || currentIndex === 6) {
-//       gsap.fromTo(currentItem, { yPercent: 100 }, { yPercent: 0, duration: 1.2, ease: "power3.out" });
-//     } else if (currentIndex === 1) {
-//       gsap.fromTo(currentItem, { xPercent: -100 }, { xPercent: 0, duration: 1.2, ease: "power3.out" });
-//     } else if (currentIndex === 2 || currentIndex === 5) {
-//       gsap.fromTo(currentItem, { xPercent: 100 }, { xPercent: 0, duration: 1.2, ease: "power3.out" });
-//     } else if (currentIndex === 3) {
-//       gsap.fromTo(currentItem, { yPercent: -100 }, { yPercent: 0, duration: 1.2, ease: "power3.out" });
-//     }
-
-//     if (prevIndex !== currentIndex) {
-//       const prevItem = galleryItems[prevIndex];
-//       if (prevItem) {
-//         gsap.set(prevItem, { zIndex: 0, autoAlpha: 1, display: 'flex' });
-//       }
-//     }
-// if (currentIndex === 0 || currentIndex === 4 || currentIndex === 6) { // bottom to top
-//   gsap.fromTo(currentItem, { yPercent: 100 }, { yPercent: 0, duration: 1.2, ease: "power3.out" });
-// } else if (currentIndex === 7) { // top to bottom for new image
-//   gsap.fromTo(currentItem, { yPercent: -100 }, { yPercent: 0, duration: 1.2, ease: "power3.out" });
-// }
-
-//     prevGalleryIndexRef.current = currentIndex;
-//   }, [galleryIndex, showSingleImage]);
+  
 // GSAP gallery animation
 useEffect(() => {
   if (!showSingleImage) return;
@@ -353,22 +434,7 @@ useEffect(() => {
     gsap.fromTo(currentItem, { yPercent: -100 }, { yPercent: 0, duration: 1.2, ease: "power3.out" });
   }
 
-  // Reset previous item z-index
-  // if (prevIndex !== currentIndex) {
-  //   const prevItem = galleryItems[prevIndex];
-  //   if (prevItem) {
-  //     gsap.set(prevItem, { zIndex: 0, autoAlpha: 1, display: 'flex' });
-  //   }
-  // }
-// galleryItems.forEach((item, idx) => {
-//   if (item) {
-//     if (idx === currentIndex || idx === currentIndex - 1) {
-//       gsap.set(item, { zIndex: idx === currentIndex ? 10 : 5, autoAlpha: 1, display: 'flex' });
-//     } else {
-//       gsap.set(item, { zIndex: 0, autoAlpha: 0, display: 'none' });
-//     }
-//   }
-// });
+ 
 galleryItems.forEach((item, idx) => {
   if (!item) return;
 
@@ -424,7 +490,7 @@ galleryItems.forEach((item, idx) => {
 
       <div className="bg-wrapper" aria-hidden="true">
         <img
-          src="/copy_3_cropped.jpg"
+          src="/copy_3_cropped5.jpg"
           alt="background"
           className="bg-image"
           ref={buildingRef}
@@ -439,45 +505,60 @@ galleryItems.forEach((item, idx) => {
           alt="Top Right Logo"
         />
 
-        <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABARA HILL</p>
-        <button className="explore-btn" ref={exploreBtnRef} onClick={handleExploreClick}>Explore more</button>
-        <img src="/Asset_4.svg" alt="Logo" className="landing-logo" ref={logoRef} />
+        <div className="landing-screen" ref={landingScreenRef}>
+          <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABARA HILL</p>
+          <button className="explore-btn" ref={exploreBtnRef} onClick={handleExploreClick}>Explore more</button>
+          <img src="/Asset_4.svg" alt="Logo" className="landing-logo" ref={logoRef} />
 
-        <div
-          className="content"
-          ref={contentRef}
-          style={{ pointerEvents: showSingleImage ? 'none' : 'auto' }}
-        >
-          <section className="building-page">
-            <div className="card card_5" ref={(el) => (cardsRef.current[4] = el)}>
-              <p className="card-paragraph">{splitTextLetters("THE PRIVATE SKY MANSOON CRAFTED TO RESIGN OVER CITY.")}</p>
-            </div>
-            <div className="card card_4" ref={(el) => (cardsRef.current[3] = el)}>
-              <span className="gold-number">{splitTextLetters("11")}</span>
-              <span className="card-label">{splitTextLetters("EXQUISITE MANSIONS")}</span>
-            </div>
-            <div className="card card_3" ref={(el) => (cardsRef.current[2] = el)}>
-              <span className="gold-number">{splitTextLetters("2")}</span>
-              <span className="card-label">{splitTextLetters("EXCLUSIVE CLUB LEVELS")}</span>
-            </div>
-            <div className="card card_2" ref={(el) => (cardsRef.current[1] = el)}>
-              <span className="gold-number">{splitTextLetters("2")}</span>
-              <span className="card-label">{splitTextLetters("PARKING BASEMENT")}</span>
-              <span className="gold-number">{splitTextLetters("9")}</span>
-              <span className="card-label">{splitTextLetters("PARKING LEVELS")}</span>
-            </div>
-            <div className="card card_1" ref={(el) => (cardsRef.current[0] = el)}>
-              <span className="card-label">{splitTextLetters("GRAND DOUBLE HEIGHT LOBBY")}</span>
-            </div>
+          <div
+            className="content"
+            ref={contentRef}
+            style={{ pointerEvents: showSingleImage ? 'none' : 'auto' }}
+          >
+            <section className="building-page">
+              <div className="card card_5" ref={(el) => (cardsRef.current[4] = el)}>
+                <p className="card-paragraph">{splitTextLetters("THE PRIVATE SKY MANSOON CRAFTED TO RESIGN OVER CITY.")}</p>
+              </div>
+              <div className="card card_4" ref={(el) => (cardsRef.current[3] = el)}>
+                <span className="gold-number">{splitTextLetters("11")}</span>
+                <span className="card-label">{splitTextLetters("EXQUISITE MANSIONS")}</span>
+              </div>
+              <div className="card card_3" ref={(el) => (cardsRef.current[2] = el)}>
+                <span className="gold-number">{splitTextLetters("2")}</span>
+                <span className="card-label">{splitTextLetters("EXCLUSIVE CLUB LEVELS")}</span>
+              </div>
+              <div className="card card_2" ref={(el) => (cardsRef.current[1] = el)}>
+                <span className="gold-number">{splitTextLetters("2")}</span>
+                <span className="card-label">{splitTextLetters("PARKING BASEMENT")}</span>
+                <span className="gold-number">{splitTextLetters("9")}</span>
+                <span className="card-label">{splitTextLetters("PARKING LEVELS")}</span>
+              </div>
+              <div className="card card_1" ref={(el) => (cardsRef.current[0] = el)}>
+                <span className="card-label">
+                  {splitTextLetters("GRAND DOUBLE HEIGHT")}
+                  <span className="nowrap-word"> LOBBY</span>
+                </span>
+              </div>
 
-            <button className="scroll-to-gallery-btn" onClick={handleGalleryClick}>
-              <span>Click To Explore Gallery</span>
-            </button>
-          </section>
+              <button className="scroll-to-gallery-btn" onClick={handleGalleryClick}>
+                <span>Click To Explore Gallery</span>
+              </button>
+            </section>
+          </div>
         </div>
 
         {showSingleImage && (
           <div className="single-image-gallery-container">
+            {/* Gallery Progress Indicator */}
+            <div className="gallery-progress">
+              {Array.from({ length: 8 }, (_, i) => (
+                <div
+                  key={i}
+                  className={`progress-dot ${i === galleryIndex ? 'active' : ''}`}
+                  onClick={() => setGalleryIndex(i)}
+                />
+              ))}
+            </div>
             <div ref={galleryItemRef1} className="gallery-item" style={{ display: 'flex' }}>
               <img ref={imgRef1} src="/Gallery/carsection.jpg" alt="Luxury Car Parking" className="single-gallery-image" />
               {showText && galleryIndex === 0 && (
@@ -567,25 +648,7 @@ ref={galleryItemRef7}
     </div>
   )}
 </div>
-{/* <div
-  ref={galleryItemRef7}
-  className="gallery-item"
-  style={{ display: galleryIndex === 6 ? 'flex' : 'none' }}
->
-  <img
-    ref={imgRef7}
-    src="/Gallery/img8_building.jpg"
-    alt="New Gallery Image"
-    className="seventh-gallery-image"
-  />
-  {showText && galleryIndex === 6 && (
-    <div ref={textRef7} className="seventh-image-text-overlay from-bottom">
-      <h2>A PRIVACY SKY MANSION, CRAFTED TO RESIGN OVER THE CITY.</h2>
-      <p>Craft your legacy at Mumbai's most prestigious enclave.</p>
-      <hr className="seventh-text-line" />
-    </div>
-  )}
-</div> */}
+
 
 <div ref={galleryItemRef8} className="gallery-item" style={{ display: galleryIndex === 7 ? 'flex' : 'none' }}>
   <img ref={imgRef8} src="/Gallery/img8_crop_sky.jpg" alt="New Gallery Image 8" className="eighth-gallery-image" />
@@ -604,48 +667,31 @@ ref={galleryItemRef7}
 
           </div>
         )}
-<div
-  style={{
-    position: "fixed",
-    bottom: "20px",
-    left: "55px",       // move to left
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    zIndex: 1000,
-    cursor: "pointer",
-  }}
-  onClick={handleMusicToggle}
->
-  <img
-    src="/icons8-audio-wave.gif"
-    alt="Audio Wave"
-    className="audio-wave-gif"
-    style={{ width: "40px", height: "40px" }} // same width & height
-  />
- <span
-  style={{
-    color: "#000000ff",
-    fontWeight: "bold",
-    fontSize: "40px",
-    lineHeight: "40px",
-    fontFamily: "FONT4",
-  }}
->
-  Sound
-</span>
 
+<div onClick={handleMusicToggle} className="sound-toggle">
+  <img src="/icon_music.gif" alt="Audio Wave" className="music-icon" />
+  <span className="sound-label">Sound</span>
 </div>
 
-        {/* <button className="music-toggle-btn" style={{ bottom: "20px" }} onClick={handleMusicToggle}>
-          {musicPlaying ? "Pause Music" : "Play Music"}
-        </button> */}
+{/* <div onClick={handleMusicToggle} className="sound-toggle">
+  <div className="music-icon-wrapper">
+    <img
+      src={musicPlaying ? "/icon_music.gif" : "/downloads.png"}
+      alt="Audio Wave"
+      className={`music-icon ${!musicPlaying ? "paused" : ""}`}
+    />
+  </div>
+  <span className="sound-label">Sound</span>
+</div> */}
+
+
+
+
+
       </div>
     </>
   );
 };
 
 export default BuildingScroll;
-
-
 

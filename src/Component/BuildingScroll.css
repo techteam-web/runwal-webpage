@@ -1,4 +1,3 @@
-
 /* ------------------------------
     Hero Section / Landing Page
 ------------------------------ */
@@ -10,7 +9,7 @@
 .content {
   min-height: 500vh;
   width: 100%;
-  background-image: url("/copy_3_cropped.jpg");
+  background-image: url("/copy_3_cropped5.jpg");
   --bg-crop-left: 0%;
   background-size: cover;
   background-position: left center !important;
@@ -35,13 +34,18 @@
   pointer-events: none;
 }
 .bg-image {
-  position: absolute; 
+  position: absolute;
   top: 0;
   left: 0;
-  width: 110%;      
-  height: 110%;     
+  width: 110%;
+  height: 110%;
   object-fit: cover;
   transform: translateZ(0);
+  transition: transform 0.3s ease;
+}
+
+.bg-image:hover {
+  transform: scale(1.05) translateZ(0);
 }
 
 .content.hidden {
@@ -70,7 +74,7 @@
 }
 
 /* ------------------------------
-    Hero Text Cards
+    Hero Text Cards - Desktop (Right Side Positioning Maintained)
 ------------------------------ */
 .card, .card_2, .card_3, .card_4, .card_5 {
   color: rgb(255, 255, 255);
@@ -82,13 +86,14 @@
   font-weight: 900;
   opacity: 1;
   max-width: 40%;
+  text-align: right;
 }
 
 .card_1 { top: 235%; }
 .card_2 { top: 170%; }
 .card_3 { top: 140%; }
 .card_4 { top: 0%; }
-.card_5 { top: -67%; }
+.card_5 { top: -70%; }
 
 .gold-number {
   font-family: FONT3;
@@ -123,6 +128,7 @@
   text-transform: uppercase;
   color: #fff;
   padding-top: 30px;
+  text-align: right;
 }
 
 .letter {
@@ -132,8 +138,9 @@
 .card-paragraph {
   font-family: FONT1;
   font-weight: 400;
-  font-size: 2.3rem;
-  text-align: center;
+  font-size: 1.9rem; /* slightly smaller so the line fits more comfortably */
+  line-height: 1.25;
+  text-align: right;
 }
 
 
@@ -157,7 +164,7 @@
 ------------------------------ */
 .scroll-to-gallery-btn {
   position: absolute;
-  top: 265%;
+  top: 275%;
   left: 50%;
   background: rgba(192, 160, 98, 0.2); 
   backdrop-filter: blur(15px);
@@ -194,8 +201,13 @@
   z-index: 1;
 }
 
-.scroll-to-gallery-btn:hover::before {
-  transform: scaleX(1);
+.scroll-to-gallery-btn:hover {
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 8px 25px rgba(192, 160, 98, 0.3);
+}
+
+.scroll-to-gallery-btn:active {
+  transform: translateX(-50%) scale(0.98);
 }
 
 
@@ -287,7 +299,7 @@
 
 /* Specific text overlay positioning */
 .single-image-text-overlay {
-  top: 50%;
+  top: 40%;
   left: 5%;  
   transform: translateY(-50%);
   width: 29%;
@@ -314,7 +326,7 @@
 
 .sec-image-text-overlay {
   position: absolute;
-  top: 50%;
+  top: 40%;
 right: 1%; /* start from right */
   transform: translateY(-50%);
   color: white;
@@ -341,10 +353,10 @@ right: 1%; /* start from right */
 /* Img3 overlay (like Img1 but custom widths) */
 .third-image-text-overlay {
   position: absolute;
-  top: 55%;
+  top: 40%;
   left: 2%;
   transform: translateY(-50%);
-  width: 42%;           /* expanded width */
+  width: 33%;           /* expanded width */
   text-align: left;
   color: #fff;
   z-index: 110;
@@ -374,12 +386,12 @@ right: 1%; /* start from right */
 } */
 .fourth-image-text-overlay {
     position: absolute;
-    top: 50%;
+    top: 40%;
   
   right: 2%; 
     transform: translateY(-50%);
   
-    width: 38%; 
+    width: 32%; 
     text-align: left; 
     color: #fff;
     z-index: 110; 
@@ -396,7 +408,28 @@ right: 1%; /* start from right */
 
     font-family: FONT4; /* Ensure this font is imported */
 }
-/* Common rule for h2 + p */
+/* Text overlay entrance animations */
+.single-image-text-overlay,
+.sec-image-text-overlay,
+.third-image-text-overlay,
+.fourth-image-text-overlay,
+.fifth-image-text-overlay,
+.sixth-image-text-overlay,
+.seventh-image-text-overlay,
+.eighth-image-text-overlay {
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 
 /* .building-img{
@@ -449,8 +482,8 @@ right: 1%; /* start from right */
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  padding: 20px 60px;
-  background: rgba(192, 160, 98, 0.2); 
+  padding: 10px 60px;
+  background: rgba(192, 160, 98, 0.2);
   backdrop-filter: blur(15px);
   color: #000000; /* keep text black */
   font-size: 1rem;
@@ -459,31 +492,30 @@ right: 1%; /* start from right */
   cursor: pointer;
   border-radius: 5px;
   overflow: hidden;
-  transition: color 0.3s, border-color 0.3s;
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
 }
 
-.explore-btn span {
-  position: relative;
-  z-index: 2; /* above the ::before overlay */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(192, 160, 98, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(192, 160, 98, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(192, 160, 98, 0);
+  }
 }
 
-.explore-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(192, 160, 98, 0.8); 
-  border-radius: 5px; 
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s ease;
-  z-index: 1; /* BELOW the text */
+.explore-btn:hover {
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 8px 25px rgba(192, 160, 98, 0.3);
 }
 
-.explore-btn:hover::before {
-  transform: scaleX(1); /* golden hover expands, but text stays black on top */
+.explore-btn:active {
+  transform: translateX(-50%) scale(0.98);
+  box-shadow: 0 4px 15px rgba(192, 160, 98, 0.5);
 }
 
 /* ... all other existing styles ... */
@@ -502,18 +534,19 @@ right: 1%; /* start from right */
 } */
 
 .cloud-image {
-  position: absolute; /* starts as absolute for auto-scroll movement */
-  top: 40%;
+  position: absolute;
+  top: 5%;   /* Move cloud higher (smaller % = higher) */
   left: 50%;
-  transform: translateX(-50%) scale(1.05); 
+  transform: translateX(-50%) scale(1.05);
   width: 120%;
-  opacity: 0.85;      
+  opacity: 0.85;
   pointer-events: none;
   mix-blend-mode: screen;
-  z-index: 10;        
-  filter: drop-shadow(0 25px 40px rgba(0,0,0,0.2)) blur(0.8px); 
-  will-change: transform, position; /* optimize for GSAP changes */
+  z-index: 10;
+  filter: drop-shadow(0 25px 40px rgba(0,0,0,0.2)) blur(0.8px);
+  will-change: transform, position;
 }
+
 
 /* ------------------------------
     Music Button
@@ -532,9 +565,6 @@ right: 1%; /* start from right */
   cursor: pointer;
   z-index: 20;
 }
-
-
-
 
 /* Container holds everything and is the reference for absolute positioning */
 .container {
@@ -555,16 +585,6 @@ right: 1%; /* start from right */
   justify-content: center;
   align-items: center;
 }
-.landing-logo {
-  position: absolute;
-  top: 15%; /* Position the top edge at the vertical center */
-  left: 50%; /* Position the left edge at the horizontal center */
-  transform: translate(-50%, -50%); /* Shift the element back by half of its size to truly center it */
-  width: 300px; /* Adjust size as needed */
-  z-index: 10;
-  height: 300px;
-}
-
 
 
 
@@ -596,15 +616,7 @@ right: 1%; /* start from right */
   justify-content: center;
   align-items: center;
 }
-.landing-logo {
-  position: absolute;
-  top: 15%; /* Position the top edge at the vertical center */
-  left: 50%; /* Position the left edge at the horizontal center */
-  transform: translate(-50%, -50%); /* Shift the element back by half of its size to truly center it */
-  width: 300px; /* Adjust size as needed */
-  z-index: 10;
-  height: 300px;
-}
+
 .card-label {
   display: block;
   font-size: 2.5rem;
@@ -655,8 +667,8 @@ right: 1%; /* start from right */
 
 .fifth-image-text-overlay {
   position: absolute;
-  top: 50%;
-  left: 5%;
+  top: 40%;
+  left: 5%;width: 38%;
   transform: translateY(-50%);
   color: rgb(243, 240, 240);
   text-align: left;  max-width: 550px;
@@ -672,17 +684,17 @@ font-family: FONT1;
 .fifth-image-text-overlay p {
   font-size: 1.7rem;   font-weight: lighter;
   font-family: FONT4;
-  max-width: 400px;
+ 
 }
 
 
 
 .sixth-image-text-overlay {
     position: absolute;
-    top: 50%;
+    top: 40%;
     right: 3%;
     transform: translateY(-50%);
-    width: 25%;
+    width: 32%;
     text-align: left;
     color: #fff;
     z-index: 110;
@@ -707,7 +719,7 @@ font-family: FONT1;
 
 .seventh-image-text-overlay {
   position: absolute;
-top: 3%;         /* closer to the bottom */
+top: 50%;         /* closer to the bottom */
   right: 8%;
   text-align: right;
   color: rgb(83, 68, 68);  /* change to white if needed for visibility */
@@ -833,7 +845,320 @@ html {
 html::-webkit-scrollbar {
   display: none;          /* hides scrollbar */
 }
-.audio-wave-gif {
-  width: 50px;
-  height: 50px;
+
+.sound-toggle {
+  position: fixed;
+  bottom: -35px;
+  left: -15px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: transparent; 
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.music-icon {
+ 
+  height: 160px;  
+  width: auto;   
+  margin-right: 8px; 
+}
+
+.sound-toggle:hover {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+.sound-toggle:active {
+  transform: scale(0.95);
+}
+.music-icon.paused {
+  width: 90px;     
+  height: 90px;
+  object-fit: contain;
+  filter: hue-rotate(45deg) saturate(5) brightness(1.2); 
+}
+
+/* Hide cloud image globally */
+.cloud-image {
+  display: none ;
+}
+
+/* Prevent the last word from splitting into two lines */
+.nowrap-word {
+  white-space: nowrap;
+}
+
+/* Fluid typography for better scaling across viewports */
+.card, .card_2, .card_3, .card_4, .card_5 {
+  font-size: clamp(1.6rem, 4.5vw, 3rem);
+}
+.card-label {
+  font-size: clamp(1.2rem, 3.2vw, 2.5rem);
+}
+.gold-number {
+  font-size: clamp(3.5rem, 10vw, 12rem);
+}
+.card-paragraph {
+  font-size: clamp(1rem, 3vw, 1.9rem);
+  line-height: 1.3;
+}
+
+/* ==============================
+   Responsive adjustments
+   - Tablet (<=1024px)
+   - Mobile (<=768px, <=480px)
+============================== */
+@media (max-width: 1024px) {
+  /* Tablet enhancements */
+  .explore-btn {
+    animation: pulseTablet 2.5s infinite;
+    padding: 12px 50px;
+    font-size: 1.1rem;
+  }
+
+  @keyframes pulseTablet {
+    0% {
+      box-shadow: 0 0 0 0 rgba(192, 160, 98, 0.5);
+    }
+    70% {
+      box-shadow: 0 0 0 15px rgba(192, 160, 98, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(192, 160, 98, 0);
+    }
+  }
+
+  .explore-btn:active {
+    transform: translateX(-50%) scale(0.95);
+    box-shadow: 0 6px 20px rgba(192, 160, 98, 0.6);
+    background: rgba(192, 160, 98, 0.4);
+  }
+
+  .bg-image {
+    transition: transform 0.5s ease;
+  }
+
+  .bg-image:active {
+    transform: scale(1.02) translateZ(0);
+  }
+
+  /* Position golden number cards on the right side */
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    left: auto;
+    right: 20px;
+    transform: translateY(0);
+    max-width: 50%;
+    text-align: right;
+  }
+  .card-label { font-size: 2.1rem; text-align: right; }
+  .gold-number { font-size: 8rem; text-align: right; }
+  .card-paragraph { font-size: 1.6rem; text-align: right; }
+}
+
+@media (max-width: 768px) {
+  /* Mobile enhancements */
+  .explore-btn {
+    animation: pulseMobile 2s infinite;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    top: 35%;
+  }
+
+  @keyframes pulseMobile {
+    0% {
+      box-shadow: 0 0 0 0 rgba(192, 160, 98, 0.6);
+    }
+    70% {
+      box-shadow: 0 0 0 20px rgba(192, 160, 98, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(192, 160, 98, 0);
+    }
+  }
+
+  .explore-btn:active {
+    transform: translateX(-50%) scale(0.92);
+    box-shadow: 0 8px 25px rgba(192, 160, 98, 0.7);
+    background: rgba(192, 160, 98, 0.5);
+  }
+
+  .bg-image {
+    transition: transform 0.4s ease;
+  }
+
+  .bg-image:active {
+    transform: scale(1.03) translateZ(0);
+  }
+
+  /* Position golden number cards on the right side for mobile */
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    left: auto;
+    right: 15px;
+    transform: translateY(0);
+    max-width: 70%;
+    text-align: right;
+  }
+  .card-label { font-size: 1.6rem; text-align: right; }
+  .gold-number { font-size: 6rem; text-align: right; }
+  .card-paragraph { font-size: 1.15rem; line-height: 1.35; text-align: right; }
+
+  /* Reposition cards to avoid overlap on small screens */
+  .card_1 { top: 200%; }
+  .card_2 { top: 150%; }
+  .card_3 { top: 120%; }
+  .card_4 { top: 10%; }
+  .card_5 { top: -35%; }
+
+  .top-right-image { width: 150px; right: 14px; top: 16px; }
+  .landing-logo { width: 180px; height: 180px; top: 14%; }
+  .sub-heading { font-size: 0.95rem; top: 22%; padding: 0 12px; }
+  .explore-btn { top: 36%; padding: 10px 28px; font-size: 0.9rem; }
+
+  .music-toggle-btn { bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; }
+  .sound-toggle { bottom: 6px; left: 6px; }
+  .music-icon { height: 110px; }
+  .sound-label { font-size: 18px; margin-left: -60px; }
+
+  /* Gallery overlays become centered blocks */
+  .single-image-text-overlay,
+  .sec-image-text-overlay,
+  .third-image-text-overlay,
+  .fourth-image-text-overlay {
+    left: 50% !important;
+    right: auto !important;
+    transform: translate(-50%, -50%) !important;
+    width: 86% !important;
+    text-align: left;
+  }
+  .single-image-text-overlay { top: 50%; }
+  .sec-image-text-overlay { top: 50%; }
+  .third-image-text-overlay { top: 54%; }
+  .fourth-image-text-overlay { top: 50%; }
+
+  .single-image-text-overlay h2,
+  .sec-image-text-overlay h2,
+  .third-image-text-overlay h2,
+  .fourth-image-text-overlay h2 { font-size: 1.6rem; }
+  .single-image-text-overlay p,
+  .sec-image-text-overlay p,
+  .third-image-text-overlay p,
+  .fourth-image-text-overlay p { font-size: 1rem; }
+
+  .seventh-image-text-overlay { right: 5%; max-width: 90%; text-align: left; }
+  .seventh-image-text-overlay h2 { font-size: 1.2rem; }
+  .seventh-image-text-overlay p { font-size: 1rem; }
+
+  .eighth-image-text-overlay { max-width: 92%; min-width: 0; padding: 24px 26px; }
+  .eighth-image-text-overlay h2 { font-size: 1.6rem; }
+  .eighth-image-text-overlay p { font-size: 1rem; }
+
+  .scroll-to-gallery-btn { top: 265%; padding: 12px 28px; font-size: 0.95rem; }
+}
+
+@media (max-width: 480px) {
+  /* Small mobile enhancements */
+  .explore-btn {
+    animation: pulseSmall 1.8s infinite;
+    padding: 18px 35px;
+    font-size: 1.3rem;
+    top: 38%;
+    min-height: 60px; /* Ensure touch target is large enough */
+  }
+
+  @keyframes pulseSmall {
+    0% {
+      box-shadow: 0 0 0 0 rgba(192, 160, 98, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 25px rgba(192, 160, 98, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(192, 160, 98, 0);
+    }
+  }
+
+  .explore-btn:active {
+    transform: translateX(-50%) scale(0.9);
+    box-shadow: 0 10px 30px rgba(192, 160, 98, 0.8);
+    background: rgba(192, 160, 98, 0.6);
+  }
+
+  .bg-image {
+    transition: transform 0.3s ease;
+  }
+
+  .bg-image:active {
+    transform: scale(1.04) translateZ(0);
+  }
+
+  /* Position golden number cards on the right side for small mobile */
+  .card, .card_2, .card_3, .card_4, .card_5 {
+    left: auto;
+    right: 10px;
+    transform: translateY(0);
+    max-width: 75%;
+    text-align: right;
+  }
+  .card-label { font-size: 1.35rem; text-align: right; }
+  .gold-number { font-size: 4.2rem; text-align: right; }
+  .card-paragraph { font-size: 1.05rem; text-align: right; }
+
+  /* Fine-tune positions further on very small screens */
+  .card_1 { top: 185%; }
+  .card_2 { top: 135%; }
+  .card_3 { top: 108%; }
+  .card_4 { top: 14%; }
+  .card_5 { top: -30%; }
+
+  .scroll-to-gallery-btn { top: 255%; padding: 10px 22px; font-size: 0.9rem; }
+
+  .music-icon { height: 90px; }
+  .sound-label { font-size: 16px; margin-left: -54px; }
+  .music-toggle-btn { bottom: calc(20px + env(safe-area-inset-bottom)); }
+}
+
+/* ------------------------------
+    Landing Screen Container
+------------------------------ */
+.landing-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+/* Gallery Progress Indicator */
+.gallery-progress {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 1000;
+}
+
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.progress-dot:hover {
+  background-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.2);
+}
+
+.progress-dot.active {
+  background-color: rgba(192, 160, 98, 0.8);
+  transform: scale(1.3);
 }

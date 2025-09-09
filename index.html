@@ -1,6 +1,29 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      // Ensure we always start at the very top, even before React mounts
+      (function () {
+        try {
+          if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+          }
+        } catch (e) {}
+
+        const reset = function () {
+          // Set all possible scroll targets
+          window.scrollTo(0, 0);
+          document.documentElement && (document.documentElement.scrollTop = 0);
+          document.body && (document.body.scrollTop = 0);
+        };
+
+        // Run immediately and on bfcache restore
+        reset();
+        window.addEventListener('pageshow', function (e) {
+          if (e.persisted) reset();
+        });
+      })();
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
