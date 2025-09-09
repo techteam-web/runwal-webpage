@@ -8,8 +8,9 @@
 }
 .content {
   min-height: 500vh;
-  width: 100%;
-  background-image: url("/copy_3_cropped5.jpg");
+  width: 100vw; 
+  background-image: url("/Bigimg_2.jpg");
+  /* background-image: url("/copy_3_cropped.jpg"); */
   --bg-crop-left: 0%;
   background-size: cover;
   background-position: left center !important;
@@ -159,75 +160,60 @@
 }
 
 
-/* ------------------------------
-    Scroll-to-Gallery Button
------------------------------- */
+
 .scroll-to-gallery-btn {
   position: absolute;
   top: 275%;
   left: 50%;
-  background: rgba(192, 160, 98, 0.2); 
-  backdrop-filter: blur(15px);
-  border: 2px solid rgba(192, 160, 98, 0.8); 
   transform: translateX(-50%);
-  color: #000000;
-  padding: 20px 60px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  border-radius: 5px;
   z-index: 10;
+  font-family: FONT1;background: rgba(140, 130, 105, 1);
+
+  padding: 12px 90px;
+  /* background: rgba(200, 195, 170, 1);  */
+  backdrop-filter: blur(15px);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: 3px solid #385270;  /* bluish border */
+  cursor: pointer;
+  border-radius: 35px;
   overflow: hidden;
-  transition: color 0.3s, border-color 0.3s;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Overlay for sweep effect */
+.scroll-to-gallery-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--start, -100%); /* start position controlled by JS */
+  width: 100%;
+  height: 100%;
+  background: rgba(24, 26, 61, 0.4); /* overlay color */
+  z-index: 0;
+  transition: left 0.5s ease;
+  border-radius: inherit; /* match button corners */
 }
 
 .scroll-to-gallery-btn span {
   position: relative;
-  z-index: 2; 
-}
-
-.scroll-to-gallery-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(192, 160, 98, 0.8); 
-  height: 100%;
-  border-radius: 5px; 
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s ease;
   z-index: 1;
+  display: inline-block;
 }
 
+/* Hover effect: overlay slides in */
+.scroll-to-gallery-btn:hover::before {
+  left: 0;
+}
+
+/* Hover background/text */
 .scroll-to-gallery-btn:hover {
-  transform: translateX(-50%) scale(1.05);
-  box-shadow: 0 8px 25px rgba(192, 160, 98, 0.3);
-}
-
-.scroll-to-gallery-btn:active {
-  transform: translateX(-50%) scale(0.98);
+  color: white;
+  background-color: rgba(255, 208, 117, 0.2); /* optional hover background */
 }
 
 
-/* ------------------------------
-    Music Button
------------------------------- */
-.music-toggle-btn {
-  position: fixed;
-  bottom: 89px;
-  left: 10%;
-  transform: translateX(-50%);
-  padding: 10px 20px;
-  font-size: 1rem;
-  border: 1px solid #fff;
-  border-radius: 5px;
-  background: black;
-  color: #fff;
-  cursor: pointer;
-  z-index: 20;
-}
 
 /* ------------------------------
     Single Image Gallery
@@ -373,17 +359,7 @@ right: 1%; /* start from right */
   font-family: FONT4;
   max-width: 600px;      /* keep paragraph readable */
 }
-/* Container */
-/* .fourth-image-text-overlay {
-  position: absolute;
-  top: 10%;
-  right: 3%;
-  transform: translateY(-50%);
-  width: 60%;
-  text-align: right;
-  color: #eee5e5;
-  z-index: 110;
-} */
+
 .fourth-image-text-overlay {
     position: absolute;
     top: 40%;
@@ -431,14 +407,6 @@ right: 1%; /* start from right */
   }
 }
 
-
-/* .building-img{
-  height: 300px;
-  width: 300px;
-} */
-
-
-/* Container holds everything and is the reference for absolute positioning */
 .container {
   position: relative;
   width: 100vw;
@@ -476,51 +444,106 @@ right: 1%; /* start from right */
     font-size: 1.5rem; /* Adjust font size as needed */
     text-align: center;
 }
-.explore-btn {
+/* .explore-btn {
   position: absolute;
-  top: 30%;
+  top: 33%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  padding: 10px 60px;
+  padding: 20px 90px;
   background: rgba(192, 160, 98, 0.2);
   backdrop-filter: blur(15px);
-  color: #000000; /* keep text black */
+  color: #421010;
   font-size: 1rem;
   font-weight: 600;
-  border: 2px solid rgba(192, 160, 98, 0.8);
+  border: none;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 15px;
   overflow: hidden;
-  transition: all 0.3s ease;
-  animation: pulse 2s infinite;
+  transition: color 0.3s ease;
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(192, 160, 98, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(192, 160, 98, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(192, 160, 98, 0);
-  }
+.explore-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--start, -100%); 
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 208, 117, 0.7);
+  z-index: 0;
+  transition: left 0.5s ease;
+}
+
+.explore-btn span {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+.explore-btn:hover::before {
+  left: 0; 
 }
 
 .explore-btn:hover {
-  transform: translateX(-50%) scale(1.05);
-  box-shadow: 0 8px 25px rgba(192, 160, 98, 0.3);
+  color: #000;
+} */
+
+.explore-btn {
+  position: absolute;
+  top: 33%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10; font-family: FONT1;
+  padding: 12px 90px;
+  background: rgba(200, 195, 170, 1)
+; 
+  backdrop-filter: blur(15px);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+border: 3px solid #385270;  
+
+  cursor: pointer;
+  border-radius: 35px;
+  overflow: hidden;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.explore-btn:active {
-  transform: translateX(-50%) scale(0.98);
-  box-shadow: 0 4px 15px rgba(192, 160, 98, 0.5);
+
+.explore-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--start, -100%); 
+  width: 100%;
+  height: 100%;
+  background: rgba(24, 26, 61, 0.4); 
+  z-index: 0;
+  transition: left 0.5s ease;
+  border-radius: inherit; 
 }
+
+.explore-btn span {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+.explore-btn:hover::before {
+  left: 0;
+}
+
+.explore-btn:hover {
+  color: white;
+  background-color: rgba(255, 208, 117, 0.2);
+
+}
+
 
 /* ... all other existing styles ... */
 
-/* .cloud-image {
+.cloud-image {
   position: absolute;
   top: 40%;
   left: 50%;
@@ -531,11 +554,11 @@ right: 1%; /* start from right */
   mix-blend-mode: screen;
   z-index: 10;        
   filter: drop-shadow(0 25px 40px rgba(0,0,0,0.2)) blur(0.8px); 
-} */
+}
 
-.cloud-image {
+/* .cloud-image {
   position: absolute;
-  top: 5%;   /* Move cloud higher (smaller % = higher) */
+  top: 5%;   
   left: 50%;
   transform: translateX(-50%) scale(1.05);
   width: 120%;
@@ -545,26 +568,10 @@ right: 1%; /* start from right */
   z-index: 10;
   filter: drop-shadow(0 25px 40px rgba(0,0,0,0.2)) blur(0.8px);
   will-change: transform, position;
-}
+} */
 
 
-/* ------------------------------
-    Music Button
------------------------------- */
-.music-toggle-btn {
-  position: fixed;
-  bottom: 89px;
-  left: 10%;
-  transform: translateX(-50%);
-  padding: 10px 20px;
-  font-size: 1rem;
-  border: 1px solid #fff;
-  border-radius: 5px;
-  background: black;
-  color: #fff;
-  cursor: pointer;
-  z-index: 20;
-}
+
 
 /* Container holds everything and is the reference for absolute positioning */
 .container {
@@ -845,46 +852,46 @@ html {
 html::-webkit-scrollbar {
   display: none;          /* hides scrollbar */
 }
-
 .sound-toggle {
   position: fixed;
-  bottom: -35px;
-  left: -15px;
+  bottom: -20px;         /* distance from bottom */
+  left: 20px;          /* distance from right */
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  background-color: transparent; 
-  border-radius: 12px;
+
+  padding: 8px 14px;
+
+  border-radius: 20px;
   cursor: pointer;
   z-index: 1000;
+
 }
 
-.music-icon {
- 
-  height: 160px;  
-  width: auto;   
-  margin-right: 8px; 
-}
-
-.sound-toggle:hover {
-  transform: scale(1.1);
-  transition: transform 0.3s ease;
-}
 
 .sound-toggle:active {
   transform: scale(0.95);
 }
-.music-icon.paused {
-  width: 90px;     
-  height: 90px;
+
+.music-icon {
+  height: 180px;
+  width: 180px; 
   object-fit: contain;
-  filter: hue-rotate(45deg) saturate(5) brightness(1.2); 
 }
 
-/* Hide cloud image globally */
-.cloud-image {
-  display: none ;
+.sound-label {
+  font-size: 24px;
+  margin-left: -px;
+  font-weight: 500;
+  color: #fff; /* white text */
 }
+
+
+
+
+/* Hide cloud image globally */
+/* .cloud-image {
+  display: none ;
+} */
 
 /* Prevent the last word from splitting into two lines */
 .nowrap-word {
@@ -1020,7 +1027,7 @@ html::-webkit-scrollbar {
   .music-toggle-btn { bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; }
   .sound-toggle { bottom: 6px; left: 6px; }
   .music-icon { height: 110px; }
-  .sound-label { font-size: 18px; margin-left: -60px; }
+  .sound-label { font-size: 18px; margin-left: -30px; }
 
   /* Gallery overlays become centered blocks */
   .single-image-text-overlay,

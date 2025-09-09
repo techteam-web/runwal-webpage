@@ -123,6 +123,10 @@ const BuildingScroll = () => {
     setMusicPlaying(!musicPlaying);
   };
 
+
+
+
+
 const handleExploreClick = useCallback(() => {
   if (exploreTriggeredRef.current) return; // avoid duplicate runs
   exploreTriggeredRef.current = true;
@@ -161,7 +165,7 @@ const handleExploreClick = useCallback(() => {
 
   tl.to(smoother, {
     scrollTop: 1000,
-    duration: 10,
+    duration: 5,
     ease: "power3.inOut",
   }, 0);
 }, [musicPlaying]);
@@ -415,12 +419,10 @@ useEffect(() => {
 
   const prevIndex = prevGalleryIndexRef.current;
   const currentIndex = galleryIndex;
-
   const currentItem = galleryItems[currentIndex];
+
   if (!currentItem) return;
-
   gsap.set(currentItem, { zIndex: 10, display: 'flex', autoAlpha: 1 });
-
   // Animation directions
   if (currentIndex === 0 || currentIndex === 4 || currentIndex === 6) {
     // bottom to top
@@ -433,11 +435,8 @@ useEffect(() => {
     // top to bottom
     gsap.fromTo(currentItem, { yPercent: -100 }, { yPercent: 0, duration: 1.2, ease: "power3.out" });
   }
-
- 
 galleryItems.forEach((item, idx) => {
   if (!item) return;
-
   // Show current image + last visible image
   if (idx === currentIndex || idx === prevIndex) {
     gsap.set(item, {
@@ -449,10 +448,8 @@ galleryItems.forEach((item, idx) => {
     gsap.set(item, { zIndex: 0, autoAlpha: 0, display: 'none' });
   }
 });
-
   prevGalleryIndexRef.current = currentIndex;
 }, [galleryIndex, showSingleImage]);
-
   // Animate text overlays
   const [showText, setShowText] = useState(false);
   useEffect(() => {
@@ -464,7 +461,6 @@ galleryItems.forEach((item, idx) => {
       setShowText(false);
     }
   }, [showSingleImage, galleryIndex]);
-
   useEffect(() => {
     if (showText) {
       const textRefs = [textRef1, textRef2, textRef3, textRef4, textRef5, textRef6, textRef7];
@@ -476,7 +472,6 @@ galleryItems.forEach((item, idx) => {
       }
     }
   }, [showText, galleryIndex]);
-
   return (
     <>
    <img
@@ -486,8 +481,6 @@ galleryItems.forEach((item, idx) => {
   ref={cloudRef}
   data-speed="0"   // 👈 Add this
 />
-
-
       <div className="bg-wrapper" aria-hidden="true">
         <img
           src="/copy_3_cropped5.jpg"
@@ -504,12 +497,34 @@ galleryItems.forEach((item, idx) => {
           ref={topRightRef}
           alt="Top Right Logo"
         />
-
         <div className="landing-screen" ref={landingScreenRef}>
           <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABARA HILL</p>
-          <button className="explore-btn" ref={exploreBtnRef} onClick={handleExploreClick}>Explore more</button>
-          <img src="/Asset_4.svg" alt="Logo" className="landing-logo" ref={logoRef} />
+<button
+  className="explore-btn"
+  ref={exploreBtnRef} onClick={handleExploreClick}
+  onMouseEnter={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left; // mouse position inside button
+    if (x < rect.width / 2) {
+      // left half hover → sweep left to right
+      e.currentTarget.style.setProperty('--start', '-100%');
+    } else {
+      // right half hover → sweep right to left
+      e.currentTarget.style.setProperty('--start', '100%');
+    }
+  }}
+>
+  <span>EXPLORE MORE</span>
+</button>
 
+
+
+
+
+
+
+          {/* <button className="explore-btn" ref={exploreBtnRef} onClick={handleExploreClick}>Explore more</button> */}
+          <img src="/Asset_4.svg" alt="Logo" className="landing-logo" ref={logoRef} />
           <div
             className="content"
             ref={contentRef}
@@ -517,7 +532,7 @@ galleryItems.forEach((item, idx) => {
           >
             <section className="building-page">
               <div className="card card_5" ref={(el) => (cardsRef.current[4] = el)}>
-                <p className="card-paragraph">{splitTextLetters("THE PRIVATE SKY MANSOON CRAFTED TO RESIGN OVER CITY.")}</p>
+                <p className="card-paragraph">{splitTextLetters("A PRIVATE SKY MANSION CRAFTED TO RESIDE OVER THE CITY.")}</p>
               </div>
               <div className="card card_4" ref={(el) => (cardsRef.current[3] = el)}>
                 <span className="gold-number">{splitTextLetters("11")}</span>
@@ -541,7 +556,7 @@ galleryItems.forEach((item, idx) => {
               </div>
 
               <button className="scroll-to-gallery-btn" onClick={handleGalleryClick}>
-                <span>Click To Explore Gallery</span>
+                <span>CLICK TO EXPLORE GALLERY</span>
               </button>
             </section>
           </div>
@@ -563,8 +578,8 @@ galleryItems.forEach((item, idx) => {
               <img ref={imgRef1} src="/Gallery/carsection.jpg" alt="Luxury Car Parking" className="single-gallery-image" />
               {showText && galleryIndex === 0 && (
                 <div ref={textRef1} className="single-image-text-overlay">
-                  <h2>{splitTextWords("FOR THE ONES WHO RESIGN, A VAULT FOR YOUR FLEET.")}</h2>
-                  <p>{splitTextWords("For every marque you collect, a sanctuary reflecting your exceptional lifestyle,")}</p>
+                 <h2>{splitTextWords("For those who resign, a vault for your fleet.")}</h2>
+<p>{splitTextWords("For every marque you collect, a sanctuary that reflects your exceptional lifestyle.")}</p>
                 </div>
               )}
             </div>
@@ -575,8 +590,8 @@ galleryItems.forEach((item, idx) => {
               <img ref={imgRef2} src="/Gallery/img2_2.jpg" alt="Skyline View" className="sec-gallery-image" />
               {showText && galleryIndex === 1 && (
                 <div ref={textRef2} className="sec-image-text-overlay from-left">
-                  <h2>{splitTextWords("MAKE A STATEMENT EVEN BEFORE YOU STEP IN.")}</h2>
-                  <p>{splitTextWords("Your arrival marks a moment of distinction - a drive that sets the stage for the world within.")}</p>
+                  <h2>{splitTextWords("Make a statement even before you step in.")}</h2>
+<p>{splitTextWords("Your arrival marks a moment of distinction — a drive that sets the stage for the world within.")}</p>
                 </div>
               )}
             </div>
@@ -585,8 +600,8 @@ galleryItems.forEach((item, idx) => {
               <img ref={imgRef3} src="/Gallery/img3_2.jpg" alt="Rooftop Retreat" className="third-gallery-image" />
               {showText && galleryIndex === 2 && (
                 <div ref={textRef3} className="third-image-text-overlay from-right">
-                  <h2>{splitTextWords("ANY MORE EXPANSIVE AND YOU MIGHT NEED A CPS TO NAVIGATE.")}</h2>
-                  <p>{splitTextWords("A testament to impeccable taste, Malabar embodies the grandeur of your cherished chateau and the warmth of an ancestral manor.")}</p>
+                  <h2>{splitTextWords("Any more expansive, and you might need a GPS to navigate.")}</h2>
+<p>{splitTextWords("A testament to impeccable taste, Malabar embodies the grandeur of your cherished chateau and the warmth of an ancestral manor.")}</p>
                 </div>
               )}
             </div>
@@ -595,8 +610,8 @@ galleryItems.forEach((item, idx) => {
               <img ref={imgRef4} src="/Gallery/img4_2.jpg" alt="Luxury Suite" className="fourth-gallery-image" />
               {showText && galleryIndex === 3 && (
                 <div ref={textRef4} className="fourth-image-text-overlay from-top">
-                  <h2>{splitTextWords("TWO REALMS. ONE PRIVILEGE YOURS.")}</h2>
-                  <p>{splitTextWords("Conversation held in rooms no one walks into unannounced. Sunset rituals that don't require scheduling. Here every inch was shaped for those whom silence answers. At 'Runwal Malabar', the clubhouse isn't something you access. It's something that others don't.")}</p>
+                   <h2>{splitTextWords("Two Realms. One Privilege: Yours.")}</h2>
+<p>{splitTextWords("Conversations held in rooms no one enters unannounced. Sunset rituals that require no scheduling. Here, every inch is crafted for those to whom silence responds. At 'Runwal Malabar', the clubhouse isn't something you merely access — it's something others do not.")}</p>
                 </div>
               )}
             </div>
@@ -605,8 +620,8 @@ galleryItems.forEach((item, idx) => {
               <img ref={imgRef5} src="/Gallery/img6_2.jpg" alt="Unique Section" className="fifth-gallery-image" />
               {showText && galleryIndex === 4 && (
                 <div ref={textRef5} className="fifth-image-text-overlay from-bottom">
-                  <h2>{splitTextWords("THIS IS YOUR MOMENT.")}</h2>
-                  <p>{splitTextWords("'Runwal Malabar' is the stage set for your legacy. A realm where your place in history is imagined and realized.While some legacies stand firm on the ground,your reaches for the sky")}</p>
+                   <h2>{splitTextWords("This is Your Moment.")}</h2>
+<p>{splitTextWords("'Runwal Malabar' is the stage set for your legacy — a realm where your place in history is imagined and realized. While some legacies stand firm on the ground, yours reaches for the sky.")}</p>
                 </div>
               )}
             </div>
@@ -615,15 +630,11 @@ galleryItems.forEach((item, idx) => {
               <img ref={imgRef6} src="/Gallery/img7_2.jpg" alt="Grand Lobby" className="sixth-gallery-image" />
               {showText && galleryIndex === 5 && (
                 <div ref={textRef6} className="sixth-image-text-overlay from-right">
-                  <h2>{splitTextWords("A CREATION WORTHY OF PICASSO'S SIGNATURE.")}</h2>
-                  <p>{splitTextWords("THE enterance lounge, a modernist sculpture capturing shifting lights and shadow - echoing Cubist artistry.")}</p>
+                   <h2>{splitTextWords("A Creation Worthy of Picasso's Signature.")}</h2>
+<p>{splitTextWords("The entrance lounge — a modernist sculpture capturing shifting lights and shadows, echoing Cubist artistry.")}</p>
                 </div>
               )}
             </div>
-
-       
-
-
             <div
 ref={galleryItemRef7}
   className="gallery-item"
@@ -643,12 +654,11 @@ ref={galleryItemRef7}
   className={`seventh-image-text-overlay from-bottom ${showText && galleryIndex === 6 ? "show" : ""}`}
 >
 
-      <h2>A PRIVACY SKY MANSION, CRAFTED TO RESIGN OVER THE CITY.</h2>
-      <p>Craft your legacy at Mumbai's most prestigious enclave.</p>
+       <h2>A Private Sky Mansion, Designed to Tower Over the City.</h2>
+<p>Craft your legacy in Mumbai's most prestigious enclave.</p>
     </div>
   )}
 </div>
-
 
 <div ref={galleryItemRef8} className="gallery-item" style={{ display: galleryIndex === 7 ? 'flex' : 'none' }}>
   <img ref={imgRef8} src="/Gallery/img8_crop_sky.jpg" alt="New Gallery Image 8" className="eighth-gallery-image" />
@@ -668,25 +678,20 @@ ref={galleryItemRef7}
           </div>
         )}
 
-<div onClick={handleMusicToggle} className="sound-toggle">
-  <img src="/icon_music.gif" alt="Audio Wave" className="music-icon" />
-  <span className="sound-label">Sound</span>
-</div>
-
 {/* <div onClick={handleMusicToggle} className="sound-toggle">
-  <div className="music-icon-wrapper">
-    <img
-      src={musicPlaying ? "/icon_music.gif" : "/downloads.png"}
-      alt="Audio Wave"
-      className={`music-icon ${!musicPlaying ? "paused" : ""}`}
-    />
-  </div>
+  <img src="/icon_music.gif" alt="Audio Wave" className="music-icon" />
   <span className="sound-label">Sound</span>
 </div> */}
 
 
+<div className="sound-toggle" onClick={handleMusicToggle}>
+  <img
+    src="/icon_music.gif"
+    alt="Audio Wave"
+    className="music-icon"
+  />
 
-
+</div>
 
       </div>
     </>
@@ -694,4 +699,6 @@ ref={galleryItemRef7}
 };
 
 export default BuildingScroll;
+
+
 
