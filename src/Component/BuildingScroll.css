@@ -5,10 +5,13 @@
   height: 100vh;
   overflow: hidden;
   position: relative;
+  width: 100%;
+  max-width: 100vw;
 }
 .content {
   min-height: 500vh;
-  width: 100vw; 
+  width: 100%;
+  max-width: 100vw;
   background-image: url("/Bigimg_2.jpg");
   /* background-image: url("/copy_3_cropped.jpg"); */
   --bg-crop-left: 0%;
@@ -23,30 +26,6 @@
   position: relative;
   color: white;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-}
-/* Background wrapper using an <img> (GPU-accelerated transform & object-position) */
-.bg-wrapper {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  z-index: 0;
-  pointer-events: none;
-}
-.bg-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 110%;
-  height: 110%;
-  object-fit: cover;
-  transform: translateZ(0);
-  transition: transform 0.3s ease;
-}
-
-.bg-image:hover {
-  transform: scale(1.05) translateZ(0);
 }
 
 .content.hidden {
@@ -144,6 +123,19 @@
   text-align: right;
 }
 
+/* Keep only the LOBBY line in a single line; allow the paragraph to wrap normally */
+.card_1 .card-label {
+  white-space: nowrap;
+  overflow: visible;
+  display: inline-block;
+  line-height: 1.25;
+}
+
+/* Ensure the lobby label uses the same sizing as the paragraph above for visual alignment */
+.card_1 .card-label {
+  font-size: 1.9rem;
+}
+
 
 .top-right-image {
   position: fixed;
@@ -160,40 +152,38 @@
 }
 
 
-
 .scroll-to-gallery-btn {
   position: absolute;
   top: 275%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  font-family: FONT1;background: rgba(140, 130, 105, 1);
-
+  font-family: FONT1;
+  background: rgba(140, 130, 105, 1);
   padding: 12px 90px;
-  /* background: rgba(200, 195, 170, 1);  */
   backdrop-filter: blur(15px);
   color: white;
   font-size: 1.2rem;
   font-weight: 600;
-  border: 3px solid #385270;  /* bluish border */
+  border: 3px solid #385270;
   cursor: pointer;
   border-radius: 35px;
   overflow: hidden;
   transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Overlay for sweep effect */
+/* Overlay for directional sweep effect */
 .scroll-to-gallery-btn::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: var(--start, -100%); /* start position controlled by JS */
+  top: var(--start-y, 0);
+  left: var(--start-x, -100%);
   width: 100%;
   height: 100%;
-  background: rgba(24, 26, 61, 0.4); /* overlay color */
+  background: rgba(24, 26, 61, 0.4);
   z-index: 0;
-  transition: left 0.5s ease;
-  border-radius: inherit; /* match button corners */
+  border-radius: inherit;
+  transition: all 0.5s ease;
 }
 
 .scroll-to-gallery-btn span {
@@ -202,17 +192,16 @@
   display: inline-block;
 }
 
-/* Hover effect: overlay slides in */
+/* Hover: overlay slides to center */
 .scroll-to-gallery-btn:hover::before {
+  top: 0;
   left: 0;
 }
 
-/* Hover background/text */
 .scroll-to-gallery-btn:hover {
   color: white;
-  background-color: rgba(255, 208, 117, 0.2); /* optional hover background */
+  background-color: rgba(255, 208, 117, 0.2);
 }
-
 
 
 /* ------------------------------
@@ -223,7 +212,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -236,7 +226,8 @@
 .gallery-item {
   opacity: 1;
   position: absolute;
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   height: 100vh;
   top: 0;
   left: 0;
@@ -248,8 +239,9 @@
 
 
 .single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image {
-  width: 105vw;
-  height: 105vh;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
   object-fit: cover;
   flex-shrink: 0; /* Prevent image from shrinking */
   opacity: 1;
@@ -285,10 +277,10 @@
 
 /* Specific text overlay positioning */
 .single-image-text-overlay {
-  top: 40%;
-  left: 5%;  
+  top: 35;
+  left: 1%;  
   transform: translateY(-50%);
-  width: 29%;
+  width: 19%;
 }
 .single-image-text-overlay h2{
   font-size: 2.3rem;font-family: FONT1;
@@ -312,13 +304,13 @@
 
 .sec-image-text-overlay {
   position: absolute;
-  top: 40%;
+  top: 35%;
 right: 1%; /* start from right */
   transform: translateY(-50%);
   color: white;
   text-align: left; 
   opacity: 0;
-   width: 29%;
+   width: 19%;
   pointer-events: none;
 }
 
@@ -339,10 +331,10 @@ right: 1%; /* start from right */
 /* Img3 overlay (like Img1 but custom widths) */
 .third-image-text-overlay {
   position: absolute;
-  top: 40%;
-  left: 2%;
+  top: 35%;
+  left: 1%;
   transform: translateY(-50%);
-  width: 33%;           /* expanded width */
+  width: 20%;           /* expanded width */
   text-align: left;
   color: #fff;
   z-index: 110;
@@ -362,12 +354,12 @@ right: 1%; /* start from right */
 
 .fourth-image-text-overlay {
     position: absolute;
-    top: 40%;
+    top: 35%;
   
-  right: 2%; 
+  right: 1%; 
     transform: translateY(-50%);
   
-    width: 32%; 
+    width: 19%; 
     text-align: left; 
     color: #fff;
     z-index: 110; 
@@ -489,7 +481,59 @@ right: 1%; /* start from right */
   color: #000;
 } */
 
+
+
 .explore-btn {
+  position: absolute;
+  top: 33%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-family: FONT1;
+  padding: 12px 90px;
+  background: rgba(200, 195, 170, 1);
+  backdrop-filter: blur(15px);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: 3px solid #385270;
+  cursor: pointer;
+  border-radius: 35px;
+  overflow: hidden;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.explore-btn::before {
+  content: '';
+  position: absolute;
+  top: var(--start-y, 0);
+  left: var(--start-x, -100%);
+  width: 100%;
+  height: 100%;
+  background: rgba(24, 26, 61, 0.4);
+  z-index: 0;
+  transition: all 0.5s ease;
+  border-radius: inherit;
+}
+
+.explore-btn span {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+.explore-btn:hover::before {
+  top: 0;
+  left: 0;
+}
+
+.explore-btn:hover {
+  color: white;
+  background-color: rgba(255, 208, 117, 0.2);
+}
+
+
+/* .explore-btn {
   position: absolute;
   top: 33%;
   left: 50%;
@@ -539,21 +583,20 @@ border: 3px solid #385270;
   background-color: rgba(255, 208, 117, 0.2);
 
 }
-
+ */
 
 /* ... all other existing styles ... */
 
 .cloud-image {
-  position: absolute;
-  top: 40%;
+  position: absolute; /* scoped to landing screen to avoid drift */
   left: 50%;
-  transform: translateX(-50%) scale(1.05); 
-  width: 120%;
-  opacity: 0.85;      
+  transform: translateX(-50%) scale(1.0);
+  width: 100%;
+  opacity: 0.9;
   pointer-events: none;
   mix-blend-mode: screen;
-  z-index: 10;        
-  filter: drop-shadow(0 25px 40px rgba(0,0,0,0.2)) blur(0.8px); 
+  z-index: 9;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.18)) blur(0.6px);
 }
 
 /* .cloud-image {
@@ -674,8 +717,8 @@ border: 3px solid #385270;
 
 .fifth-image-text-overlay {
   position: absolute;
-  top: 40%;
-  left: 5%;width: 38%;
+  top: 35%;
+  left: 2%;width: 19%;
   transform: translateY(-50%);
   color: rgb(243, 240, 240);
   text-align: left;  max-width: 550px;
@@ -698,10 +741,10 @@ font-family: FONT1;
 
 .sixth-image-text-overlay {
     position: absolute;
-    top: 40%;
-    right: 3%;
+    top: 35%;
+    right: 0%;
     transform: translateY(-50%);
-    width: 32%;
+    width: 19%;
     text-align: left;
     color: #fff;
     z-index: 110;
@@ -772,9 +815,10 @@ top: 50%;         /* closer to the bottom */
 
 
 .eighth-gallery-image {
-  width: 110%;         /* full width of its container */
-  height: 100vh;       /* full viewport height */
-  object-fit: cover;   /* cover the container without distortion */
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  object-fit: cover;
   display: block;
 }
 .eighth-image-text-overlay {
@@ -837,7 +881,8 @@ top: 50%;         /* closer to the bottom */
 }
 /* Hide scrollbar but allow scrolling */
 html, body {
-  overflow: auto;       /* scrolling still works */
+  overflow-x: hidden;
+  overflow-y: auto;       /* scrolling still works */
   height: 100%;
   margin: 0;
   padding: 0;
@@ -1155,17 +1200,46 @@ html::-webkit-scrollbar {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.4); /* normal dot */
+  border: 2px solid transparent; /* no border by default */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, transform 0.3s ease;
 }
+
+.progress-dot.active {
+   background-color: rgba(192, 160, 98, 0.8);
+  border-color: #38b2f7; /* bluish border for active dot */
+  transform: scale(1.2); /* optional: slightly bigger active dot */
+}
+
 
 .progress-dot:hover {
   background-color: rgba(255, 255, 255, 0.6);
   transform: scale(1.2);
 }
 
-.progress-dot.active {
-  background-color: rgba(192, 160, 98, 0.8);
-  transform: scale(1.3);
+
+.gallery-close-btn {
+  position: absolute;  /* top-left relative to gallery-item */
+  top: 20px;
+  left: 20px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: 2.5px solid #FFD700; /* golden border */
+  font-size: 1.5rem;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;  border-color: white;
+  z-index: 1000;
+}
+
+ .gallery-close-btn:hover {
+  background: rgba(0,0,0,0.8);
+  box-shadow: 0 0 10px 2px #FFD700, 0 0 0 2px rgba(255, 215, 0, 0.3);
+  border-color: #FFD700;
 }

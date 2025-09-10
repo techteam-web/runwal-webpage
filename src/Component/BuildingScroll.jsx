@@ -4,9 +4,7 @@ import "./BuildingScroll.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
-
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
-
 // Split text into words for word-by-word animation (gallery)
 const splitTextWords = (text) =>
   text.split(" ").map((word, i) => (
@@ -14,7 +12,6 @@ const splitTextWords = (text) =>
       {word}
     </span>
   ));
-
 // Split text into letters but keep each word together (no mid-word wrapping)
 const splitTextLetters = (text) => {
   const words = text.split(" ");
@@ -31,15 +28,15 @@ const splitTextLetters = (text) => {
     </React.Fragment>
   ));
 };
-
 const BuildingScroll = () => {
   const cardsRef = useRef([]);
 
   // Track whether the explore sequence already ran (prevents multiple triggers)
   const exploreTriggeredRef = useRef(false);
-  // Control cloud parallax after explore animation completes
-  const cloudCanMoveRef = useRef(true);
+  // Cloud should not move; keep false to disable any parallax movement
+  const cloudCanMoveRef = useRef(false);
 
+  // Tracks whether sound is ON (not muted). Default OFF until Explore is triggered.
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [showSingleImage, setShowSingleImage] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -79,7 +76,6 @@ const BuildingScroll = () => {
   const exploreBtnRef = useRef(null);
   const logoRef = useRef(null);
   const contentRef = useRef(null);
-  const buildingRef = useRef(null);
   const topRightRef = useRef(null);
   const landingScreenRef = useRef(null);
 
@@ -88,8 +84,40 @@ const BuildingScroll = () => {
 
   const bgMusic = useRef(new Audio("/backgroundsound.mp3"));
   bgMusic.current.loop = true;
+  bgMusic.current.preload = 'auto';
+  bgMusic.current.volume = 1.0;
+  // Optional: uncomment if you load from a CDN
+  // bgMusic.current.crossOrigin = 'anonymous';
 
-  const clickSound = useRef(new Audio("/click.mp3"));
+  // Preload audio without autoplay so it starts instantly on Explore
+  useEffect(() => {
+    try {
+      bgMusic.current.src = '/backgroundsound.mp3';
+      bgMusic.current.load();
+    } catch (e) {
+      console.warn('Preload backgroundsound failed', e);
+    }
+  }, []);
+
+  // Helper: play background music (single, fixed source only)
+  const playBackgroundMusic = useCallback(async () => {
+    try {
+      const src = '/backgroundsound.mp3';
+      if (!bgMusic.current.src.endsWith(src)) {
+        bgMusic.current.src = src;
+        bgMusic.current.load();
+      }
+      const playResult = await bgMusic.current.play();
+      // Useful for debugging which source is actually playing
+      console.info('Background music playing:', bgMusic.current.currentSrc || bgMusic.current.src);
+      return !!playResult || !bgMusic.current.paused;
+    } catch (err) {
+      console.warn('Background music play blocked/failed', err);
+      return false;
+    }
+  }, []);
+
+  // Removed button click SFX per request
 
   // Always start at the very top where the Explore button is
   useEffect(() => {
@@ -104,81 +132,143 @@ const BuildingScroll = () => {
     }
   }, []);
 
-  // Autoplay background music
+  // Autoplay on page start: try to start background music immediately.
   useEffect(() => {
-    const playMusic = async () => {
-      try {
-        await bgMusic.current.play();
-        setMusicPlaying(true);
-      } catch (err) {
-        console.log("Autoplay blocked, user interaction needed", err);
-      }
+    let removed = false;
+    const resume = () => {
+      if (!bgMusic.current || !bgMusic.current.paused) return;
+      playBackgroundMusic().then((ok) => {
+        if (ok) setMusicPlaying(true);
+      }).catch(() => {});
+      window.removeEventListener('pointerdown', resume, { capture: true });
+      window.removeEventListener('keydown', resume, { capture: true });
+      window.removeEventListener('wheel', resume, { capture: true });
     };
-    playMusic();
-  }, []);
+    (async () => {
+      if (!bgMusic.current) return;
+      // request unmuted autoplay
+      setMusicPlaying(true);
+      try {
+        await playBackgroundMusic();
+      } catch {
+        // Autoplay blocked: revert UI and attach resume listeners
+        setMusicPlaying(false);
+        if (!removed) {
+          window.addEventListener('pointerdown', resume, { once: true, capture: true });
+          window.addEventListener('keydown', resume, { once: true, capture: true });
+          window.addEventListener('wheel', resume, { once: true, capture: true });
+        }
+      }
+    })();
+    return () => {
+      removed = true;
+      window.removeEventListener('pointerdown', resume, { capture: true });
+      window.removeEventListener('keydown', resume, { capture: true });
+      window.removeEventListener('wheel', resume, { capture: true });
+    };
+  }, [playBackgroundMusic]);
 
+  // Keep element muted state in sync with UI state
+  useEffect(() => {
+    if (bgMusic.current) {
+      bgMusic.current.muted = !musicPlaying;
+    }
+  }, [musicPlaying]);
   const handleMusicToggle = () => {
-    if (musicPlaying) bgMusic.current.pause();
-    else bgMusic.current.play();
-    setMusicPlaying(!musicPlaying);
+    // Toggle mute without pausing playback. If turning ON and audio is paused, try to start it.
+    const willBeMuted = !bgMusic.current.muted;
+    bgMusic.current.muted = willBeMuted;
+    const nowPlaying = !willBeMuted;
+    setMusicPlaying(nowPlaying);
+    if (nowPlaying && bgMusic.current.paused) {
+      // user intent; safe to try to start
+      if (typeof playBackgroundMusic === 'function') {
+        playBackgroundMusic().catch(() => {});
+      } else {
+        bgMusic.current.play().catch(() => {});
+      }
+    }
   };
-
-
-
-
 
 const handleExploreClick = useCallback(() => {
   if (exploreTriggeredRef.current) return; // avoid duplicate runs
   exploreTriggeredRef.current = true;
-  clickSound.current.currentTime = 0;
-  clickSound.current.play();
 
-  const smoother = ScrollSmoother.get();
-  if (!smoother) return;
-
-  // 👉 Ensure music starts
-  if (!musicPlaying) {
-    bgMusic.current.play();
+  // 1) Start sound immediately (before any scroll)
+  if (bgMusic.current) {
+    bgMusic.current.muted = false; // unmute
     setMusicPlaying(true);
+    playBackgroundMusic().catch((err) => {
+      console.log('Background music play was blocked, will retry on next tap/click.', err);
+      const resume = () => {
+        if (!bgMusic.current || !bgMusic.current.paused) return;
+        playBackgroundMusic().catch(() => {});
+        window.removeEventListener('pointerdown', resume, { capture: true });
+      };
+      window.addEventListener('pointerdown', resume, { once: true, capture: true });
+    });
   }
+  // No click SFX
 
-  smoother.paused(true);
+  // 2) Proceed with auto-scroll once smoother is available
+  const kickScroll = (smoother) => {
+    smoother.paused(true);
 
-  const tl = gsap.timeline({
-    onComplete: () => {
-      smoother.paused(false);
-      cloudCanMoveRef.current = false; // stop further cloud movement
-      gsap.set(cloudRef.current, { x: 0, y: 0 });
-    },
-  });
+    // Compute target Y so the card with the desired sentence is centered
+    const targetCard = document.querySelector('.card_5');
+    let targetY = 1000; // fallback
+    try {
+      if (targetCard) {
+        const contentEl = document.querySelector('.content');
+        const contentRect = contentEl?.getBoundingClientRect();
+        const targetRect = targetCard.getBoundingClientRect();
+        const current = smoother.scrollTop();
+        const relativeTop = (targetRect.top - (contentRect ? contentRect.top : 0));
+        const viewportH = window.innerHeight || 0;
+        const cardH = targetCard.offsetHeight || 0;
+        // Position so the card appears roughly centered
+        targetY = Math.max(0, current + relativeTop - (viewportH / 2 - cardH / 2));
+      }
+    } catch {
+      // ignore measurement errors; fallback targetY will be used
+    }
 
-  tl.to([headingRef.current, exploreBtnRef.current, logoRef.current], {
-    y: -200,
-    opacity: 0,
-    stagger: 0.1,
-    duration: 1,
-    ease: "power2.inOut",
-    onComplete: () => {
-      gsap.to(topRightRef.current, { opacity: 1, duration: 0.5 });
-    },
-  }, 0);
+    const tl = gsap.timeline({
+      onComplete: () => {
+        smoother.paused(false);
+        cloudCanMoveRef.current = false; // stop further cloud movement
+        gsap.set(cloudRef.current, { x: 0, y: 0 });
+      },
+    });
+    tl.to([headingRef.current, exploreBtnRef.current, logoRef.current], {
+      y: -200,
+      opacity: 0,
+      stagger: 0.1,
+      duration: 1,
+      ease: "power2.inOut",
+      onComplete: () => {
+        gsap.to(topRightRef.current, { opacity: 1, duration: 0.5 });
+      },
+    }, 0);
+  tl.to(smoother, { scrollTop: targetY, duration: 5, ease: "power3.inOut" }, 0);
+  };
 
-  tl.to(smoother, {
-    scrollTop: 1000,
-    duration: 5,
-    ease: "power3.inOut",
-  }, 0);
-}, [musicPlaying]);
+  let smoother = ScrollSmoother.get();
+  if (smoother) {
+    kickScroll(smoother);
+  } else {
+    // try shortly if not yet ready
+    setTimeout(() => {
+      const s = ScrollSmoother.get();
+      if (s) kickScroll(s);
+    }, 50);
+  }
+}, [playBackgroundMusic]);
 
   const handleGalleryClick = () => {
-    clickSound.current.currentTime = 0;
-    clickSound.current.play();
     setShowSingleImage(true);
     setGalleryIndex(0);
-    if (!musicPlaying) {
-      bgMusic.current.play();
-      setMusicPlaying(true);
-    }
+  // Do not start playback here; sound starts with Explore only
   };
 
   // Smooth scrolling & card animation
@@ -199,57 +289,6 @@ const handleExploreClick = useCallback(() => {
     } catch {
       // ignore if smoother not ready yet
     }
-
-    const building = buildingRef.current; // parallax background image
-    const cloud = cloudRef.current;       // clouds
-
-    if (!building) {
-      console.log("Parallax: sorry, building image not found!");
-      return;
-    } else {
-      console.log("Parallax: working");
-    }
-
-let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
-const speed = 0.015;
-
-    const moveBackground = () => {
-      currentX += (mouseX - currentX) * speed;
-      currentY += (mouseY - currentY) * speed;
-
-      // Animate building image
-      gsap.set(building, {
-        x: currentX * 100,
-        y: currentY * 60
-      });
-
-      // Animate clouds
-      // if (cloud) {
-      //   gsap.set(cloud, {
-      //     x: currentX * 80,
-      //     y: currentY * 30
-      //   });
-      // }
-// Animate clouds
-if (cloud && cloudCanMoveRef.current) {
-gsap.to(cloud, {
-  x: currentX * 50,
-  y: currentY * 30,
-  duration: 0.6,
-  ease: "power2.out"
-});
-}
-
-      requestAnimationFrame(moveBackground);
-    };
-
-    const handleMouseMove = (e) => {
-      mouseX = e.clientX / window.innerWidth - 0.5;
-      mouseY = e.clientY / window.innerHeight - 0.5;
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    moveBackground();
 
     // Card animations
     cardsRef.current.forEach((card) => {
@@ -282,13 +321,48 @@ gsap.to(cloud, {
     return () => {
       smoother.kill();
       ScrollTrigger.getAll().forEach((st) => st.kill());
-      window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [showSingleImage, handleExploreClick]);
+  }, [showSingleImage]);
+
+  // Place the cloud just below the Explore button (scrolls with the landing screen)
+  useEffect(() => {
+    const positionCloud = () => {
+      const btn = exploreBtnRef.current;
+      const cloud = cloudRef.current;
+      const landing = landingScreenRef.current;
+      if (!btn || !cloud || !landing) return;
+      const btnRect = btn.getBoundingClientRect();
+      const landingRect = landing.getBoundingClientRect();
+  // Desired top relative to landing
+  let topWithinLanding = Math.round((btnRect.bottom - landingRect.top) + 12);
+  // Clamp so cloud never goes too high/low
+  const minTop = 0; // not above top of landing
+  const maxTop = Math.max(0, landingRect.height - (cloud.offsetHeight || 0));
+  topWithinLanding = Math.min(Math.max(topWithinLanding, minTop), maxTop);
+      cloud.style.position = 'absolute';
+      cloud.style.top = `${topWithinLanding}px`;
+      cloud.style.left = '50%';
+  cloud.style.transform = 'translateX(-50%) scale(1.05)';
+      cloud.style.zIndex = '9';
+      cloud.style.pointerEvents = 'none';
+    };
+    // Initial and on resize
+    requestAnimationFrame(positionCloud);
+    window.addEventListener('resize', positionCloud);
+    return () => window.removeEventListener('resize', positionCloud);
+  }, []);
 
   // Auto-trigger Explore when the user first scrolls (or uses keys/touch) before clicking the button
   useEffect(() => {
     if (showSingleImage) return; // only on landing state
+
+    const isFromSoundToggle = (target) => {
+      try {
+        return !!(target && target.closest && target.closest('.sound-toggle'));
+      } catch {
+        return false;
+      }
+    };
 
     const trigger = () => {
       if (!exploreTriggeredRef.current) {
@@ -297,17 +371,20 @@ gsap.to(cloud, {
     };
 
     const onWheel = (e) => {
+      if (isFromSoundToggle(e.target)) return;
       // Trigger on downward intent; remove check if you want any wheel to trigger
       if (e.deltaY > 0) trigger();
     };
 
     const onKeyDown = (e) => {
+      if (isFromSoundToggle(e.target)) return;
       const code = e.code || e.key;
       if (["ArrowDown", "PageDown", "Space", " "].includes(code)) trigger();
     };
 
     let touched = false;
-    const onTouchStart = () => {
+    const onTouchStart = (e) => {
+      if (isFromSoundToggle(e.target)) return;
       if (!touched) {
         touched = true;
         trigger();
@@ -344,6 +421,28 @@ gsap.to(cloud, {
         canScroll = true;
       }, delay);
     };
+
+
+    const closeGallery = () => {
+  setShowSingleImage(false);
+  setGalleryIndex(0);
+  prevGalleryIndexRef.current = 0;
+  setShowText(false);
+
+  // Scroll to gallery button position
+  const galleryBtn = document.querySelector('.scroll-to-gallery-btn');
+  const smoother = ScrollSmoother.get();
+  if (smoother && galleryBtn) {
+    // Scroll so the button is visible at the bottom of viewport
+    const btnRect = galleryBtn.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const targetScroll = smoother.scrollTop() + (btnRect.top - viewportHeight + btnRect.height + 20); // 20px padding
+    smoother.scrollTo(targetScroll, true);
+  } else if (galleryBtn) {
+    // Fallback for non-smoother
+    galleryBtn.scrollIntoView({ block: "end", behavior: "smooth" });
+  }
+};
 
     const handleKeyDown = (e) => {
       if (!canScroll) return;
@@ -400,6 +499,71 @@ gsap.to(cloud, {
       window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [showSingleImage]);
+
+  // Parallax effect for visible gallery images (mouse-based)
+  useEffect(() => {
+    if (!showSingleImage) return;
+
+    const items = [
+      galleryItemRef1.current,
+      galleryItemRef2.current,
+      galleryItemRef3.current,
+      galleryItemRef4.current,
+      galleryItemRef5.current,
+      galleryItemRef6.current,
+      galleryItemRef7.current,
+      galleryItemRef8.current,
+    ];
+
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+    const speed = 0.08; // smoothing factor
+    const maxShift = 28; // px shift at edges
+    let rafId;
+
+    const isVisible = (el) => !!el && getComputedStyle(el).display !== 'none' && el.offsetParent !== null;
+    const getVisibleImages = () =>
+      items
+        .filter(isVisible)
+        .map((wrap) => wrap.querySelector('img'))
+        .filter(Boolean);
+
+    const onMouseMove = (e) => {
+      const nx = e.clientX / window.innerWidth - 0.5; // -0.5 .. 0.5
+      const ny = e.clientY / window.innerHeight - 0.5;
+      targetX = nx;
+      targetY = ny;
+    };
+
+    const tick = () => {
+      currentX += (targetX - currentX) * speed;
+      currentY += (targetY - currentY) * speed;
+      const tx = currentX * maxShift;
+      const ty = currentY * maxShift;
+
+      const visibleImgs = getVisibleImages();
+      visibleImgs.forEach((img, i) => {
+        // subtle depth variation by index
+        const depth = 1 - Math.min(i, 3) * 0.15; // 1.0, 0.85, 0.7, 0.55
+        gsap.set(img, { x: tx * depth, y: ty * depth });
+      });
+
+      rafId = requestAnimationFrame(tick);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    rafId = requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+      // reset any transforms on all images
+      items.forEach((wrap) => {
+        const img = wrap ? wrap.querySelector('img') : null;
+        if (img) gsap.set(img, { x: 0, y: 0 });
+      });
+    };
+  }, [showSingleImage, galleryIndex]);
 
   
 // GSAP gallery animation
@@ -479,17 +643,8 @@ galleryItems.forEach((item, idx) => {
   alt="Clouds"
   className="cloud-image"
   ref={cloudRef}
-  data-speed="0"   // 👈 Add this
+  data-speed="0"
 />
-      <div className="bg-wrapper" aria-hidden="true">
-        <img
-          src="/copy_3_cropped5.jpg"
-          alt="background"
-          className="bg-image"
-          ref={buildingRef}
-        />
-      </div>
-
       <div className="container">
         <img
           src="/Asset_4.svg"
@@ -497,9 +652,9 @@ galleryItems.forEach((item, idx) => {
           ref={topRightRef}
           alt="Top Right Logo"
         />
-        <div className="landing-screen" ref={landingScreenRef}>
+  <div className="landing-screen" ref={landingScreenRef}>
           <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABARA HILL</p>
-<button
+{/* <button
   className="explore-btn"
   ref={exploreBtnRef} onClick={handleExploreClick}
   onMouseEnter={(e) => {
@@ -515,13 +670,42 @@ galleryItems.forEach((item, idx) => {
   }}
 >
   <span>EXPLORE MORE</span>
+</button> */}
+
+
+<button
+  className="explore-btn"
+  ref={exploreBtnRef}
+  onClick={handleExploreClick}
+  onMouseEnter={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const deltaX = x - centerX;
+    const deltaY = y - centerY;
+    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+    let startX = '-100%';
+    let startY = '0';
+
+    if (angle > -67.5 && angle <= -22.5) { startX = '100%'; startY = '-100%'; }       // top-right
+    else if (angle > -112.5 && angle <= -67.5) { startX = '0'; startY = '-100%'; }   // top
+    else if (angle > -157.5 && angle <= -112.5) { startX = '-100%'; startY = '-100%'; } // top-left
+    else if (angle > 157.5 || angle <= -157.5) { startX = '-100%'; startY = '0'; }   // left
+    else if (angle > 112.5 && angle <= 157.5) { startX = '-100%'; startY = '100%'; } // bottom-left
+    else if (angle > 67.5 && angle <= 112.5) { startX = '0'; startY = '100%'; }      // bottom
+    else if (angle > 22.5 && angle <= 67.5) { startX = '100%'; startY = '100%'; }    // bottom-right
+    else { startX = '100%'; startY = '0'; }                                          // right
+
+    e.currentTarget.style.setProperty('--start-x', startX);
+    e.currentTarget.style.setProperty('--start-y', startY);
+  }}
+>
+  <span>EXPLORE MORE</span>
 </button>
-
-
-
-
-
-
 
           {/* <button className="explore-btn" ref={exploreBtnRef} onClick={handleExploreClick}>Explore more</button> */}
           <img src="/Asset_4.svg" alt="Logo" className="landing-logo" ref={logoRef} />
@@ -554,10 +738,50 @@ galleryItems.forEach((item, idx) => {
                   <span className="nowrap-word"> LOBBY</span>
                 </span>
               </div>
+<button
+  className="scroll-to-gallery-btn relative overflow-hidden rounded-2xl px-6 py-3 border-2 border-cyan-400"
+  onClick={handleGalleryClick}
+  onMouseEnter={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-              <button className="scroll-to-gallery-btn" onClick={handleGalleryClick}>
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const deltaX = x - centerX;
+    const deltaY = y - centerY;
+    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+    let startX = '-100%';
+    let startY = '0';
+
+    if (angle > -67.5 && angle <= -22.5) { startX = '100%'; startY = '-100%'; }       // top-right
+    else if (angle > -112.5 && angle <= -67.5) { startX = '0'; startY = '-100%'; }   // top
+    else if (angle > -157.5 && angle <= -112.5) { startX = '-100%'; startY = '-100%'; } // top-left
+    else if (angle > 157.5 || angle <= -157.5) { startX = '-100%'; startY = '0'; }   // left
+    else if (angle > 112.5 && angle <= 157.5) { startX = '-100%'; startY = '100%'; } // bottom-left
+    else if (angle > 67.5 && angle <= 112.5) { startX = '0'; startY = '100%'; }      // bottom
+    else if (angle > 22.5 && angle <= 67.5) { startX = '100%'; startY = '100%'; }    // bottom-right
+    else { startX = '100%'; startY = '0'; }                                          // right
+
+    e.currentTarget.style.setProperty('--start-x', startX);
+    e.currentTarget.style.setProperty('--start-y', startY);
+  }}
+>
+  <span className="relative z-10">CLICK TO EXPLORE GALLERY</span>
+  <span
+    className="absolute inset-0 bg-[rgba(24,26,61,0.4)] rounded-2xl transform transition-all duration-500"
+    style={{
+      top: 'var(--start-y, 0)',
+      left: 'var(--start-x, -100%)',
+      zIndex: 0,
+    }}
+  ></span>
+</button>
+
+              {/* <button className="scroll-to-gallery-btn" onClick={handleGalleryClick}>
                 <span>CLICK TO EXPLORE GALLERY</span>
-              </button>
+              </button> */}
             </section>
           </div>
         </div>
@@ -574,7 +798,9 @@ galleryItems.forEach((item, idx) => {
                 />
               ))}
             </div>
-            <div ref={galleryItemRef1} className="gallery-item" style={{ display: 'flex' }}>
+
+            
+            {/* <div ref={galleryItemRef1} className="gallery-item" style={{ display: 'flex' }}>
               <img ref={imgRef1} src="/Gallery/carsection.jpg" alt="Luxury Car Parking" className="single-gallery-image" />
               {showText && galleryIndex === 0 && (
                 <div ref={textRef1} className="single-image-text-overlay">
@@ -582,10 +808,36 @@ galleryItems.forEach((item, idx) => {
 <p>{splitTextWords("For every marque you collect, a sanctuary that reflects your exceptional lifestyle.")}</p>
                 </div>
               )}
-            </div>
+            </div> */}
+<div ref={galleryItemRef1} className="gallery-item" style={{ display: 'flex', position: 'relative' }}>
+  {/* Close Button */}
+  {showSingleImage && (
+    <button
+      className="gallery-close-btn"
+      onClick={() => setShowSingleImage(false)}
+    >
+      ×
+    </button>
+  )}
+
+  {/* Gallery Image */}
+  <img
+    ref={imgRef1}
+    src="/Gallery/carsection.jpg"
+    alt="Luxury Car Parking"
+    className="single-gallery-image"
+  />
+
+  {/* Text Overlay */}
+  {showText && galleryIndex === 0 && (
+    <div ref={textRef1} className="single-image-text-overlay">
+      <h2>{splitTextWords("For those who resign, a vault for your fleet.")}</h2>
+      <p>{splitTextWords("For every marque you collect, a sanctuary that reflects your exceptional lifestyle.")}</p>
+    </div>
+  )}
+</div>
+
 <div ref={galleryItemRef2} className="gallery-item" style={{ display: (galleryIndex === 1 || galleryIndex === 0 || galleryIndex === 2) ? 'flex' : 'none' }}>
-
-
             {/* <div ref={galleryItemRef2} className="gallery-item" style={{ display: galleryIndex === 1 ? 'flex' : 'none' }}> */}
               <img ref={imgRef2} src="/Gallery/img2_2.jpg" alt="Skyline View" className="sec-gallery-image" />
               {showText && galleryIndex === 1 && (
@@ -678,20 +930,45 @@ ref={galleryItemRef7}
           </div>
         )}
 
-{/* <div onClick={handleMusicToggle} className="sound-toggle">
-  <img src="/icon_music.gif" alt="Audio Wave" className="music-icon" />
-  <span className="sound-label">Sound</span>
-</div> */}
 
 
-<div className="sound-toggle" onClick={handleMusicToggle}>
+<button
+  type="button"
+  className="sound-toggle"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleMusicToggle();
+  }}
+  onMouseDown={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  onPointerDown={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  onTouchStart={(e) => {
+    // Stop bubbling so the global window 'touchstart' auto-explore handler doesn't run
+    e.stopPropagation();
+  }}
+  onKeyDown={(e) => {
+    // Prevent Space/Arrow/Page keys from triggering global scroll/handlers
+    const k = e.key || e.code;
+    if ([" ", "Space", "Spacebar", "ArrowDown", "ArrowUp", "PageDown", "PageUp"].includes(k)) {
+      e.preventDefault();
+    }
+    e.stopPropagation();
+  }}
+  aria-label="Toggle sound"
+  style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+>
   <img
     src="/icon_music.gif"
     alt="Audio Wave"
     className="music-icon"
   />
-
-</div>
+</button>
 
       </div>
     </>
