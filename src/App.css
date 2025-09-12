@@ -10,3 +10,15 @@
     background: linear-gradient(135deg, rgba(192,160,98,0.7), rgba(168,136,76,0.7));
     z-index: -777;
 }
+
+
+.drop-container {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+.drop-container.show {
+  opacity: 1;
+  pointer-events: auto;
+}

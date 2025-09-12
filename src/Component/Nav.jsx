@@ -11,7 +11,12 @@ const Nav = ({
   markersGroup,
   markers,
   clickHandle,
+  showNav,
+  setShowSingleImage,
 }) => {
+  // Click sound for navbar buttons
+  const clickSoundRef = useRef(null);
+
   const handleMarkerGroupClick = (name) => {
     setActiveMarker("");
     setActiveGroupeMarker(name);
@@ -192,28 +197,26 @@ const Nav = ({
 
   return (
     <>
+      <audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
       {/* Desktop Menu */}
       <div
         ref={containerRef}
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
-        className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-2 z-[99999] absolute bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
+        className={`drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-2 z-[99999] fixed bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
        rounded-4xl flex justify-center items-center gap-16 
        max-sm:gap-1 max-sm:bottom-1 max-sm:border-2 max-sm:p-0.5 
        max-md:gap-0 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between
        max-lg:gap-0 max-lg:bottom-2 max-lg:border-2 max-lg:p-1 max-lg:justify-between 
-       max-xl:p-2 max-xl:gap-0 max-xl:justify-between"
+       max-xl:p-2 max-xl:gap-0 max-xl:justify-between${showNav ? ' show' : ''}`}
         style={{
           "--x": "500%",
           "--y": "500%",
           "--r": "160px",
           backgroundImage:
             "radial-gradient(var(--r) var(--r) at var(--x) var(--y), rgba(255, 208, 117, 0.8), rgba(255,255,255,0) 40%)",
-
-          // backgroundColor: "rgba(103,84,48,0.3)",
         }}
       >
-
         {Object.keys(markersGroup).map((name) => (
           <div key={name} className="flex items-center">
             <button
@@ -230,6 +233,11 @@ const Nav = ({
               max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]
               "
               onClick={(e) => {
+                // Play click sound
+                if (clickSoundRef.current) {
+                  clickSoundRef.current.currentTime = 0;
+                  clickSoundRef.current.play();
+                }
                 const container = containerRef.current;
                 if (container) {
                   const rect = container.getBoundingClientRect();
@@ -237,7 +245,40 @@ const Nav = ({
                   const y = e.clientY - rect.top;
                   animateGradientFromPoint(x, y, name);
                 }
-                handleDropBox(name);
+                if (name === "Gallery") {
+                  setShowSingleImage(true);
+                } else if (name === "Home") {
+                    if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                    window.__skipCard5Anim = true;
+                    setTimeout(() => {
+                      // Use the autoScrollStopYRef value from BuildingScroll.jsx
+                      const targetY = window.autoScrollStopYRef && window.autoScrollStopYRef.current != null ? window.autoScrollStopYRef.current : 1000;
+                      const smoother = window.ScrollSmoother ? window.ScrollSmoother.get && window.ScrollSmoother.get() : null;
+                      if (smoother && smoother.scrollTo) {
+                        smoother.scrollTo(targetY, true);
+                      } else if (smoother && smoother.scrollTop) {
+                        smoother.scrollTop(targetY, true);
+                      } else {
+                        // fallback to window.scrollTo
+                        const duration = 500;
+                        const startY = window.scrollY;
+                        const diff = targetY - startY;
+                        let start;
+                        function step(timestamp) {
+                          if (!start) start = timestamp;
+                          const elapsed = timestamp - start;
+                          const progress = Math.min(elapsed / duration, 1);
+                          window.scrollTo(0, startY + diff * progress);
+                          if (progress < 1) {
+                            window.requestAnimationFrame(step);
+                          }
+                        }
+                        window.requestAnimationFrame(step);
+                      }
+                    }, 200);
+                } else {
+                  handleDropBox(name);
+                }
               }}
               style={
                 activeGroupDropbox === name

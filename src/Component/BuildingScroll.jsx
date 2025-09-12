@@ -28,7 +28,103 @@ const splitTextLetters = (text) => {
     </React.Fragment>
   ));
 };
-const BuildingScroll = () => {
+const BuildingScroll = ({ setShowNav, showSingleImage, setShowSingleImage }) => {
+  // Store the auto-scroll stop position
+  const autoScrollStopYRef = useRef(null);
+  // Make the ref globally accessible for Nav.jsx
+  window.autoScrollStopYRef = autoScrollStopYRef;
+  const [autoScrollComplete, setAutoScrollComplete] = useState(false);
+
+  // --- SCROLL LOCK LOGIC ---
+  useEffect(() => {
+    // Set bottom scroll limit to below card_1 (add extra space)
+    let maxY = null;
+    const card1 = document.querySelector('.card_1');
+    if (card1) {
+      const cardRect = card1.getBoundingClientRect();
+      const cardBottom = cardRect.bottom + window.scrollY;
+  // Add 390px extra space below card_1
+  maxY = cardBottom - window.innerHeight + 390;
+    }
+    if (!autoScrollComplete || autoScrollStopYRef.current == null) return;
+    const minY = autoScrollStopYRef.current;
+    let ticking = false;
+    function lockScroll() {
+      if (maxY !== null && window.scrollY > maxY) {
+        window.scrollTo(0, maxY);
+      }
+      if (window.scrollY < minY) {
+        window.scrollTo(0, minY);
+      }
+      ticking = false;
+    }
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(lockScroll);
+        ticking = true;
+      }
+    }
+    function onWheel(e) {
+      if (maxY !== null && window.scrollY >= maxY && e.deltaY > 0) {
+        e.preventDefault();
+        window.scrollTo(0, maxY);
+      }
+      if (window.scrollY <= minY && e.deltaY < 0) {
+        e.preventDefault();
+        window.scrollTo(0, minY);
+      }
+    }
+    function onKeyDown(e) {
+      const downKeys = ["ArrowDown", "PageDown", "End"];
+      if (maxY !== null && window.scrollY >= maxY && downKeys.includes(e.key)) {
+        e.preventDefault();
+        window.scrollTo(0, maxY);
+      }
+      const upKeys = ["ArrowUp", "PageUp", "Home"];
+      if (window.scrollY <= minY && upKeys.includes(e.key)) {
+        e.preventDefault();
+        window.scrollTo(0, minY);
+      }
+    }
+    let touchStartY = 0;
+    function onTouchStart(e) {
+      if (e.touches && e.touches.length > 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }
+    function onTouchMove(e) {
+      if (maxY !== null && window.scrollY >= maxY && e.touches && e.touches.length > 0) {
+        const deltaY = e.touches[0].clientY - touchStartY;
+        if (deltaY < 0) {
+          e.preventDefault();
+          window.scrollTo(0, maxY);
+        }
+      }
+      if (window.scrollY <= minY && e.touches && e.touches.length > 0) {
+        const deltaY = e.touches[0].clientY - touchStartY;
+        if (deltaY > 0) {
+          e.preventDefault();
+          window.scrollTo(0, minY);
+        }
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: false });
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('keydown', onKeyDown, { passive: false });
+    window.addEventListener('touchstart', onTouchStart, { passive: false });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+    };
+  }, [autoScrollComplete]);
+
+
+  // Click sound for Explore button
+  const clickSoundRef = useRef(null);
   const cardsRef = useRef([]);
 
   // Track whether the explore sequence already ran (prevents multiple triggers)
@@ -38,7 +134,7 @@ const BuildingScroll = () => {
 
   // Tracks whether sound is ON (not muted). Default OFF until Explore is triggered.
   const [musicPlaying, setMusicPlaying] = useState(false);
-  const [showSingleImage, setShowSingleImage] = useState(false);
+  const [audioPausing, setAudioPausing] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const prevGalleryIndexRef = useRef(0);
 
@@ -81,6 +177,23 @@ const BuildingScroll = () => {
 
   // Cloud ref
   const cloudRef = useRef(null);
+  // Hide cloud when scroll is locked at card position
+  useEffect(() => {
+    if (!autoScrollComplete || autoScrollStopYRef.current == null) return;
+    const minY = autoScrollStopYRef.current;
+    function hideCloudIfLocked() {
+      if (window.scrollY <= minY + 1 && cloudRef.current) {
+        cloudRef.current.style.display = 'none';
+      } else if (cloudRef.current) {
+        cloudRef.current.style.display = '';
+      }
+    }
+    window.addEventListener('scroll', hideCloudIfLocked, { passive: false });
+    hideCloudIfLocked();
+    return () => {
+      window.removeEventListener('scroll', hideCloudIfLocked);
+    };
+  }, [autoScrollComplete]);
 
   const bgMusic = useRef(new Audio("/backgroundsound.mp3"));
   bgMusic.current.loop = true;
@@ -136,33 +249,54 @@ const BuildingScroll = () => {
   useEffect(() => {
     let removed = false;
     const resume = () => {
-      if (!bgMusic.current || !bgMusic.current.paused) return;
-      playBackgroundMusic().then((ok) => {
-        if (ok) setMusicPlaying(true);
-      }).catch(() => {});
-      window.removeEventListener('pointerdown', resume, { capture: true });
-      window.removeEventListener('keydown', resume, { capture: true });
-      window.removeEventListener('wheel', resume, { capture: true });
-    };
-    (async () => {
-      if (!bgMusic.current) return;
-      // request unmuted autoplay
-      setMusicPlaying(true);
-      try {
-        await playBackgroundMusic();
-      } catch {
-        // Autoplay blocked: revert UI and attach resume listeners
-        setMusicPlaying(false);
-        if (!removed) {
-          window.addEventListener('pointerdown', resume, { once: true, capture: true });
-          window.addEventListener('keydown', resume, { once: true, capture: true });
-          window.addEventListener('wheel', resume, { once: true, capture: true });
+    if (!autoScrollComplete || autoScrollStopYRef.current == null) return;
+    const minY = autoScrollStopYRef.current;
+    let ticking = false;
+    function lockScroll() {
+      if (window.scrollY < minY) {
+        window.scrollTo(0, minY);
+      }
+      ticking = false;
+    }
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(lockScroll);
+        ticking = true;
+      }
+    }
+    function onWheel(e) {
+      if (window.scrollY <= minY && e.deltaY < 0) {
+        e.preventDefault();
+        window.scrollTo(0, minY);
+      }
+    }
+    function onKeyDown(e) {
+      const upKeys = ["ArrowUp", "PageUp", "Home"];
+      if (window.scrollY <= minY && upKeys.includes(e.key)) {
+        e.preventDefault();
+        window.scrollTo(0, minY);
+      }
+    }
+    let touchStartY = 0;
+    function onTouchStart(e) {
+      if (e.touches && e.touches.length > 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }
+    function onTouchMove(e) {
+      if (window.scrollY <= minY && e.touches && e.touches.length > 0) {
+        const deltaY = e.touches[0].clientY - touchStartY;
+        if (deltaY > 0) {
+          e.preventDefault();
+          window.scrollTo(0, minY);
         }
       }
-    })();
-    return () => {
-      removed = true;
-      window.removeEventListener('pointerdown', resume, { capture: true });
+    }
+    window.addEventListener('scroll', onScroll, { passive: false });
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('keydown', onKeyDown, { passive: false });
+    window.addEventListener('touchstart', onTouchStart, { passive: false });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
       window.removeEventListener('keydown', resume, { capture: true });
       window.removeEventListener('wheel', resume, { capture: true });
     };
@@ -194,6 +328,12 @@ const handleExploreClick = useCallback(() => {
   if (exploreTriggeredRef.current) return; // avoid duplicate runs
   exploreTriggeredRef.current = true;
 
+  // Play click sound
+  if (clickSoundRef.current) {
+    clickSoundRef.current.currentTime = 0;
+    clickSoundRef.current.play();
+  }
+
   // 1) Start sound immediately (before any scroll)
   if (bgMusic.current) {
     bgMusic.current.muted = false; // unmute
@@ -208,7 +348,6 @@ const handleExploreClick = useCallback(() => {
       window.addEventListener('pointerdown', resume, { once: true, capture: true });
     });
   }
-  // No click SFX
 
   // 2) Proceed with auto-scroll once smoother is available
   const kickScroll = (smoother) => {
@@ -228,6 +367,8 @@ const handleExploreClick = useCallback(() => {
         const cardH = targetCard.offsetHeight || 0;
         // Position so the card appears roughly centered
         targetY = Math.max(0, current + relativeTop - (viewportH / 2 - cardH / 2));
+  // Store the stop position for scroll lock
+  autoScrollStopYRef.current = targetY;
       }
     } catch {
       // ignore measurement errors; fallback targetY will be used
@@ -238,13 +379,27 @@ const handleExploreClick = useCallback(() => {
         smoother.paused(false);
         cloudCanMoveRef.current = false; // stop further cloud movement
         gsap.set(cloudRef.current, { x: 0, y: 0 });
+        if (typeof setShowNav === 'function') setShowNav(true); // Show navbar after autoscroll
+        setAutoScrollComplete(true); // Mark auto-scroll as complete
       },
     });
-    tl.to([headingRef.current, exploreBtnRef.current, logoRef.current], {
-      y: -200,
+    // Animate all up together, but with different y values to avoid overlap
+    tl.to(logoRef.current, {
+      y: -220,
       opacity: 0,
-      stagger: 0.1,
-      duration: 1,
+      duration: 0.8,
+      ease: "power2.inOut",
+    }, 0);
+    tl.to(headingRef.current, {
+      y: -160,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power2.inOut",
+    }, 0);
+    tl.to(exploreBtnRef.current, {
+      y: -100,
+      opacity: 0,
+      duration: 0.8,
       ease: "power2.inOut",
       onComplete: () => {
         gsap.to(topRightRef.current, { opacity: 1, duration: 0.5 });
@@ -266,8 +421,8 @@ const handleExploreClick = useCallback(() => {
 }, [playBackgroundMusic]);
 
   const handleGalleryClick = () => {
-    setShowSingleImage(true);
-    setGalleryIndex(0);
+  setShowSingleImage(true);
+  setGalleryIndex(0);
   // Do not start playback here; sound starts with Explore only
   };
 
@@ -291,31 +446,100 @@ const handleExploreClick = useCallback(() => {
     }
 
     // Card animations
-    cardsRef.current.forEach((card) => {
+    cardsRef.current.forEach((card, idx) => {
       if (!card) return;
-      gsap.set(card, { opacity: 0 });
+  gsap.set(card, { opacity: idx === 0 ? 1 : 0 });
       const letters = card.querySelectorAll(".letter");
-
-      ScrollTrigger.create({
-        trigger: card,
-        start: "top center",
-        end: "bottom center",
-        onEnter: () => {
-          cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
-          gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
-          gsap.fromTo(
-            letters,
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, stagger: 0.05, duration: 0.6, ease: "power2.out" }
-          );
-        },
-        onEnterBack: () => {
-          cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
-          gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
-        },
-        onLeave: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
-        onLeaveBack: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
-      });
+      // Conditionally disable animation for card_5 (index 4)
+      if (idx === 0) {
+        // For GRAND LOBBY (card_1), keep visible and animate splitText effect starting from 'GRAND'
+        ScrollTrigger.create({
+          trigger: card,
+          start: "top center",
+          end: "bottom center",
+          onEnter: () => {
+            cardsRef.current.forEach((c, i) => {
+              if (i !== 0) gsap.to(c, { opacity: 0, duration: 0.5 });
+            });
+            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
+            // Animate the entire label letter by letter (splitText effect for all)
+            const label = card.querySelector('.card-label');
+            if (label) {
+              const allLetters = Array.from(label.querySelectorAll('.letter'));
+              gsap.fromTo(
+                allLetters,
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, stagger: 0.07, duration: 0.7, ease: "power2.out" }
+              );
+            }
+          },
+          onEnterBack: () => {
+            cardsRef.current.forEach((c, i) => {
+              if (i !== 0) gsap.to(c, { opacity: 0, duration: 0.5 });
+            });
+            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
+            const label = card.querySelector('.card-label');
+            if (label) {
+              const label = card.querySelector('.card-label');
+              if (label) {
+                const allLetters = Array.from(label.querySelectorAll('.letter'));
+                gsap.fromTo(
+                  allLetters,
+                  { opacity: 0, y: 20 },
+                  { opacity: 1, y: 0, stagger: 0.07, duration: 0.7, ease: "power2.out" }
+                );
+              }
+            }
+          },
+          onLeave: () => {
+            // Do not hide card_1 when leaving
+            gsap.to(card, { opacity: 1, duration: 0.6, ease: "power2.inOut" });
+          },
+          onLeaveBack: () => {
+            // Do not hide card_1 when leaving back
+            gsap.to(card, { opacity: 1, duration: 0.6, ease: "power2.inOut" });
+          },
+        });
+      } else if (idx === 4 && window.__skipCard5Anim) {
+        ScrollTrigger.create({
+          trigger: card,
+          start: "top center",
+          end: "bottom center",
+          onEnter: () => {
+            cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
+            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
+            // No letter animation
+            window.__skipCard5Anim = false;
+          },
+          onEnterBack: () => {
+            cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
+            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
+          },
+          onLeave: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
+          onLeaveBack: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
+        });
+      } else {
+        ScrollTrigger.create({
+          trigger: card,
+          start: "top center",
+          end: "bottom center",
+          onEnter: () => {
+            cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
+            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
+            gsap.fromTo(
+              letters,
+              { opacity: 0, y: 20 },
+              { opacity: 1, y: 0, stagger: 0.05, duration: 0.6, ease: "power2.out" }
+            );
+          },
+          onEnterBack: () => {
+            cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
+            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
+          },
+          onLeave: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
+          onLeaveBack: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
+        });
+      }
     });
 
     return () => {
@@ -500,70 +724,6 @@ const handleExploreClick = useCallback(() => {
     };
   }, [showSingleImage]);
 
-  // Parallax effect for visible gallery images (mouse-based)
-  useEffect(() => {
-    if (!showSingleImage) return;
-
-    const items = [
-      galleryItemRef1.current,
-      galleryItemRef2.current,
-      galleryItemRef3.current,
-      galleryItemRef4.current,
-      galleryItemRef5.current,
-      galleryItemRef6.current,
-      galleryItemRef7.current,
-      galleryItemRef8.current,
-    ];
-
-    let targetX = 0, targetY = 0;
-    let currentX = 0, currentY = 0;
-    const speed = 0.08; // smoothing factor
-    const maxShift = 28; // px shift at edges
-    let rafId;
-
-    const isVisible = (el) => !!el && getComputedStyle(el).display !== 'none' && el.offsetParent !== null;
-    const getVisibleImages = () =>
-      items
-        .filter(isVisible)
-        .map((wrap) => wrap.querySelector('img'))
-        .filter(Boolean);
-
-    const onMouseMove = (e) => {
-      const nx = e.clientX / window.innerWidth - 0.5; // -0.5 .. 0.5
-      const ny = e.clientY / window.innerHeight - 0.5;
-      targetX = nx;
-      targetY = ny;
-    };
-
-    const tick = () => {
-      currentX += (targetX - currentX) * speed;
-      currentY += (targetY - currentY) * speed;
-      const tx = currentX * maxShift;
-      const ty = currentY * maxShift;
-
-      const visibleImgs = getVisibleImages();
-      visibleImgs.forEach((img, i) => {
-        // subtle depth variation by index
-        const depth = 1 - Math.min(i, 3) * 0.15; // 1.0, 0.85, 0.7, 0.55
-        gsap.set(img, { x: tx * depth, y: ty * depth });
-      });
-
-      rafId = requestAnimationFrame(tick);
-    };
-
-    window.addEventListener('mousemove', onMouseMove);
-    rafId = requestAnimationFrame(tick);
-
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      if (rafId) cancelAnimationFrame(rafId);
-      // reset any transforms on all images
-      items.forEach((wrap) => {
-        const img = wrap ? wrap.querySelector('img') : null;
-        if (img) gsap.set(img, { x: 0, y: 0 });
-      });
-    };
-  }, [showSingleImage, galleryIndex]);
 
   
 // GSAP gallery animation
@@ -673,6 +833,7 @@ galleryItems.forEach((item, idx) => {
 </button> */}
 
 
+<audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
 <button
   className="explore-btn"
   ref={exploreBtnRef}
@@ -734,50 +895,10 @@ galleryItems.forEach((item, idx) => {
               </div>
               <div className="card card_1" ref={(el) => (cardsRef.current[0] = el)}>
                 <span className="card-label">
-                  {splitTextLetters("GRAND DOUBLE HEIGHT")}
-                  <span className="nowrap-word"> LOBBY</span>
+                  {splitTextLetters("GRAND DOUBLE HEIGHT LOBBY")}
+                  
                 </span>
               </div>
-<button
-  className="scroll-to-gallery-btn relative overflow-hidden rounded-2xl px-6 py-3 border-2 border-cyan-400"
-  onClick={handleGalleryClick}
-  onMouseEnter={(e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const deltaX = x - centerX;
-    const deltaY = y - centerY;
-    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-
-    let startX = '-100%';
-    let startY = '0';
-
-    if (angle > -67.5 && angle <= -22.5) { startX = '100%'; startY = '-100%'; }       // top-right
-    else if (angle > -112.5 && angle <= -67.5) { startX = '0'; startY = '-100%'; }   // top
-    else if (angle > -157.5 && angle <= -112.5) { startX = '-100%'; startY = '-100%'; } // top-left
-    else if (angle > 157.5 || angle <= -157.5) { startX = '-100%'; startY = '0'; }   // left
-    else if (angle > 112.5 && angle <= 157.5) { startX = '-100%'; startY = '100%'; } // bottom-left
-    else if (angle > 67.5 && angle <= 112.5) { startX = '0'; startY = '100%'; }      // bottom
-    else if (angle > 22.5 && angle <= 67.5) { startX = '100%'; startY = '100%'; }    // bottom-right
-    else { startX = '100%'; startY = '0'; }                                          // right
-
-    e.currentTarget.style.setProperty('--start-x', startX);
-    e.currentTarget.style.setProperty('--start-y', startY);
-  }}
->
-  <span className="relative z-10">CLICK TO EXPLORE GALLERY</span>
-  <span
-    className="absolute inset-0 bg-[rgba(24,26,61,0.4)] rounded-2xl transform transition-all duration-500"
-    style={{
-      top: 'var(--start-y, 0)',
-      left: 'var(--start-x, -100%)',
-      zIndex: 0,
-    }}
-  ></span>
-</button>
 
               {/* <button className="scroll-to-gallery-btn" onClick={handleGalleryClick}>
                 <span>CLICK TO EXPLORE GALLERY</span>
@@ -810,15 +931,6 @@ galleryItems.forEach((item, idx) => {
               )}
             </div> */}
 <div ref={galleryItemRef1} className="gallery-item" style={{ display: 'flex', position: 'relative' }}>
-  {/* Close Button */}
-  {showSingleImage && (
-    <button
-      className="gallery-close-btn"
-      onClick={() => setShowSingleImage(false)}
-    >
-      ×
-    </button>
-  )}
 
   {/* Gallery Image */}
   <img
@@ -843,7 +955,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 1 && (
                 <div ref={textRef2} className="sec-image-text-overlay from-left">
                   <h2>{splitTextWords("Make a statement even before you step in.")}</h2>
-<p>{splitTextWords("Your arrival marks a moment of distinction — a drive that sets the stage for the world within.")}</p>
+<p>{splitTextWords("Your arrival marks a moment of distinction a drive that sets the stage for the world within.")}</p>
                 </div>
               )}
             </div>
@@ -863,7 +975,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 3 && (
                 <div ref={textRef4} className="fourth-image-text-overlay from-top">
                    <h2>{splitTextWords("Two Realms. One Privilege: Yours.")}</h2>
-<p>{splitTextWords("Conversations held in rooms no one enters unannounced. Sunset rituals that require no scheduling. Here, every inch is crafted for those to whom silence responds. At 'Runwal Malabar', the clubhouse isn't something you merely access — it's something others do not.")}</p>
+<p>{splitTextWords("Conversations held in rooms no one enters unannounced. Sunset rituals that require no scheduling. Here, every inch is crafted for those to whom silence responds. At 'Runwal Malabar', the clubhouse isn't something you merely access  it's something others do not.")}</p>
                 </div>
               )}
             </div>
@@ -873,7 +985,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 4 && (
                 <div ref={textRef5} className="fifth-image-text-overlay from-bottom">
                    <h2>{splitTextWords("This is Your Moment.")}</h2>
-<p>{splitTextWords("'Runwal Malabar' is the stage set for your legacy — a realm where your place in history is imagined and realized. While some legacies stand firm on the ground, yours reaches for the sky.")}</p>
+<p>{splitTextWords("'Runwal Malabar' is the stage set for your legacy a realm where your place in history is imagined and realized. While some legacies stand firm on the ground, yours reaches for the sky.")}</p>
                 </div>
               )}
             </div>
@@ -883,7 +995,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 5 && (
                 <div ref={textRef6} className="sixth-image-text-overlay from-right">
                    <h2>{splitTextWords("A Creation Worthy of Picasso's Signature.")}</h2>
-<p>{splitTextWords("The entrance lounge — a modernist sculpture capturing shifting lights and shadows, echoing Cubist artistry.")}</p>
+<p>{splitTextWords("The entrance lounge a modernist sculpture capturing shifting lights and shadows, echoing Cubist artistry.")}</p>
                 </div>
               )}
             </div>
@@ -932,42 +1044,41 @@ ref={galleryItemRef7}
 
 
 
+
 <button
-  type="button"
-  className="sound-toggle"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    handleMusicToggle();
-  }}
-  onMouseDown={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }}
-  onPointerDown={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }}
-  onTouchStart={(e) => {
-    // Stop bubbling so the global window 'touchstart' auto-explore handler doesn't run
-    e.stopPropagation();
-  }}
-  onKeyDown={(e) => {
-    // Prevent Space/Arrow/Page keys from triggering global scroll/handlers
-    const k = e.key || e.code;
-    if ([" ", "Space", "Spacebar", "ArrowDown", "ArrowUp", "PageDown", "PageUp"].includes(k)) {
-      e.preventDefault();
+  className="audio-btn"
+  aria-label="Toggle audio"
+  data-state={musicPlaying ? (audioPausing ? "pausing" : "play") : "pause"}
+  onClick={() => {
+    if (!musicPlaying) {
+      setMusicPlaying(true);
+      setAudioPausing(false);
+      bgMusic.current.play();
+    } else if (musicPlaying && !audioPausing) {
+      setAudioPausing(true);
+      setTimeout(() => {
+        setMusicPlaying(false);
+        setAudioPausing(false);
+        bgMusic.current.pause();
+      }, 1000); // match winddown duration
     }
-    e.stopPropagation();
   }}
-  aria-label="Toggle sound"
-  style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+  style={{ position: "fixed", bottom: 30, left: 30, zIndex: 1000 }}
 >
-  <img
-    src="/icon_music.gif"
-    alt="Audio Wave"
-    className="music-icon"
-  />
+  {[...Array(5)].map((_, i) => (
+    <span
+      key={i}
+      ref={el => {
+        if (el && musicPlaying && !audioPausing) {
+          el.style.setProperty('--current-scale', (0.3 + Math.random() * 0.7).toFixed(2));
+          el.style.animationDelay = '';
+        }
+        if (el && audioPausing) {
+          el.style.animationDelay = `${i * 0.12}s`;
+        }
+      }}
+    ></span>
+  ))}
 </button>
 
       </div>
