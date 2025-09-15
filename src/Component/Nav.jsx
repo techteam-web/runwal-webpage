@@ -249,7 +249,7 @@ const Nav = ({
                   setShowSingleImage(true);
                 } else if (name === "Home") {
                     if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
-                    window.__skipCard5Anim = true;
+                    window.__homeButtonClicked = true; // Set flag for smooth card5 animation
                     setTimeout(() => {
                       // Use the autoScrollStopYRef value from BuildingScroll.jsx
                       const targetY = window.autoScrollStopYRef && window.autoScrollStopYRef.current != null ? window.autoScrollStopYRef.current : 1000;
@@ -277,6 +277,11 @@ const Nav = ({
                       }
                       window.requestAnimationFrame(step);
                     }, 200);
+                } else if (name === "Map") {
+                  // Handle Map button click - you can customize this action
+                  console.log("Map button clicked");
+                  // Example: Open Google Maps or a custom map component
+                  // window.open('https://maps.google.com', '_blank');
                 } else {
                   handleDropBox(name);
                 }

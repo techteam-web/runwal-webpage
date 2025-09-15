@@ -445,8 +445,9 @@ const handleExploreClick = useCallback(() => {
 }, [playBackgroundMusic]);
 
   const handleGalleryClick = () => {
-  setShowSingleImage(true);
   setGalleryIndex(0);
+  prevGalleryIndexRef.current = 0;
+  setShowSingleImage(true);
   // Do not start playback here; sound starts with Explore only
   };
 
@@ -486,23 +487,87 @@ const handleExploreClick = useCallback(() => {
             cardsRef.current.forEach((c, i) => {
               if (i !== idx) gsap.to(c, { opacity: 0, duration: 0.5 });
             });
-            gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
             
-            // Check if this is card5 and we should skip animation
-            if (idx === 4 && window.__skipCard5Anim) {
-              // Card5: Show text immediately without any transition
-              const allLetters = Array.from(card.querySelectorAll('.letter'));
-              gsap.set(allLetters, { opacity: 1 }); // Show all letters immediately
-              window.__skipCard5Anim = false; // Reset the flag
+            // Check if this is card5
+            if (idx === 4) {
+              if (window.__homeButtonClicked) {
+                // Card5: Show smoothly like img1 paragraph when Home button is clicked
+                gsap.set(card, { opacity: 1 }); // Show card
+                
+                // Smooth text animation for Home button
+                const allLetters = Array.from(card.querySelectorAll('.letter'));
+                gsap.killTweensOf(allLetters);
+                gsap.set(allLetters, { opacity: 0 });
+                gsap.to(allLetters, {
+                  opacity: 1,
+                  duration: 1.0,
+                  ease: "power2.out",
+                  stagger: 0.05,
+                  delay: 0.3,
+                  overwrite: true,
+                  onComplete: () => {
+                    window.__homeButtonClicked = false; // Reset the flag
+                  }
+                });
+              } else if (window.__skipCard5Anim) {
+                // Card5: Show instantly with no animation or effects
+                gsap.set(card, { opacity: 1 }); // Show card instantly
+                const allLetters = Array.from(card.querySelectorAll('.letter'));
+                gsap.set(allLetters, { opacity: 1 }); // Show text instantly
+                window.__skipCard5Anim = false; // Reset the flag
+              } else {
+                // Default card5 behavior
+                gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
+                
+                // ROBUST text animation - always start from clean state
+                const allLetters = Array.from(card.querySelectorAll('.letter'));
+                
+                // Kill any existing animations on these letters to prevent conflicts
+                gsap.killTweensOf(allLetters);
+                
+                // Force reset all letters to invisible state
+                gsap.set(allLetters, { 
+                  opacity: 0,
+                  scale: 1,
+                  rotation: 0,
+                  x: 0,
+                  y: 0
+                });
+                
+                // Start fresh animation with proper stagger
+                gsap.to(allLetters, {
+                  opacity: 1,
+                  duration: 1.5,
+                  ease: "sine.out",
+                  stagger: 0.1,
+                  overwrite: true, // Overwrite any conflicting animations
+                });
+              }
             } else {
-              // ONLY animate the .letter spans - no other elements
+              gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
+              
+              // ROBUST text animation - always start from clean state
               const allLetters = Array.from(card.querySelectorAll('.letter'));
-              gsap.set(allLetters, { opacity: 0 }); // Reset letters to invisible
+              
+              // Kill any existing animations on these letters to prevent conflicts
+              gsap.killTweensOf(allLetters);
+              
+              // Force reset all letters to invisible state
+              gsap.set(allLetters, { 
+                opacity: 0,
+                scale: 1,
+                rotation: 0,
+                x: 0,
+                y: 0
+              });
+              
+              // Start fresh animation with proper stagger
               gsap.to(allLetters, {
                 opacity: 1,
                 duration: 1.5,
                 ease: "sine.out",
                 stagger: 0.1,
+                overwrite: true, // Overwrite any conflicting animations
               });
             }
           },
@@ -510,23 +575,87 @@ const handleExploreClick = useCallback(() => {
             cardsRef.current.forEach((c, i) => {
               if (i !== idx) gsap.to(c, { opacity: 0, duration: 0.5 });
             });
-            gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
             
-            // Check if this is card5 and we should skip animation
-            if (idx === 4 && window.__skipCard5Anim) {
-              // Card5: Show text immediately without any transition
-              const allLetters = Array.from(card.querySelectorAll('.letter'));
-              gsap.set(allLetters, { opacity: 1 }); // Show all letters immediately
-              window.__skipCard5Anim = false; // Reset the flag
+            // Check if this is card5
+            if (idx === 4) {
+              if (window.__homeButtonClicked) {
+                // Card5: Show smoothly like img1 paragraph when Home button is clicked
+                gsap.set(card, { opacity: 1 }); // Show card
+                
+                // Smooth text animation for Home button
+                const allLetters = Array.from(card.querySelectorAll('.letter'));
+                gsap.killTweensOf(allLetters);
+                gsap.set(allLetters, { opacity: 0 });
+                gsap.to(allLetters, {
+                  opacity: 1,
+                  duration: 1.0,
+                  ease: "power2.out",
+                  stagger: 0.05,
+                  delay: 0.3,
+                  overwrite: true,
+                  onComplete: () => {
+                    window.__homeButtonClicked = false; // Reset the flag
+                  }
+                });
+              } else if (window.__skipCard5Anim) {
+                // Card5: Show instantly with no animation or effects
+                gsap.set(card, { opacity: 1 }); // Show card instantly
+                const allLetters = Array.from(card.querySelectorAll('.letter'));
+                gsap.set(allLetters, { opacity: 1 }); // Show text instantly
+                window.__skipCard5Anim = false; // Reset the flag
+              } else {
+                // Default card5 behavior
+                gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
+                
+                // ROBUST text animation - always start from clean state
+                const allLetters = Array.from(card.querySelectorAll('.letter'));
+                
+                // Kill any existing animations on these letters to prevent conflicts
+                gsap.killTweensOf(allLetters);
+                
+                // Force reset all letters to invisible state
+                gsap.set(allLetters, { 
+                  opacity: 0,
+                  scale: 1,
+                  rotation: 0,
+                  x: 0,
+                  y: 0
+                });
+                
+                // Start fresh animation with proper stagger
+                gsap.to(allLetters, {
+                  opacity: 1,
+                  duration: 1.5,
+                  ease: "sine.out",
+                  stagger: 0.1,
+                  overwrite: true, // Overwrite any conflicting animations
+                });
+              }
             } else {
-              // ONLY animate the .letter spans - no other elements
+              gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
+              
+              // ROBUST text animation - always start from clean state
               const allLetters = Array.from(card.querySelectorAll('.letter'));
-              gsap.set(allLetters, { opacity: 0 }); // Reset letters to invisible
+              
+              // Kill any existing animations on these letters to prevent conflicts
+              gsap.killTweensOf(allLetters);
+              
+              // Force reset all letters to invisible state
+              gsap.set(allLetters, { 
+                opacity: 0,
+                scale: 1,
+                rotation: 0,
+                x: 0,
+                y: 0
+              });
+              
+              // Start fresh animation with proper stagger
               gsap.to(allLetters, {
                 opacity: 1,
                 duration: 1.5,
                 ease: "sine.out",
                 stagger: 0.1,
+                overwrite: true, // Overwrite any conflicting animations
               });
             }
           },
@@ -801,6 +930,15 @@ galleryItems.forEach((item, idx) => {
 });
   prevGalleryIndexRef.current = currentIndex;
 }, [galleryIndex, showSingleImage]);
+
+  // Force gallery to start from img1 when opened
+  useEffect(() => {
+    if (showSingleImage && galleryIndex !== 0) {
+      setGalleryIndex(0);
+      prevGalleryIndexRef.current = 0;
+    }
+  }, [showSingleImage]);
+
   // Animate text overlays
   const [showText, setShowText] = useState(false);
   useEffect(() => {
@@ -826,16 +964,26 @@ galleryItems.forEach((item, idx) => {
           // First animate letters (headings) with letter-by-letter effect
           gsap.fromTo(letters, { opacity: 0 }, { opacity: 1, stagger: 0.1, duration: 1.0, ease: "sine.out" });
           
-          // Then animate words (paragraphs) with delay after heading animation completes
+          // Set paragraphs to hidden initially, then make them appear when about half the letters are remaining
+          gsap.set(words, { opacity: 0 }); // Hide paragraphs initially
           const headingDuration = 1.0 + (letters.length * 0.1); // Total time for heading animation
-          gsap.fromTo(words, { opacity: 0, y: 20 }, { 
-            opacity: 1, 
-            y: 0, 
-            stagger: 0.08, 
-            duration: 0.8, 
-            ease: "power3.out",
-            delay: headingDuration
-          });
+          // Start paragraph when about half the letters are remaining - perfect timing
+          const paragraphDelay = headingDuration - 0.5; // Start 0.5s before heading completes
+          // gsap.to(words, { 
+          //   opacity: 1, 
+          //   delay: paragraphDelay,
+          //   duration: 1.0,
+          //   ease: "power2.out"
+          // });
+       
+gsap.to(words, { 
+  opacity: 1, 
+  delay: paragraphDelay,
+  duration: 5.0,      
+  ease: "power2.out"   
+});
+
+
         } else {
           const words = currentTextRef.current.querySelectorAll(".word");
           gsap.to(currentTextRef.current, { opacity: 1, duration: 0.1 });
@@ -961,7 +1109,7 @@ galleryItems.forEach((item, idx) => {
   {showText && galleryIndex === 0 && (
     <div ref={textRef1} className="single-image-text-overlay">
   <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0 }}>{splitTextLetters("FOR THOSE WHO RESIGN, A VAULT FOR YOUR FLEET.")}</h2>
-  <p>{splitTextWords("For every marque you collect, a sanctuary that reflects your exceptional lifestyle.")}</p>
+  <p style={{ margin: 0, lineHeight: 1.1, padding: 0 }}>{splitTextWords("For every marque you collect, a sanctuary that reflects your exceptional lifestyle.")}</p>
     </div>
   )}
 </div>
@@ -972,7 +1120,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 1 && (
                   <div ref={textRef2} className="sec-image-text-overlay from-left">
                     <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0}}>{splitTextLetters("MAKE A STATEMENT EVEN BEFORE YOU STEP IN.")}</h2>
-<p>{splitTextWords("Your arrival marks a moment of distinction a drive that sets the stage for the world within.")}</p>
+<p style={{ margin: 0, lineHeight: 1.1, padding: 0 }}>{splitTextWords("Your arrival marks a moment of distinction a drive that sets the stage for the world within.")}</p>
                 </div>
               )}
             </div>
@@ -982,7 +1130,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 2 && (
                   <div ref={textRef3} className="third-image-text-overlay from-right">
                     <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0}}>{splitTextLetters("ANY MORE EXPANSIVE, AND YOU MIGHT NEED A GPS TO NAVIGATE.")}</h2>
-<p>{splitTextWords("A testament to impeccable taste, Malabar embodies the grandeur of your cherished chateau and the warmth of an ancestral manor.")}</p>
+<p style={{ margin: 0, lineHeight: 1.1, padding: 0 }}>{splitTextWords("A testament to impeccable taste, Malabar embodies the grandeur of your cherished chateau and the warmth of an ancestral manor.")}</p>
                 </div>
               )}
             </div>
@@ -992,7 +1140,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 3 && (
              <div ref={textRef4} className="fourth-image-text-overlay from-top">
                <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0 }}>{splitTextLetters("TWO REALMS. ONE PRIVILEGE: YOURS.")}</h2>
-<p>{splitTextWords("Conversations held in rooms no one enters unannounced. Sunset rituals that require no scheduling. Here, every inch is crafted for those to whom silence responds. At 'Runwal Malabar', the clubhouse isn't something you merely access  it's something others do not.")}</p>
+<p style={{ margin: 0, lineHeight: 1.1, padding: 0 }}>{splitTextWords("Conversations held in rooms no one enters unannounced. Sunset rituals that require no scheduling. Here, every inch is crafted for those to whom silence responds. At 'Runwal Malabar', the clubhouse isn't something you merely access  it's something others do not.")}</p>
                 </div>
               )}
             </div>
@@ -1002,7 +1150,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 4 && (
              <div ref={textRef5} className="fifth-image-text-overlay from-bottom">
                <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0}}>{splitTextLetters("THIS IS YOUR MOMENT.")}</h2>
-<p>{splitTextWords("'Runwal Malabar' is the stage set for your legacy a realm where your place in history is imagined and realized. While some legacies stand firm on the ground, yours reaches for the sky.")}</p>
+<p style={{ marginTop: '16px', marginBottom: 0, marginLeft: 0, marginRight: 0, lineHeight: 1.1, padding: 0 }}>{splitTextWords("'Runwal Malabar' is the stage set for your legacy a realm where your place in history is imagined and realized. While some legacies stand firm on the ground, yours reaches for the sky.")}</p>
                 </div>
               )}
             </div>
@@ -1012,7 +1160,7 @@ galleryItems.forEach((item, idx) => {
               {showText && galleryIndex === 5 && (
              <div ref={textRef6} className="sixth-image-text-overlay from-right">
                <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0}}>{splitTextLetters("A CREATION WORTHY OF PICASSO'S SIGNATURE.")}</h2>
-<p>{splitTextWords("The entrance lounge a modernist sculpture capturing shifting lights and shadows, echoing Cubist artistry.")}</p>
+<p style={{ marginTop: '16px', marginBottom: 0, marginLeft: 0, marginRight: 0, lineHeight: 1.1, padding: 0 }}>{splitTextWords("The entrance lounge a modernist sculpture capturing shifting lights and shadows, echoing Cubist artistry.")}</p>
                 </div>
               )}
             </div>

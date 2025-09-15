@@ -134,7 +134,8 @@
 .card_2 { top: 163%; }
 .card_3 { top: 138%; }
 .card_4 { top: 0%; }
-.card_5 { top: -70%; }
+.card_5 { top: -70%;
+left: 50%; }
 
 .gold-number {
   font-family: FONT3;

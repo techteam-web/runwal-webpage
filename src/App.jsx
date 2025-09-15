@@ -72,7 +72,8 @@ function App() {
     Features: null,
     "Floor plans": null,
     View: null,
-    Gallery: null
+    Gallery: null,
+    Map: null
   };
 
   const clickHandle = (path) => {
