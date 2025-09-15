@@ -181,17 +181,45 @@ const BuildingScroll = ({ setShowNav, showSingleImage, setShowSingleImage }) => 
   useEffect(() => {
     if (!autoScrollComplete || autoScrollStopYRef.current == null) return;
     const minY = autoScrollStopYRef.current;
+    let ticking = false;
+    let isCloudHidden = false;
+    
     function hideCloudIfLocked() {
-      if (window.scrollY <= minY + 1 && cloudRef.current) {
-        cloudRef.current.style.display = 'none';
-      } else if (cloudRef.current) {
+      const shouldHide = window.scrollY <= minY + 1;
+      
+      if (shouldHide && !isCloudHidden && cloudRef.current) {
+        gsap.to(cloudRef.current, { 
+          opacity: 0, 
+          duration: 0.3, 
+          ease: "power2.out",
+          onComplete: () => {
+            cloudRef.current.style.display = 'none';
+          }
+        });
+        isCloudHidden = true;
+      } else if (!shouldHide && isCloudHidden && cloudRef.current) {
         cloudRef.current.style.display = '';
+        gsap.to(cloudRef.current, { 
+          opacity: 1, 
+          duration: 0.3, 
+          ease: "power2.out" 
+        });
+        isCloudHidden = false;
+      }
+      ticking = false;
+    }
+    
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(hideCloudIfLocked);
+        ticking = true;
       }
     }
-    window.addEventListener('scroll', hideCloudIfLocked, { passive: false });
+    
+    window.addEventListener('scroll', onScroll, { passive: true });
     hideCloudIfLocked();
     return () => {
-      window.removeEventListener('scroll', hideCloudIfLocked);
+      window.removeEventListener('scroll', onScroll);
     };
   }, [autoScrollComplete]);
 
@@ -199,10 +227,7 @@ const BuildingScroll = ({ setShowNav, showSingleImage, setShowSingleImage }) => 
   bgMusic.current.loop = true;
   bgMusic.current.preload = 'auto';
   bgMusic.current.volume = 1.0;
-  // Optional: uncomment if you load from a CDN
-  // bgMusic.current.crossOrigin = 'anonymous';
 
-  // Preload audio without autoplay so it starts instantly on Explore
   useEffect(() => {
     try {
       bgMusic.current.src = '/backgroundsound.mp3';
@@ -378,7 +403,6 @@ const handleExploreClick = useCallback(() => {
       onComplete: () => {
         smoother.paused(false);
         cloudCanMoveRef.current = false; // stop further cloud movement
-        gsap.set(cloudRef.current, { x: 0, y: 0 });
         if (typeof setShowNav === 'function') setShowNav(true); // Show navbar after autoscroll
         setAutoScrollComplete(true); // Mark auto-scroll as complete
       },
@@ -405,7 +429,7 @@ const handleExploreClick = useCallback(() => {
         gsap.to(topRightRef.current, { opacity: 1, duration: 0.5 });
       },
     }, 0);
-  tl.to(smoother, { scrollTop: targetY, duration: 5, ease: "power3.inOut" }, 0);
+  tl.to(smoother, { scrollTop: targetY, duration: 3, ease: "power3.inOut" }, 0);
   };
 
   let smoother = ScrollSmoother.get();
@@ -448,96 +472,80 @@ const handleExploreClick = useCallback(() => {
     // Card animations
     cardsRef.current.forEach((card, idx) => {
       if (!card) return;
-  gsap.set(card, { opacity: idx === 0 ? 1 : 0 });
+      gsap.set(card, { opacity: idx === 0 ? 1 : 0 });
       const letters = card.querySelectorAll(".letter");
-      // Conditionally disable animation for card_5 (index 4)
-      if (idx === 0) {
-        // For GRAND LOBBY (card_1), keep visible and animate splitText effect starting from 'GRAND'
+      
+      // Letter-by-letter text animation for all cards
+      if (idx === 0 || idx === 1 || idx === 2 || idx === 3 || idx === 4) {
+        // For all cards, animate all .letter spans
         ScrollTrigger.create({
           trigger: card,
           start: "top center",
           end: "bottom center",
           onEnter: () => {
             cardsRef.current.forEach((c, i) => {
-              if (i !== 0) gsap.to(c, { opacity: 0, duration: 0.5 });
+              if (i !== idx) gsap.to(c, { opacity: 0, duration: 0.5 });
             });
-            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
-            // Animate the entire label letter by letter (splitText effect for all)
-            const label = card.querySelector('.card-label');
-            if (label) {
-              const allLetters = Array.from(label.querySelectorAll('.letter'));
-              gsap.fromTo(
-                allLetters,
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, stagger: 0.07, duration: 0.7, ease: "power2.out" }
-              );
+            gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
+            
+            // Check if this is card5 and we should skip animation
+            if (idx === 4 && window.__skipCard5Anim) {
+              // Card5: Show text immediately without any transition
+              const allLetters = Array.from(card.querySelectorAll('.letter'));
+              gsap.set(allLetters, { opacity: 1 }); // Show all letters immediately
+              window.__skipCard5Anim = false; // Reset the flag
+            } else {
+              // ONLY animate the .letter spans - no other elements
+              const allLetters = Array.from(card.querySelectorAll('.letter'));
+              gsap.set(allLetters, { opacity: 0 }); // Reset letters to invisible
+              gsap.to(allLetters, {
+                opacity: 1,
+                duration: 1.5,
+                ease: "sine.out",
+                stagger: 0.1,
+              });
             }
           },
           onEnterBack: () => {
             cardsRef.current.forEach((c, i) => {
-              if (i !== 0) gsap.to(c, { opacity: 0, duration: 0.5 });
+              if (i !== idx) gsap.to(c, { opacity: 0, duration: 0.5 });
             });
-            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
-            const label = card.querySelector('.card-label');
-            if (label) {
-              const label = card.querySelector('.card-label');
-              if (label) {
-                const allLetters = Array.from(label.querySelectorAll('.letter'));
-                gsap.fromTo(
-                  allLetters,
-                  { opacity: 0, y: 20 },
-                  { opacity: 1, y: 0, stagger: 0.07, duration: 0.7, ease: "power2.out" }
-                );
-              }
+            gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
+            
+            // Check if this is card5 and we should skip animation
+            if (idx === 4 && window.__skipCard5Anim) {
+              // Card5: Show text immediately without any transition
+              const allLetters = Array.from(card.querySelectorAll('.letter'));
+              gsap.set(allLetters, { opacity: 1 }); // Show all letters immediately
+              window.__skipCard5Anim = false; // Reset the flag
+            } else {
+              // ONLY animate the .letter spans - no other elements
+              const allLetters = Array.from(card.querySelectorAll('.letter'));
+              gsap.set(allLetters, { opacity: 0 }); // Reset letters to invisible
+              gsap.to(allLetters, {
+                opacity: 1,
+                duration: 1.5,
+                ease: "sine.out",
+                stagger: 0.1,
+              });
             }
           },
           onLeave: () => {
-            // Do not hide card_1 when leaving
-            gsap.to(card, { opacity: 1, duration: 0.6, ease: "power2.inOut" });
+            if (idx === 0) {
+              // Do not hide card_1 when leaving
+              gsap.to(card, { opacity: 1, duration: 0.6, ease: "power2.inOut" });
+            } else {
+              gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" });
+            }
           },
           onLeaveBack: () => {
-            // Do not hide card_1 when leaving back
-            gsap.to(card, { opacity: 1, duration: 0.6, ease: "power2.inOut" });
+            if (idx === 0) {
+              // Do not hide card_1 when leaving back
+              gsap.to(card, { opacity: 1, duration: 0.6, ease: "power2.inOut" });
+            } else {
+              gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" });
+            }
           },
-        });
-      } else if (idx === 4 && window.__skipCard5Anim) {
-        ScrollTrigger.create({
-          trigger: card,
-          start: "top center",
-          end: "bottom center",
-          onEnter: () => {
-            cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
-            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
-            // No letter animation
-            window.__skipCard5Anim = false;
-          },
-          onEnterBack: () => {
-            cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
-            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
-          },
-          onLeave: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
-          onLeaveBack: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
-        });
-      } else {
-        ScrollTrigger.create({
-          trigger: card,
-          start: "top center",
-          end: "bottom center",
-          onEnter: () => {
-            cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
-            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
-            gsap.fromTo(
-              letters,
-              { opacity: 0, y: 20 },
-              { opacity: 1, y: 0, stagger: 0.05, duration: 0.6, ease: "power2.out" }
-            );
-          },
-          onEnterBack: () => {
-            cardsRef.current.forEach((c) => gsap.to(c, { opacity: 0, duration: 0.5 }));
-            gsap.to(card, { opacity: 1, duration: 0.8, ease: "power2.out" });
-          },
-          onLeave: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
-          onLeaveBack: () => gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" }),
         });
       }
     });
@@ -550,30 +558,49 @@ const handleExploreClick = useCallback(() => {
 
   // Place the cloud just below the Explore button (scrolls with the landing screen)
   useEffect(() => {
+    let rafId = null;
+    
     const positionCloud = () => {
       const btn = exploreBtnRef.current;
       const cloud = cloudRef.current;
       const landing = landingScreenRef.current;
       if (!btn || !cloud || !landing) return;
+      
       const btnRect = btn.getBoundingClientRect();
       const landingRect = landing.getBoundingClientRect();
-  // Desired top relative to landing
-  let topWithinLanding = Math.round((btnRect.bottom - landingRect.top) + 12);
-  // Clamp so cloud never goes too high/low
-  const minTop = 0; // not above top of landing
-  const maxTop = Math.max(0, landingRect.height - (cloud.offsetHeight || 0));
-  topWithinLanding = Math.min(Math.max(topWithinLanding, minTop), maxTop);
+      // Desired top relative to landing
+      let topWithinLanding = Math.round((btnRect.bottom - landingRect.top) + 12);
+      // Clamp so cloud never goes too high/low
+      const minTop = 0; // not above top of landing
+      const maxTop = Math.max(0, landingRect.height - (cloud.offsetHeight || 0));
+      topWithinLanding = Math.min(Math.max(topWithinLanding, minTop), maxTop);
+      
       cloud.style.position = 'absolute';
       cloud.style.top = `${topWithinLanding}px`;
       cloud.style.left = '50%';
-  cloud.style.transform = 'translateX(-50%) scale(1.05)';
+      cloud.style.transform = 'translateX(-50%) scale(1.05)';
       cloud.style.zIndex = '9';
       cloud.style.pointerEvents = 'none';
     };
-    // Initial and on resize
-    requestAnimationFrame(positionCloud);
-    window.addEventListener('resize', positionCloud);
-    return () => window.removeEventListener('resize', positionCloud);
+    
+    const throttledPositionCloud = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        positionCloud();
+        rafId = null;
+      });
+    };
+    
+    // Initial positioning
+    throttledPositionCloud();
+    window.addEventListener('resize', throttledPositionCloud);
+    
+    return () => {
+      window.removeEventListener('resize', throttledPositionCloud);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
   }, []);
 
   // Auto-trigger Explore when the user first scrolls (or uses keys/touch) before clicking the button
@@ -790,9 +817,30 @@ galleryItems.forEach((item, idx) => {
       const textRefs = [textRef1, textRef2, textRef3, textRef4, textRef5, textRef6, textRef7];
       const currentTextRef = textRefs[galleryIndex];
       if (currentTextRef && currentTextRef.current) {
-        const words = currentTextRef.current.querySelectorAll(".word");
-        gsap.to(currentTextRef.current, { opacity: 1, duration: 0.1 });
-        gsap.fromTo(words, { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.8, ease: "power3.out" });
+        // For img1, img2, img3, img4, img5, and img6 (galleryIndex === 0, 1, 2, 3, 4, or 5), use letters for headings and words for paragraphs
+        if (galleryIndex === 0 || galleryIndex === 1 || galleryIndex === 2 || galleryIndex === 3 || galleryIndex === 4 || galleryIndex === 5) {
+          const letters = currentTextRef.current.querySelectorAll(".letter");
+          const words = currentTextRef.current.querySelectorAll(".word");
+          gsap.to(currentTextRef.current, { opacity: 1, duration: 0.1 });
+          
+          // First animate letters (headings) with letter-by-letter effect
+          gsap.fromTo(letters, { opacity: 0 }, { opacity: 1, stagger: 0.1, duration: 1.0, ease: "sine.out" });
+          
+          // Then animate words (paragraphs) with delay after heading animation completes
+          const headingDuration = 1.0 + (letters.length * 0.1); // Total time for heading animation
+          gsap.fromTo(words, { opacity: 0, y: 20 }, { 
+            opacity: 1, 
+            y: 0, 
+            stagger: 0.08, 
+            duration: 0.8, 
+            ease: "power3.out",
+            delay: headingDuration
+          });
+        } else {
+          const words = currentTextRef.current.querySelectorAll(".word");
+          gsap.to(currentTextRef.current, { opacity: 1, duration: 0.1 });
+          gsap.fromTo(words, { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.8, ease: "power3.out" });
+        }
       }
     }
   }, [showText, galleryIndex]);
@@ -814,24 +862,6 @@ galleryItems.forEach((item, idx) => {
         />
   <div className="landing-screen" ref={landingScreenRef}>
           <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABARA HILL</p>
-{/* <button
-  className="explore-btn"
-  ref={exploreBtnRef} onClick={handleExploreClick}
-  onMouseEnter={(e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left; // mouse position inside button
-    if (x < rect.width / 2) {
-      // left half hover → sweep left to right
-      e.currentTarget.style.setProperty('--start', '-100%');
-    } else {
-      // right half hover → sweep right to left
-      e.currentTarget.style.setProperty('--start', '100%');
-    }
-  }}
->
-  <span>EXPLORE MORE</span>
-</button> */}
-
 
 <audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
 <button
@@ -900,9 +930,6 @@ galleryItems.forEach((item, idx) => {
                 </span>
               </div>
 
-              {/* <button className="scroll-to-gallery-btn" onClick={handleGalleryClick}>
-                <span>CLICK TO EXPLORE GALLERY</span>
-              </button> */}
             </section>
           </div>
         </div>
@@ -920,16 +947,6 @@ galleryItems.forEach((item, idx) => {
               ))}
             </div>
 
-            
-            {/* <div ref={galleryItemRef1} className="gallery-item" style={{ display: 'flex' }}>
-              <img ref={imgRef1} src="/Gallery/carsection.jpg" alt="Luxury Car Parking" className="single-gallery-image" />
-              {showText && galleryIndex === 0 && (
-                <div ref={textRef1} className="single-image-text-overlay">
-                 <h2>{splitTextWords("For those who resign, a vault for your fleet.")}</h2>
-<p>{splitTextWords("For every marque you collect, a sanctuary that reflects your exceptional lifestyle.")}</p>
-                </div>
-              )}
-            </div> */}
 <div ref={galleryItemRef1} className="gallery-item" style={{ display: 'flex', position: 'relative' }}>
 
   {/* Gallery Image */}
@@ -943,8 +960,8 @@ galleryItems.forEach((item, idx) => {
   {/* Text Overlay */}
   {showText && galleryIndex === 0 && (
     <div ref={textRef1} className="single-image-text-overlay">
-      <h2>{splitTextWords("For those who resign, a vault for your fleet.")}</h2>
-      <p>{splitTextWords("For every marque you collect, a sanctuary that reflects your exceptional lifestyle.")}</p>
+  <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0 }}>{splitTextLetters("FOR THOSE WHO RESIGN, A VAULT FOR YOUR FLEET.")}</h2>
+  <p>{splitTextWords("For every marque you collect, a sanctuary that reflects your exceptional lifestyle.")}</p>
     </div>
   )}
 </div>
@@ -953,8 +970,8 @@ galleryItems.forEach((item, idx) => {
             {/* <div ref={galleryItemRef2} className="gallery-item" style={{ display: galleryIndex === 1 ? 'flex' : 'none' }}> */}
               <img ref={imgRef2} src="/Gallery/img2_2.jpg" alt="Skyline View" className="sec-gallery-image" />
               {showText && galleryIndex === 1 && (
-                <div ref={textRef2} className="sec-image-text-overlay from-left">
-                  <h2>{splitTextWords("Make a statement even before you step in.")}</h2>
+                  <div ref={textRef2} className="sec-image-text-overlay from-left">
+                    <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0}}>{splitTextLetters("MAKE A STATEMENT EVEN BEFORE YOU STEP IN.")}</h2>
 <p>{splitTextWords("Your arrival marks a moment of distinction a drive that sets the stage for the world within.")}</p>
                 </div>
               )}
@@ -963,8 +980,8 @@ galleryItems.forEach((item, idx) => {
             <div ref={galleryItemRef3} className="gallery-item" style={{ display: galleryIndex === 2 ? 'flex' : 'none' }}>
               <img ref={imgRef3} src="/Gallery/img3_2.jpg" alt="Rooftop Retreat" className="third-gallery-image" />
               {showText && galleryIndex === 2 && (
-                <div ref={textRef3} className="third-image-text-overlay from-right">
-                  <h2>{splitTextWords("Any more expansive, and you might need a GPS to navigate.")}</h2>
+                  <div ref={textRef3} className="third-image-text-overlay from-right">
+                    <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0}}>{splitTextLetters("ANY MORE EXPANSIVE, AND YOU MIGHT NEED A GPS TO NAVIGATE.")}</h2>
 <p>{splitTextWords("A testament to impeccable taste, Malabar embodies the grandeur of your cherished chateau and the warmth of an ancestral manor.")}</p>
                 </div>
               )}
@@ -973,8 +990,8 @@ galleryItems.forEach((item, idx) => {
             <div ref={galleryItemRef4} className="gallery-item" style={{ display: galleryIndex === 3 ? 'flex' : 'none' }}>
               <img ref={imgRef4} src="/Gallery/img4_2.jpg" alt="Luxury Suite" className="fourth-gallery-image" />
               {showText && galleryIndex === 3 && (
-                <div ref={textRef4} className="fourth-image-text-overlay from-top">
-                   <h2>{splitTextWords("Two Realms. One Privilege: Yours.")}</h2>
+             <div ref={textRef4} className="fourth-image-text-overlay from-top">
+               <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0 }}>{splitTextLetters("TWO REALMS. ONE PRIVILEGE: YOURS.")}</h2>
 <p>{splitTextWords("Conversations held in rooms no one enters unannounced. Sunset rituals that require no scheduling. Here, every inch is crafted for those to whom silence responds. At 'Runwal Malabar', the clubhouse isn't something you merely access  it's something others do not.")}</p>
                 </div>
               )}
@@ -983,8 +1000,8 @@ galleryItems.forEach((item, idx) => {
             <div ref={galleryItemRef5} className="gallery-item" style={{ display: galleryIndex === 4 ? 'flex' : 'none' }}>
               <img ref={imgRef5} src="/Gallery/img6_2.jpg" alt="Unique Section" className="fifth-gallery-image" />
               {showText && galleryIndex === 4 && (
-                <div ref={textRef5} className="fifth-image-text-overlay from-bottom">
-                   <h2>{splitTextWords("This is Your Moment.")}</h2>
+             <div ref={textRef5} className="fifth-image-text-overlay from-bottom">
+               <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0}}>{splitTextLetters("THIS IS YOUR MOMENT.")}</h2>
 <p>{splitTextWords("'Runwal Malabar' is the stage set for your legacy a realm where your place in history is imagined and realized. While some legacies stand firm on the ground, yours reaches for the sky.")}</p>
                 </div>
               )}
@@ -993,8 +1010,8 @@ galleryItems.forEach((item, idx) => {
             <div ref={galleryItemRef6} className="gallery-item" style={{ display: galleryIndex === 5 ? 'flex' : 'none' }}>
               <img ref={imgRef6} src="/Gallery/img7_2.jpg" alt="Grand Lobby" className="sixth-gallery-image" />
               {showText && galleryIndex === 5 && (
-                <div ref={textRef6} className="sixth-image-text-overlay from-right">
-                   <h2>{splitTextWords("A Creation Worthy of Picasso's Signature.")}</h2>
+             <div ref={textRef6} className="sixth-image-text-overlay from-right">
+               <h2 style={{ margin: 0, lineHeight: 1.1, padding: 0}}>{splitTextLetters("A CREATION WORTHY OF PICASSO'S SIGNATURE.")}</h2>
 <p>{splitTextWords("The entrance lounge a modernist sculpture capturing shifting lights and shadows, echoing Cubist artistry.")}</p>
                 </div>
               )}

@@ -254,27 +254,28 @@ const Nav = ({
                       // Use the autoScrollStopYRef value from BuildingScroll.jsx
                       const targetY = window.autoScrollStopYRef && window.autoScrollStopYRef.current != null ? window.autoScrollStopYRef.current : 1000;
                       const smoother = window.ScrollSmoother ? window.ScrollSmoother.get && window.ScrollSmoother.get() : null;
-                      if (smoother && smoother.scrollTo) {
+                      if (smoother && typeof smoother.scrollTo === 'function') {
                         smoother.scrollTo(targetY, true);
-                      } else if (smoother && smoother.scrollTop) {
-                        smoother.scrollTop(targetY, true);
-                      } else {
-                        // fallback to window.scrollTo
-                        const duration = 500;
-                        const startY = window.scrollY;
-                        const diff = targetY - startY;
-                        let start;
-                        function step(timestamp) {
-                          if (!start) start = timestamp;
-                          const elapsed = timestamp - start;
-                          const progress = Math.min(elapsed / duration, 1);
-                          window.scrollTo(0, startY + diff * progress);
-                          if (progress < 1) {
-                            window.requestAnimationFrame(step);
-                          }
-                        }
-                        window.requestAnimationFrame(step);
                       }
+                      // Always run fallback to guarantee smoothness
+                      const duration = 1400;
+                      const startY = window.scrollY;
+                      const diff = targetY - startY;
+                      let start;
+                      function easeInOutQuad(t) {
+                        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                      }
+                      function step(timestamp) {
+                        if (!start) start = timestamp;
+                        const elapsed = timestamp - start;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const eased = easeInOutQuad(progress);
+                        window.scrollTo(0, startY + diff * eased);
+                        if (progress < 1) {
+                          window.requestAnimationFrame(step);
+                        }
+                      }
+                      window.requestAnimationFrame(step);
                     }, 200);
                 } else {
                   handleDropBox(name);

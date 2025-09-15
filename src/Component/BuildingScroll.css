@@ -1080,7 +1080,7 @@ html::-webkit-scrollbar {
 }
 .single-image-text-overlay p{
   font-family: FONT4;
-  font-size: 1.2rem;
+  font-size: 1.2rem;margin-top: 18px;
   font-weight: lighter;
 }
 
@@ -1098,7 +1098,7 @@ html::-webkit-scrollbar {
 .sec-image-text-overlay p{
   font-family: FONT4;
    font-size: 1.2rem;
-  font-weight: lighter;
+  font-weight: lighter;margin-top: 18px;
 }
 
 
@@ -1115,7 +1115,7 @@ html::-webkit-scrollbar {
 .third-image-text-overlay p{
   font-family: FONT4;
   font-size: 1.2rem;
-  font-weight: lighter;
+  font-weight: lighter;margin-top: 18px;
 }
 
 
@@ -1132,7 +1132,7 @@ right: 0%;
 }
 .fourth-image-text-overlay  p{
   font-family: FONT4;
-   font-size: 1.2rem;
+   font-size: 1.2rem;margin-top: 18px;
   font-weight: lighter;
 }
 
@@ -1146,12 +1146,12 @@ right: 0%;
 .fifth-image-text-overlay p{
   font-family: FONT4;
   font-size: 1.2rem;
-  font-weight: lighter;
+  font-weight: lighter;margin-top: 18px;
 }
 
 .fifth-image-text-overlay {
   position: absolute;
-  top: 40%;
+  top:45%;
 left: 1%;  
   width: 23%;
 }
@@ -1166,7 +1166,7 @@ left: 1%;
 .sixth-image-text-overlay p{
   font-family: FONT4;
   font-size: 1.2rem;
-  font-weight: lighter;
+  font-weight: lighter;margin-top: 18px;
 }
 
 .sixth-image-text-overlay {
