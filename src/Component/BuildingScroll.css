@@ -95,22 +95,22 @@
 }
 @font-face {
   font-family: FONT1;
-  src: url("./bodoni-six-itc-bold-italic-os-5871d33e4dc4a.ttf");
+  src: url("../assets/bodoni-six-itc-bold-italic-os-5871d33e4dc4a.ttf");
   font-display: swap;
 }
 
 @font-face {
   font-family: FONT4;
-  src: url("./GOTHMBOK.TTF");
+  src: url("../assets/GOTHMBOK.TTF");
   font-display: swap;
 }
 @font-face {
   font-family: FONT2;
-  src: url("./BRITTANYSIGNATURE.TTF");
+  src: url("../assets/BRITTANYSIGNATURE.TTF");
 }
 @font-face {
   font-family: FONT3;
-  src: url("./GIAZA.OTF");
+  src: url("../assets/GIAZA.OTF");
   font-display: swap;
 }
 
@@ -180,7 +180,7 @@ left: 50%; }
 .card-paragraph {
   font-family: FONT1;
   font-weight: 400;
-  font-size: 1.9rem; /* slightly smaller so the line fits more comfortably */
+  font-size: 1.9rem;
   line-height: 1.25;
   text-align: right;
 }
@@ -204,13 +204,13 @@ left: 50%; }
   top: 20px;
   right: 30px;
   width: 250px;
-  height: auto;  /* maintain aspect ratio */
+  height: auto;  
   z-index: 999;
   pointer-events: none;
   opacity: 0;
-  margin: 0;     /* remove default spacing */
+  margin: 0;    
   padding: 0;
-  display: block; /* ensures no inline spacing around img */
+  display: block; 
 }
 
 
@@ -296,7 +296,7 @@ left: 50%; }
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* Add this to contain the oversized image */
+  overflow: hidden;
 }
 
 
@@ -305,7 +305,7 @@ left: 50%; }
   max-width: 100vw;
   height: 100vh;
   object-fit: cover;
-  flex-shrink: 0; /* Prevent image from shrinking */
+  flex-shrink: 0; 
   opacity: 1;
   transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -326,36 +326,16 @@ left: 50%; }
   padding: 20px;
   color: #f3f3f3;
   z-index: 102;
-  opacity: 0; /* Initially hidden */
+  opacity: 0; 
 }
 
 .single-image-text-overlay .word,
 .sec-image-text-overlay .word,
 .third-image-text-overlay .word,
 .fourth-image-text-overlay .word {
-  opacity: 0; /* Words are initially hidden */
+  opacity: 0; 
   transform: translateY(20px);
 }
-
-
-/* .single-image-text-overlay h2{
-  font-size: 2.3rem;font-family: FONT1;
-  font-weight: lighter;
-}
-.single-image-text-overlay p{
-    font-size: 1.5rem;font-family: FONT4;
-} */
-
-
-/* .third-image-text-overlay {
-  bottom: 5%;
-  left: 5%;
-  width: 40%;
-  text-align: left;font-family: FONT1;
-  color: #fff;
-  z-index: 110;
-} */
-
 
 
 .sec-image-text-overlay {
@@ -453,7 +433,7 @@ right: 1%;
     color: rgb(132, 120, 90);
     transform: translate(-50%, -50%);
     z-index: 10;
-    font-size: 1.5rem; /* Adjust font size as needed */
+    font-size: 1.5rem; 
     text-align: center;
 }
 
@@ -510,7 +490,7 @@ right: 1%;
 
 
 .cloud-image {
-  position: absolute; /* scoped to landing screen to avoid drift */
+  position: absolute; 
   left: 50%;
   transform: translateX(-50%) scale(1.0);
   width: 100%;
@@ -587,11 +567,6 @@ right: 1%;
   align-items: center;
 }
 
-
-
-
-
-
 .seventh-image-text-overlay p {
   text-align: left;  
     font-family: FONT4;
@@ -600,10 +575,10 @@ right: 1%;
 
 .seventh-image-text-overlay {
   position: absolute;
-top: 50%;         /* closer to the bottom */
+top: 50%;         
   right: 8%;
   text-align: right;
-  color: rgb(83, 68, 68);  /* change to white if needed for visibility */
+  color: rgb(83, 68, 68);  
   max-width: 50%;
   z-index: 20;
 
@@ -612,7 +587,7 @@ top: 50%;         /* closer to the bottom */
 .seventh-image-text-overlay h2 {
   font-size: 1.5rem;
   font-weight: bold;font-family: FONT1;
-  margin-bottom: 0.5rem; /* reduce space to fit line */
+  margin-bottom: 0.5rem; 
   position: relative;
 }
 
@@ -620,30 +595,27 @@ top: 50%;         /* closer to the bottom */
 .seventh-image-text-overlay h2::after {
   content: "";
   display: block;
-  width: 100%;           /* final width of the line */
-  height: 2px;          /* thickness */
-  background-color: rgb(225, 161, 0);  /* color */
- margin: 1rem 0 0 auto;  /* increase top margin to add space */
+  width: 100%;         
+  height: 2px;          
+  background-color: rgb(225, 161, 0); 
+ margin: 1rem 0 0 auto; 
 
   /* Animation setup */
-  transform: scaleX(0);          /* start with zero width */
-  transform-origin: left;        /* grow from left to right */
-  transition: transform 1s ease-out;  /* smooth grow animation */
+  transform: scaleX(0);
+  transform-origin: left;        
+  transition: transform 1s ease-out; 
 }
 
 /* When overlay has .show class, animate the line */
 .seventh-image-text-overlay.show h2::after {
-  transform: scaleX(1);          /* final width */
+  transform: scaleX(1);        
 }
-
-
 
 .seventh-gallery-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 
 .eighth-gallery-image {
   width: 100%;
@@ -658,21 +630,20 @@ top: 50%;         /* closer to the bottom */
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 50px 60px;       /* increase padding for bigger box */
+  padding: 50px 60px;
   border-radius: 12px;
   text-align: center;
-  max-width: 90%;           /* increase width from 80% to 90% */
-  min-width: 400px;         /* optional: set a minimum width */
-  min-height: 350px;        /* increase minimum height */
+  max-width: 90%;
+  min-width: 400px;         
+  min-height: 350px;       
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   z-index: 10;
 }
 
-
 .eighth-image-text-overlay h2 {
   margin-bottom: 15px;
   font-size: 2rem;
-  color: #000;        font-family: FONT1;      /* black text */
+  color: #000;        font-family: FONT1;      
 }
 
 .eighth-image-text-overlay p {
@@ -681,7 +652,7 @@ top: 50%;         /* closer to the bottom */
 }
 .eighth-image-text-overlay {
   position: absolute;
-  top: -100%; /* start above the image */
+  top: -100%;
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(255, 255, 255, 0.9);
@@ -691,14 +662,13 @@ top: 50%;         /* closer to the bottom */
   max-width: 80%;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   z-index: 10;
-  opacity: 0; /* start invisible */
+  opacity: 0; 
   
   /* Animation */
-  animation: slideDown 1.2s ease forwards; /* forwards keeps final state */
-  animation-delay: 0.2s; /* optional delay */
+  animation: slideDown 1.2s ease forwards; 
+  animation-delay: 0.2s; 
 }
 
-/* Keyframes for top to bottom slide */
 @keyframes slideDown {
   0% {
     top: -100%;
@@ -713,7 +683,7 @@ top: 50%;         /* closer to the bottom */
 /* Hide scrollbar but allow scrolling */
 html, body {
   overflow-x: hidden;
-  overflow-y: auto;       /* scrolling still works */
+  overflow-y: auto;      
   height: 100%;
   margin: 0;
   padding: 0;
@@ -721,17 +691,17 @@ html, body {
 
 /* For Firefox */
 html {
-  scrollbar-width: none;  /* hides scrollbar */
+  scrollbar-width: none; 
 }
 
 /* For Chrome, Safari, Edge, Opera */
 html::-webkit-scrollbar {
-  display: none;          /* hides scrollbar */
+  display: none;       
 }
 .sound-toggle {
   position: fixed;
-  bottom: -20px;         /* distance from bottom */
-  left: 20px;          /* distance from right */
+  bottom: -20px;       
+  left: 20px;          
   display: flex;
   align-items: center;
 
@@ -758,9 +728,8 @@ html::-webkit-scrollbar {
   font-size: 24px;
   margin-left: -px;
   font-weight: 500;
-  color: #fff; /* white text */
+  color: #fff; 
 }
-
 
 /* Prevent the last word from splitting into two lines */
 .nowrap-word {
@@ -941,7 +910,7 @@ html::-webkit-scrollbar {
     padding: 18px 35px;
     font-size: 1.3rem;
     top: 38%;
-    min-height: 60px; /* Ensure touch target is large enough */
+    min-height: 60px; 
   }
 
   @keyframes pulseSmall {
@@ -970,7 +939,7 @@ html::-webkit-scrollbar {
     transform: scale(1.04) translateZ(0);
   }
 
-  /* Position golden number cards on the right side for small mobile */
+ 
   .card, .card_2, .card_3, .card_4, .card_5 {
     left: auto;
     right: 10px;
@@ -982,12 +951,6 @@ html::-webkit-scrollbar {
   .gold-number { font-size: 4.2rem; text-align: right; }
   .card-paragraph { font-size: 1.05rem; text-align: right; }
 
-  /* Fine-tune positions further on very small screens */
-  /* .card_1 { top: 185%; }
-  .card_2 { top: 135%; }
-  .card_3 { top: 108%; }
-  .card_4 { top: 14%; }
-  .card_5 { top: -30%; } */
 
   .scroll-to-gallery-btn { top: 255%; padding: 10px 22px; font-size: 0.9rem; }
 
@@ -1024,32 +987,30 @@ html::-webkit-scrollbar {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.4); /* normal dot */
-  border: 2px solid transparent; /* no border by default */
+  background-color: rgba(255, 255, 255, 0.4);
+  border: 2px solid transparent; 
   cursor: pointer;
   transition: border-color 0.3s ease, transform 0.3s ease;
 }
 
 .progress-dot.active {
    background-color: rgba(192, 160, 98, 0.8);
-  border-color: #38b2f7; /* bluish border for active dot */
-  transform: scale(1.2); /* optional: slightly bigger active dot */
+  border-color: #38b2f7;
+  transform: scale(1.2); 
 }
-
 
 .progress-dot:hover {
   background-color: rgba(255, 255, 255, 0.6);
   transform: scale(1.2);
 }
 
-
 .gallery-close-btn {
-  position: absolute;  /* top-left relative to gallery-item */
+  position: absolute; 
   top: 20px;
   left: 20px;
   background: rgba(0,0,0,0.6);
   color: white;
-  border: 2.5px solid #FFD700; /* golden border */
+  border: 2.5px solid #FFD700; 
   font-size: 1.5rem;
   width: 44px;
   height: 44px;
@@ -1067,7 +1028,6 @@ html::-webkit-scrollbar {
   box-shadow: 0 0 10px 2px #FFD700, 0 0 0 2px rgba(255, 215, 0, 0.3);
   border-color: #FFD700;
 }
-/* font styling */
 
 .single-image-text-overlay h2 {
   font-family: FONT1;
@@ -1085,7 +1045,6 @@ html::-webkit-scrollbar {
   font-weight: lighter;
 }
 
-
 .sec-image-text-overlay h2{
   font-family: FONT1;
   font-size: 2rem;margin-top: 0px;
@@ -1102,7 +1061,6 @@ html::-webkit-scrollbar {
   font-weight: lighter;margin-top: 18px;
 }
 
-
 .third-image-text-overlay h2{
   font-family: FONT1;
   font-size: 2rem;margin-top: 0px;
@@ -1118,8 +1076,6 @@ html::-webkit-scrollbar {
   font-size: 1.2rem;
   font-weight: lighter;margin-top: 18px;
 }
-
-
 
 .fourth-image-text-overlay  h2{
   font-family: FONT1;
