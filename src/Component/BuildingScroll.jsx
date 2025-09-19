@@ -34,6 +34,8 @@ const BuildingScroll = ({ setShowNav, showSingleImage, setShowSingleImage }) => 
   // Make the ref globally accessible for Nav.jsx
   window.autoScrollStopYRef = autoScrollStopYRef;
   const [autoScrollComplete, setAutoScrollComplete] = useState(false);
+  
+  const animatedCardsRef = useRef(new Set());
 
   // --- SCROLL LOCK LOGIC ---
   useEffect(() => {
@@ -471,214 +473,60 @@ const handleExploreClick = useCallback(() => {
     }
 
     // Card animations
-    cardsRef.current.forEach((card, idx) => {
-      if (!card) return;
-      gsap.set(card, { opacity: idx === 0 ? 1 : 0 });
-      const letters = card.querySelectorAll(".letter");
-      
-      // Letter-by-letter text animation for all cards
-      if (idx === 0 || idx === 1 || idx === 2 || idx === 3 || idx === 4) {
-        // For all cards, animate all .letter spans
-        ScrollTrigger.create({
-          trigger: card,
-          start: "top center",
-          end: "bottom center",
-          onEnter: () => {
-            cardsRef.current.forEach((c, i) => {
-              if (i !== idx) gsap.to(c, { opacity: 0, duration: 0.5 });
-            });
-            
-            // Check if this is card5
-            if (idx === 4) {
-              if (window.__homeButtonClicked) {
-                // Card5: Show smoothly like img1 paragraph when Home button is clicked
-                gsap.set(card, { opacity: 1 }); // Show card
-                
-                // Smooth text animation for Home button
-                const allLetters = Array.from(card.querySelectorAll('.letter'));
-                gsap.killTweensOf(allLetters);
-                gsap.set(allLetters, { opacity: 0 });
-                gsap.to(allLetters, {
-                  opacity: 1,
-                  duration: 1.0,
-                  ease: "power2.out",
-                  stagger: 0.05,
-                  delay: 0.3,
-                  overwrite: true,
-                  onComplete: () => {
-                    window.__homeButtonClicked = false; // Reset the flag
-                  }
-                });
-              } else if (window.__skipCard5Anim) {
-                // Card5: Show instantly with no animation or effects
-                gsap.set(card, { opacity: 1 }); // Show card instantly
-                const allLetters = Array.from(card.querySelectorAll('.letter'));
-                gsap.set(allLetters, { opacity: 1 }); // Show text instantly
-                window.__skipCard5Anim = false; // Reset the flag
-              } else {
-                // Default card5 behavior
-                gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
-                
-                // ROBUST text animation - always start from clean state
-                const allLetters = Array.from(card.querySelectorAll('.letter'));
-                
-                // Kill any existing animations on these letters to prevent conflicts
-                gsap.killTweensOf(allLetters);
-                
-                // Force reset all letters to invisible state
-                gsap.set(allLetters, { 
-                  opacity: 0,
-                  scale: 1,
-                  rotation: 0,
-                  x: 0,
-                  y: 0
-                });
-                
-                // Start fresh animation with proper stagger
-                gsap.to(allLetters, {
-                  opacity: 1,
-                  duration: 1.5,
-                  ease: "sine.out",
-                  stagger: 0.1,
-                  overwrite: true, // Overwrite any conflicting animations
-                });
-              }
-            } else {
-              gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
-              
-              // ROBUST text animation - always start from clean state
-              const allLetters = Array.from(card.querySelectorAll('.letter'));
-              
-              // Kill any existing animations on these letters to prevent conflicts
-              gsap.killTweensOf(allLetters);
-              
-              // Force reset all letters to invisible state
-              gsap.set(allLetters, { 
-                opacity: 0,
-                scale: 1,
-                rotation: 0,
-                x: 0,
-                y: 0
-              });
-              
-              // Start fresh animation with proper stagger
-              gsap.to(allLetters, {
-                opacity: 1,
-                duration: 1.5,
-                ease: "sine.out",
-                stagger: 0.1,
-                overwrite: true, // Overwrite any conflicting animations
-              });
-            }
-          },
-          onEnterBack: () => {
-            cardsRef.current.forEach((c, i) => {
-              if (i !== idx) gsap.to(c, { opacity: 0, duration: 0.5 });
-            });
-            
-            // Check if this is card5
-            if (idx === 4) {
-              if (window.__homeButtonClicked) {
-                // Card5: Show smoothly like img1 paragraph when Home button is clicked
-                gsap.set(card, { opacity: 1 }); // Show card
-                
-                // Smooth text animation for Home button
-                const allLetters = Array.from(card.querySelectorAll('.letter'));
-                gsap.killTweensOf(allLetters);
-                gsap.set(allLetters, { opacity: 0 });
-                gsap.to(allLetters, {
-                  opacity: 1,
-                  duration: 1.0,
-                  ease: "power2.out",
-                  stagger: 0.05,
-                  delay: 0.3,
-                  overwrite: true,
-                  onComplete: () => {
-                    window.__homeButtonClicked = false; // Reset the flag
-                  }
-                });
-              } else if (window.__skipCard5Anim) {
-                // Card5: Show instantly with no animation or effects
-                gsap.set(card, { opacity: 1 }); // Show card instantly
-                const allLetters = Array.from(card.querySelectorAll('.letter'));
-                gsap.set(allLetters, { opacity: 1 }); // Show text instantly
-                window.__skipCard5Anim = false; // Reset the flag
-              } else {
-                // Default card5 behavior
-                gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
-                
-                // ROBUST text animation - always start from clean state
-                const allLetters = Array.from(card.querySelectorAll('.letter'));
-                
-                // Kill any existing animations on these letters to prevent conflicts
-                gsap.killTweensOf(allLetters);
-                
-                // Force reset all letters to invisible state
-                gsap.set(allLetters, { 
-                  opacity: 0,
-                  scale: 1,
-                  rotation: 0,
-                  x: 0,
-                  y: 0
-                });
-                
-                // Start fresh animation with proper stagger
-                gsap.to(allLetters, {
-                  opacity: 1,
-                  duration: 1.5,
-                  ease: "sine.out",
-                  stagger: 0.1,
-                  overwrite: true, // Overwrite any conflicting animations
-                });
-              }
-            } else {
-              gsap.set(card, { opacity: 1 }); // Instant show, no animation on card itself
-              
-              // ROBUST text animation - always start from clean state
-              const allLetters = Array.from(card.querySelectorAll('.letter'));
-              
-              // Kill any existing animations on these letters to prevent conflicts
-              gsap.killTweensOf(allLetters);
-              
-              // Force reset all letters to invisible state
-              gsap.set(allLetters, { 
-                opacity: 0,
-                scale: 1,
-                rotation: 0,
-                x: 0,
-                y: 0
-              });
-              
-              // Start fresh animation with proper stagger
-              gsap.to(allLetters, {
-                opacity: 1,
-                duration: 1.5,
-                ease: "sine.out",
-                stagger: 0.1,
-                overwrite: true, // Overwrite any conflicting animations
-              });
-            }
-          },
-          onLeave: () => {
-            if (idx === 0) {
-              // Do not hide card_1 when leaving
-              gsap.to(card, { opacity: 1, duration: 0.6, ease: "power2.inOut" });
-            } else {
-              gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" });
-            }
-          },
-          onLeaveBack: () => {
-            if (idx === 0) {
-              // Do not hide card_1 when leaving back
-              gsap.to(card, { opacity: 1, duration: 0.6, ease: "power2.inOut" });
-            } else {
-              gsap.to(card, { opacity: 0, duration: 0.6, ease: "power2.inOut" });
-            }
-          },
-        });
-      }
-    });
+// Card animations
+// Replace the current ScrollTrigger creation code with this:
 
+// Replace the existing ScrollTrigger creation code with this:
+cardsRef.current.forEach((card, idx) => {
+  if (!card) return;
+  gsap.set(card, { opacity: idx === 0 ? 1 : 0 });
+  
+  if (idx === 0 || idx === 1 || idx === 2 || idx === 3 || idx === 4) {
+    ScrollTrigger.create({
+      trigger: card,
+      start: "top center",
+      end: "bottom center",
+      onEnter: () => {
+        // Check if this card has already been animated using the ref
+        if (animatedCardsRef.current.has(idx)) {
+          // Just show the card and text without animation
+          gsap.set(card, { opacity: 1 });
+          const allLetters = Array.from(card.querySelectorAll('.letter'));
+          gsap.set(allLetters, { opacity: 1 });
+          return;
+        }
+        
+        // Mark this card as animated in the ref
+        animatedCardsRef.current.add(idx);
+        
+        // Show and animate current card
+        gsap.set(card, { opacity: 1 });
+        const allLetters = Array.from(card.querySelectorAll('.letter'));
+        gsap.killTweensOf(allLetters);
+        gsap.set(allLetters, { 
+          opacity: 0,
+          scale: 1,
+          rotation: 0,
+          x: 0,
+          y: 0
+        });
+        gsap.to(allLetters, {
+          opacity: 1,
+          duration: 1.5,
+          ease: "sine.out",
+          stagger: 0.1,
+          overwrite: true,
+        });
+      },
+      onEnterBack: () => {
+        // Show current card and text permanently (no re-animation)
+        gsap.set(card, { opacity: 1 });
+        const allLetters = Array.from(card.querySelectorAll('.letter'));
+        gsap.set(allLetters, { opacity: 1 });
+      },
+    });
+  }
+});
     return () => {
       smoother.kill();
       ScrollTrigger.getAll().forEach((st) => st.kill());
@@ -1061,7 +909,7 @@ gsap.to(words, {
                 <span className="gold-number">{splitTextLetters("11")}</span>
                 <span className="card-label">{splitTextLetters("EXQUISITE MANSIONS")}</span>
               </div>
-              <div className="card card_3" ref={(el) => (cardsRef.current[2] = el)}>
+              <div className="card card_3 " ref={(el) => (cardsRef.current[2] = el)} >
                 <span className="gold-number">{splitTextLetters("2")}</span>
                 <span className="card-label">{splitTextLetters("EXCLUSIVE CLUB LEVELS")}</span>
               </div>
@@ -1069,7 +917,7 @@ gsap.to(words, {
                 <span className="gold-number">{splitTextLetters("2")}</span>
                 <span className="card-label">{splitTextLetters("PARKING BASEMENT")}</span>
                 <span className="gold-number">{splitTextLetters("9")}</span>
-                <span className="card-label">{splitTextLetters("PARKING LEVELS")}</span>
+                <span className="card-label card2text">{splitTextLetters("PARKING LEVELS")}</span>
               </div>
               <div className="card card_1" ref={(el) => (cardsRef.current[0] = el)}>
                 <span className="card-label">

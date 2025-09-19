@@ -1,3 +1,11 @@
+.card_3 {
+  left: 55% !important;
+ 
+}
+.card2text{
+  text-align: center !important; 
+}
+
 .audio-btn {
   background: none;
   border: none;
@@ -130,9 +138,9 @@
   text-align: right;
 }
 
-.card_1 { top: 235%; }
-.card_2 { top: 163%; }
-.card_3 { top: 138%; }
+.card_1 { top: 265%; }
+.card_2 { top: 180%; }
+.card_3 { top: 148%; }
 .card_4 { top: 0%; }
 .card_5 { top: -70%;
 left: 50%; }
@@ -795,6 +803,7 @@ html::-webkit-scrollbar {
     max-width: 50%;
     text-align: right;
   }
+  
   .card-label { font-size: 2.1rem; text-align: right; }
   .gold-number { font-size: 8rem; text-align: right; }
   .card-paragraph { font-size: 1.6rem; text-align: right; }
