@@ -1,0 +1,43 @@
+@font-face {
+    font-family: Giaza;
+    src: url("/assets/fonts/GIAZA.OTF");
+}
+
+@font-face {
+    font-family: Cera Bold;
+    src: url("/assets/fonts/CERA\ PRO\ BOLD.OTF");
+}
+
+@font-face {
+    font-family: Signature;
+    src: url('/assets/fonts/BRITTANYSIGNATURE.TTF')
+}
+
+@font-face {
+    font-family: Celine;
+    src: url('/assets/fonts/Celine Peach Sans.TTF')
+}
+
+@font-face {
+    font-family: Zap;
+    src: url('/assets/fonts/bodoni-six-itc-bold-italic-os-5871d33e4dc4a.ttf');
+}
+
+@font-face {
+    font-family: Zap-Bold;
+    src: url('/assets/fonts/zapf-humanist-601-bt-bold.ttf');
+}
+
+@import 'tailwindcss';
+
+
+
+.drop-container::before{
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    background-color: rgba(103,84,48,0.3);
+    background: linear-gradient(135deg, rgba(192,160,98,0.7), rgba(168,136,76,0.7));
+    z-index: -777;
+}

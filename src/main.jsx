@@ -1,7 +1,13 @@
-import { StrictMode } from 'react'
+import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter, useLocation } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
+import Map from "./pages/Map/Map";
+import Inventory from "./pages/Inventory/Inventory";
+import Home from "./pages/Home/Home";
+import Views from "./pages/Views/Views";
+import { Routes, Route } from "react-router-dom";
 
 // Force scroll position to top on load/refresh and disable browser restoration
 if (typeof window !== 'undefined') {
@@ -38,8 +44,28 @@ if (typeof window !== 'undefined') {
   })
 }
 
+// Wrapper component that forces fresh mount of Views
+function ViewsWrapper() {
+  const location = useLocation();
+  const [mountKey, setMountKey] = useState(0);
+  
+  // Generate new key every time we navigate to Views
+  useEffect(() => {
+    setMountKey(prev => prev + 1);
+  }, [location.pathname]);
+  
+  return <Views key={`views-${mountKey}`} />;
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/map" element={<Map />} />
+      <Route path="/inventory" element={<Inventory />} />
+      <Route path="/views" element={<ViewsWrapper />} />
+    </Routes>
+  </BrowserRouter>
+  </StrictMode>
 )
