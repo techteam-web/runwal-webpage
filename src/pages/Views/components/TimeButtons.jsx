@@ -7,8 +7,8 @@ function TimeButtons({ current, onSelect }) {
 
  // In TimeButtons.jsx, wrap the return with positioning:
 return (
-  <div className="fixed bottom-2 left-[20%] z-[99998]" style={{ transform: 'translateY(-60px)' }}>
-    <div className="time-buttons">
+  <div className="fixed bottom-2 left-[5%] z-[99998] " style={{ transform: 'translateY(-50vh)' }}>
+    <div className="time-buttons flex flex-col">
       {times.map(time => (
         <button 
           key={time.id}
