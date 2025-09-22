@@ -305,6 +305,7 @@ max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
                     backgroundColor: "rgba(24,26,61,0.67)",
                     backdropFilter: "blur(12px)",
                     WebkitBackdropFilter: "blur(12px)",
+                    fontFamily: 'Zap, sans-serif'
                   }}
                 >
                   {markersGroup[name]?.locations?.map((path) => (

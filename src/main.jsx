@@ -65,7 +65,7 @@ createRoot(document.getElementById('root')).render(
       <Route path="/" element={<Home />} />
       <Route path="/map" element={<Map />} />
       <Route path="/inventory" element={<Inventory />} />
-      <Route path="/views" element={<ViewsWrapper />} />
+      <Route path="/views" element={<Views />} />
     </Routes>
   </BrowserRouter>
   </StrictMode>

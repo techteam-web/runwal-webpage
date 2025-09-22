@@ -198,11 +198,11 @@ const Card = forwardRef(({ activeMarker }, ref) => {
               src={card?.src}
               alt=""
             />
-            <h1 className="font-zap text-[#f3b94d] text-left text-[12px]
+            <h1 className=" text-[#f3b94d] text-left text-[12px] 
               sm:text-[13px]
               md:text-[18px]
               lg:text-xl
-            ">
+            " style={{fontFamily:'Zap'}}>
               {card?.name}
             </h1>
             {/* <p className="text-gray-200 text-[8px]">Mumbai</p> */}
@@ -232,11 +232,11 @@ const Card = forwardRef(({ activeMarker }, ref) => {
               
             </div>
             <div className="text-right">
-              <p className="text-xs font-zap text-[#b99249] font-bold
+              <p className="text-xs text-[#b99249] font-bold
               sm:text-sm
               md:text-base
               lg:text-2xl
-              ">
+              " style={{fontFamily:'Zap'}}>
                 {card?.time[transportState]} min
               </p>
               <p className="text-gray-300 text-[8px] font-semibold
@@ -245,18 +245,18 @@ const Card = forwardRef(({ activeMarker }, ref) => {
               lg:text-[17px]
               ">
                 from{" "}
-                <span className="bg-gradient-to-r font-zap-bold uppercase text-[10px] text-[#b99249]
+                <span className="bg-gradient-to-r  uppercase text-[10px] text-[#b99249]
                 sm:text-[11px]
                 md:text-[15px]
                 lg:text-[21px]
-                ">
+                " style={{fontFamily:'Zap'}}>
                   Runwal
                 </span>{" "}
-                <span className="font-sign text-[8px] block
+                <span className=" text-[8px] block
                 sm:text-[9px]
                 md:text-[12px]
                 lg:text-[17px]
-                "> Malabar</span>
+                "  style={{fontFamily:'Signature'}}> Malabar</span>
               </p>
             </div>
           </div>
