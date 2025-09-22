@@ -187,7 +187,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
           <button
             onClick={handleOpenComparison}
             className="bg-[#d0aa2d] text-white py-2 px-3 rounded-lg font-light hover:bg-[#b8941f] transition-colors cursor-pointer whitespace-nowrap"
-            style={{ fontFamily: "'Spectra', sans-serif", fontSize: '0.875rem' }}
+            style={{ fontFamily: "'Zap', sans-serif", fontSize: '0.875rem' }}
           >
             <span className="hidden md:inline">Compare with Other Floors</span>
             <span className="md:hidden text-xs">Compare</span>

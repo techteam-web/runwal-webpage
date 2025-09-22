@@ -22,7 +22,7 @@ function FloorInfoCard({ info, onClose }) {
           p-4 sm:p-5 md:p-6
           border border-yellow-100
         "
-        style={{ fontFamily: 'Gotham-Office, sans-serif' }}
+        style={{ fontFamily: 'Zap, sans-serif' }}
       >
         {/* Header */}
         <div className="flex items-baseline justify-between mb-3 sm:mb-4">
@@ -31,7 +31,7 @@ function FloorInfoCard({ info, onClose }) {
             style={{
               fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', // ~20px → ~28px
               lineHeight: 1.1,
-              fontFamily: 'Gotham-Office, sans-serif'
+              fontFamily: 'Zap, sans-serif'
             }}
           >
            Floor {info.floorNumber}
@@ -45,7 +45,7 @@ function FloorInfoCard({ info, onClose }) {
             className="font-light text-gray-900"
             style={{ 
               fontSize: 'clamp(1rem, 2.2vw, 1.125rem)',
-              fontFamily: 'Gotham-Office, sans-serif'
+              fontFamily: 'Zap, sans-serif'
             }} // 16px → 18px
           >
             {info.price}
@@ -56,7 +56,7 @@ function FloorInfoCard({ info, onClose }) {
               className="text-gray-600"
               style={{ 
                 fontSize: 'clamp(0.8125rem, 1.6vw, 0.9375rem)',
-                fontFamily: 'Gotham-Office, sans-serif'
+                fontFamily: 'Zap, sans-serif'
               }} // 13px → 15px
             >
               Area: <span className="text-gray-800">{info.area}</span>
@@ -65,7 +65,7 @@ function FloorInfoCard({ info, onClose }) {
               className="text-gray-600"
               style={{ 
                 fontSize: 'clamp(0.8125rem, 1.6vw, 0.9375rem)',
-                fontFamily: 'Gotham-Office, sans-serif'
+                fontFamily: 'Zap, sans-serif'
               }}
             >
               Type: <span className="text-gray-800">{info.bhk}</span>
@@ -74,7 +74,7 @@ function FloorInfoCard({ info, onClose }) {
               className="text-gray-600 sm:col-span-2"
               style={{ 
                 fontSize: 'clamp(0.8125rem, 1.6vw, 0.9375rem)',
-                fontFamily: 'Gotham-Office, sans-serif'
+                fontFamily: 'Zap, sans-serif'
               }}
             >
               

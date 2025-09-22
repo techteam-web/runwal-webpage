@@ -235,7 +235,7 @@ export default function FloorSelectionModal({
   const hasSelections = selectedTypes.length > 0;
 
   return createPortal(
-    <div className="fixed inset-0 bg-transparent backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50" style={{ fontFamily: 'Spectra, sans-serif' }}>
+    <div className="fixed inset-0 bg-transparent backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50" style={{ fontFamily: 'Zap, sans-serif' }}>
       <div className="bg-[#d9d4c7] w-full h-full overflow-hidden">
         
         {/* Close Button */}
