@@ -127,7 +127,8 @@ export default function BuildingOverlay() {
     if (!isMobile && !compareMode) {
       setSelectedFloor(floor);
       setCardPosition({ x: event.clientX + 10, y: event.clientY + 10 });
-      const isAvailable = floor.info.availability?.toLowerCase() === "true";
+      const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true' || floor.info.availability === true;
+
       const hoverFill = isAvailable ? "rgba(208, 170, 45, 0.28)" : "rgba(255, 0, 0, 0.28)";
       event.target.style.fill = hoverFill;
     }
@@ -160,7 +161,8 @@ export default function BuildingOverlay() {
           y: event.clientY - 100 
         });
         
-        const isAvailable = floor.info.availability?.toLowerCase() === "true";
+       const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true' || floor.info.availability === true;
+
         const activeFill = isAvailable ? "rgba(208, 170, 45, 0.28)" : "rgba(255, 0, 0, 0.28)";
         event.target.style.fill = activeFill;
         
@@ -231,7 +233,8 @@ export default function BuildingOverlay() {
 
   // ✅ UPDATED: Simplified floor coloring (removed compare mode logic)
   const getFloorFillColor = (floor) => {
-    const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true';
+   const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true' || floor.info.availability === true;
+
 
     // When category filters (wardrobe/terrace/skyclub) are active, keep floors neutral
     if (activeHighlight === 'wardrobe' || activeHighlight === 'terrace' || activeHighlight === 'skyclub') {

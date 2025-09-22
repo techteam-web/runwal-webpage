@@ -347,11 +347,11 @@ export default function FloorSelectionModal({
                               <span>{floor.info.price}</span>
                               <span>{floor.info.area}</span>
                               <span className={`px-2 py-1 rounded-full ${
-                                floor.info.availability?.toLowerCase() === "true"
+                                String(floor.info.availability || '').toLowerCase() === "true" || floor.info.availability === true
                                   ? 'bg-green-100 text-green-800'
                                   : 'bg-red-100 text-red-800'
                               }`}>
-                                {floor.info.availability?.toLowerCase() === "true" ? 'Available' : 'Sold'}
+                                {String(floor.info.availability || '').toLowerCase() === "true" || floor.info.availability === true ? 'Available' : 'Sold'}
                               </span>
                             </div>
                           </div>
