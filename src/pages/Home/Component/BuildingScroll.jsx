@@ -477,30 +477,29 @@ const handleExploreClick = useCallback(() => {
 // Replace the current ScrollTrigger creation code with this:
 
 // Replace the existing ScrollTrigger creation code with this:
+// Replace the existing ScrollTrigger creation code with this:
 cardsRef.current.forEach((card, idx) => {
   if (!card) return;
-  gsap.set(card, { opacity: idx === 0 ? 1 : 0 });
+  
+  // Set initial state - all cards start hidden
+  gsap.set(card, { opacity: 0 });
   
   if (idx === 0 || idx === 1 || idx === 2 || idx === 3 || idx === 4) {
     ScrollTrigger.create({
       trigger: card,
-      start: "top center",
-      end: "bottom center",
+      start: "top 80%", // Adjusted to trigger earlier
+      end: "bottom 20%",
       onEnter: () => {
-        // Check if this card has already been animated using the ref
         if (animatedCardsRef.current.has(idx)) {
-          // Just show the card and text without animation
           gsap.set(card, { opacity: 1 });
           const allLetters = Array.from(card.querySelectorAll('.letter'));
           gsap.set(allLetters, { opacity: 1 });
           return;
         }
         
-        // Mark this card as animated in the ref
         animatedCardsRef.current.add(idx);
+        gsap.to(card, { opacity: 1, duration: 0.5 }); // Fade in card first
         
-        // Show and animate current card
-        gsap.set(card, { opacity: 1 });
         const allLetters = Array.from(card.querySelectorAll('.letter'));
         gsap.killTweensOf(allLetters);
         gsap.set(allLetters, { 
@@ -510,16 +509,18 @@ cardsRef.current.forEach((card, idx) => {
           x: 0,
           y: 0
         });
+        
+        // Add a slight delay before animating letters
         gsap.to(allLetters, {
           opacity: 1,
-          duration: 1.5,
+          duration: 0.8,
           ease: "sine.out",
-          stagger: 0.1,
+          stagger: 0.05,
           overwrite: true,
+          
         });
       },
       onEnterBack: () => {
-        // Show current card and text permanently (no re-animation)
         gsap.set(card, { opacity: 1 });
         const allLetters = Array.from(card.querySelectorAll('.letter'));
         gsap.set(allLetters, { opacity: 1 });
@@ -754,14 +755,14 @@ useEffect(() => {
   // Animation directions
   if (currentIndex === 0 || currentIndex === 4 || currentIndex === 6) {
     // bottom to top
-    gsap.fromTo(currentItem, { yPercent: 100 }, { yPercent: 0, duration: 1.2, ease: "power3.out" });
+    gsap.fromTo(currentItem, { yPercent: 100 }, { yPercent: 0, duration: 0.5, ease: "power3.out" });
   } else if (currentIndex === 1) {
-    gsap.fromTo(currentItem, { xPercent: -100 }, { xPercent: 0, duration: 1.2, ease: "power3.out" });
+    gsap.fromTo(currentItem, { xPercent: -100 }, { xPercent: 0, duration: 0.5, ease: "power3.out" });
   } else if (currentIndex === 2 || currentIndex === 5) {
-    gsap.fromTo(currentItem, { xPercent: 100 }, { xPercent: 0, duration: 1.2, ease: "power3.out" });
+    gsap.fromTo(currentItem, { xPercent: 100 }, { xPercent: 0, duration: 0.5, ease: "power3.out" });
   } else if (currentIndex === 3 || currentIndex === 7) {
     // top to bottom
-    gsap.fromTo(currentItem, { yPercent: -100 }, { yPercent: 0, duration: 1.2, ease: "power3.out" });
+    gsap.fromTo(currentItem, { yPercent: -100 }, { yPercent: 0, duration: 0.5, ease: "power3.out" });
   }
 galleryItems.forEach((item, idx) => {
   if (!item) return;
@@ -810,7 +811,7 @@ galleryItems.forEach((item, idx) => {
           gsap.to(currentTextRef.current, { opacity: 1, duration: 0.1 });
           
           // First animate letters (headings) with letter-by-letter effect
-          gsap.fromTo(letters, { opacity: 0 }, { opacity: 1, stagger: 0.1, duration: 1.0, ease: "sine.out" });
+          gsap.fromTo(letters, { opacity: 0 }, { opacity: 1, stagger: 0.1, duration: 0.5, ease: "sine.out" });
           
           // Set paragraphs to hidden initially, then make them appear when about half the letters are remaining
           gsap.set(words, { opacity: 0 }); // Hide paragraphs initially
@@ -827,7 +828,7 @@ galleryItems.forEach((item, idx) => {
 gsap.to(words, { 
   opacity: 1, 
   delay: paragraphDelay,
-  duration: 5.0,      
+  duration: 1,      
   ease: "power2.out"   
 });
 
@@ -857,10 +858,10 @@ gsap.to(words, {
           alt="Top Right Logo"
         />
   <div className="landing-screen" ref={landingScreenRef}>
-          <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABARA HILL</p>
+          <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABAR HILL</p>
 
 <audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
-<button
+{/* <button
   className="explore-btn"
   ref={exploreBtnRef}
   onClick={handleExploreClick}
@@ -892,7 +893,7 @@ gsap.to(words, {
   }}
 >
   <span>EXPLORE MORE</span>
-</button>
+</button> */}
 
           {/* <button className="explore-btn" ref={exploreBtnRef} onClick={handleExploreClick}>Explore more</button> */}
           <img src="/Asset_4.svg" alt="Logo" className="landing-logo" ref={logoRef} />

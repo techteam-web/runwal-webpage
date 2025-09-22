@@ -5,6 +5,10 @@
 .card2text{
   text-align: center !important; 
 }
+.cloud-image{
+  top:25% !important;
+  z-index: 10 !important;
+}
 
 .audio-btn {
   background: none;
@@ -138,7 +142,7 @@
   text-align: right;
 }
 
-.card_1 { top: 265%; }
+.card_1 { top: 260%; }
 .card_2 { top: 180%; }
 .card_3 { top: 148%; }
 .card_4 { top: 0%; }
