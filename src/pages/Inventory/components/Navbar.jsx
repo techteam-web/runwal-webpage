@@ -261,7 +261,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
         className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-2 z-[99999] absolute bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
-         rounded-4xl flex justify-center items-center gap-8
+         rounded-4xl flex justify-center items-center gap-3
          max-sm:gap-0.5 max-sm:bottom-1 max-sm:border-1 max-sm:p-0.5 max-sm:rounded-2xl
          max-md:gap-1 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between max-md:rounded-3xl
          max-lg:gap-2 max-lg:bottom-2 max-lg:border-2 max-lg:p-0.5 max-lg:justify-between max-lg:rounded-3xl

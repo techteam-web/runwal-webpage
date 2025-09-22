@@ -4,10 +4,10 @@ import "../App.css";
 
 export default function FloorsPanel({ current, onSelect }) {
   const floors = [
-    { id: "120", label: "120th Floor" },
-    { id: "105", label: "105th Floor" },
-    { id: "89", label: "89th Floor" },
-    { id: "73", label: "73rd Floor" },
+    { id: "120", label: "120M" },
+    { id: "105", label: "105M" },
+    { id: "89", label: "89M" },
+    { id: "73", label: "73M" },
   ];
 
   const containerRef = useRef(null);
@@ -205,7 +205,7 @@ export default function FloorsPanel({ current, onSelect }) {
         ref={containerRef}
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
-        className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white p-1 bg-clip-padding backdrop-blur-sm border-4 border-[#385270] rounded-4xl flex flex-col gap-2
+        className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white p-1 bg-clip-padding backdrop-blur-sm border-4 border-[#385270] rounded-4xl flex flex-col gap-3
         max-sm:border-2 max-sm:p-0.5 max-sm:rounded-2xl max-sm:gap-1
         max-md:border-2 max-md:p-0.5 max-md:rounded-3xl max-md:gap-1
         max-lg:border-2 max-lg:p-0.5 max-lg:rounded-3xl max-lg:gap-1.5"
@@ -218,8 +218,8 @@ export default function FloorsPanel({ current, onSelect }) {
         }}
       >
         {/* Navigation Buttons Row */}
-        <div className="flex items-center gap-2 justify-center
-        max-sm:gap-1 max-md:gap-1.5 max-lg:gap-2">
+        <div className="flex items-center gap-3 justify-center
+        max-sm:gap-1 max-md:gap-1.5 max-lg:gap-3">
           
           {/* Home Button */}
           <button
@@ -250,7 +250,7 @@ max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
               onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
               onClick={(e) => handleFloorClick(floor.id, e)}
               className="dropbox-btn font-zap uppercase overflow-hidden text-shadow-lg rounded-2xl transition-all duration-300 cursor-pointer relative 
-              px-2 py-1 text-sm
+              px-2 py-1 text-lg
               max-sm:px-1 max-sm:py-0.5 max-sm:text-[7px] max-sm:rounded-lg
               max-md:px-1.5 max-md:py-0.5 max-md:text-[8px] max-md:rounded-xl
               max-lg:px-2 max-lg:py-1 max-lg:text-[10px] max-lg:rounded-xl
@@ -262,7 +262,7 @@ max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
                   : {}
               }
             >
-              {floor.label.replace("th Floor", "").replace("rd Floor", "")}
+              {floor.label}
             </button>
           ))}
         </div>

@@ -234,10 +234,10 @@ const Nav = ({
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
         className={`drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-2 z-[99999] fixed bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
-       rounded-4xl flex justify-center items-center gap-16 
+       rounded-4xl flex flex-1/5 justify-center items-center gap-3
        max-sm:gap-1 max-sm:bottom-1 max-sm:border-2 max-sm:p-0.5 
        max-md:gap-0 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between
-       max-lg:gap-0 max-lg:bottom-2 max-lg:border-2 max-lg:p-1 max-lg:justify-between 
+       max-lg:gap-0 max-lg:bottom-2 max-lg:border-2 max-lg:p-0.5 max-lg:justify-between 
        max-xl:p-2 max-xl:gap-0 max-xl:justify-between
        transition-all duration-700 ease-out
        ${delayedShow 

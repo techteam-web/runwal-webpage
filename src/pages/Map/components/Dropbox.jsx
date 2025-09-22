@@ -214,12 +214,12 @@ const Dropbox = ({
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
         className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-1 z-[99999] absolute bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
-       rounded-4xl flex justify-center items-center gap-10
+       rounded-4xl flex justify-center items-center gap-3
        max-sm:gap-0.5 max-sm:bottom-1 max-sm:border-1 max-sm:p-0.5 max-sm:rounded-2xl
        max-md:gap-1 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between max-md:rounded-3xl
        max-lg:gap-2 max-lg:bottom-2 max-lg:border-2 max-lg:p-0.5 max-lg:justify-between max-lg:rounded-3xl
-       max-xl:p-1 max-xl:gap-4 max-xl:justify-between
-       max-2xl:p-2 max-2xl:gap-6"
+       max-xl:p-1 max-xl:gap-3 max-xl:justify-between
+       max-2xl:p-2 max-2xl:gap-3"
         style={{
           "--x": "500%",
           "--y": "500%",
