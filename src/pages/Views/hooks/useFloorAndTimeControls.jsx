@@ -19,14 +19,14 @@ export function useFloorAndTimeControls(scenes, switchScene) {
   const changeFloor = (floor) => {
     setCurrentFloor(floor);
     const scene = getSceneByFloorAndTime(floor, currentTime);
-    if (scene) switchScene(scene);
+    if (scene) switchScene(scene,true);
   };
 
   const changeTime = (timeKey) => {
     const timeCode = timeCodes[timeKey];
     setCurrentTime(timeCode);
     const scene = getSceneByFloorAndTime(currentFloor, timeCode);
-    if (scene) switchScene(scene);
+    if (scene) switchScene(scene,true);
   };
 
   return { currentFloor, currentTime, changeFloor, changeTime };

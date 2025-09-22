@@ -229,13 +229,12 @@ export default function FloorsPanel({ current, onSelect }) {
             onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
             onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
             onClick={handleHomeClick}
-            className="dropbox-btn font-zap uppercase overflow-hidden text-shadow-lg rounded-2xl transition-all duration-300 cursor-pointer relative 
-            px-2 py-1 text-sm
-            max-sm:px-1 max-sm:py-0.5 max-sm:text-[7px] max-sm:rounded-lg
-            max-md:px-1.5 max-md:py-0.5 max-md:text-[8px] max-md:rounded-xl
-            max-lg:px-2 max-lg:py-1 max-lg:text-[10px] max-lg:rounded-xl
-            max-xl:px-2 max-xl:py-1 max-xl:text-xs
-            max-2xl:px-3 max-2xl:py-1 max-2xl:text-sm"
+            className="dropbox-btn uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
+max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
+max-md:px-2 max-md:p-1 max-md:text-[10px] 
+max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
+max-xl:px-2 max-xl:p-1 max-xl:text-[12px]
+max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
           >
             Home
           </button>

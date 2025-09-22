@@ -15,6 +15,16 @@ function Home() {
   const [showSingleImage, setShowSingleImage] = useState(false);
 
   // showNav will be set by BuildingScroll after autoscroll
+   useEffect(() => {
+    console.log("🏠 Home.jsx - showNav changed to:", showNav);
+  }, [showNav]);
+
+  // Debug the setShowNav function
+  const debugSetShowNav = (value) => {
+    console.log("🏠 Home.jsx - setShowNav called with:", value);
+    setShowNav(value);
+  };
+
 
   // Only top-level items, no sub-options
   const markersGroup = {
@@ -34,7 +44,7 @@ function Home() {
 
   return (
     <div className="App">
-      <BuildingScroll setShowNav={setShowNav} showSingleImage={showSingleImage} setShowSingleImage={setShowSingleImage} />
+      <BuildingScroll setShowNav={debugSetShowNav} showSingleImage={showSingleImage} setShowSingleImage={setShowSingleImage} />
       <Nav
         showNav={showNav}
         setActiveGroupeMarker={setActiveGroupeMarker}

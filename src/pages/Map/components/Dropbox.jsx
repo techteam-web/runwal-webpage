@@ -214,7 +214,7 @@ const Dropbox = ({
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
         className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-1 z-[99999] absolute bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
-       rounded-4xl flex justify-center items-center gap-8
+       rounded-4xl flex justify-center items-center gap-10
        max-sm:gap-0.5 max-sm:bottom-1 max-sm:border-1 max-sm:p-0.5 max-sm:rounded-2xl
        max-md:gap-1 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between max-md:rounded-3xl
        max-lg:gap-2 max-lg:bottom-2 max-lg:border-2 max-lg:p-0.5 max-lg:justify-between max-lg:rounded-3xl
@@ -236,13 +236,12 @@ const Dropbox = ({
             }}
             onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
             onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-            className="dropbox-btn  uppercase overflow-hidden text-shadow-lg rounded-2xl transition-all duration-300 cursor-pointer relative 
-            px-2 py-1 text-sm
-            max-sm:px-1 max-sm:py-0.5 max-sm:text-[7px] max-sm:rounded-lg
-            max-md:px-1.5 max-md:py-0.5 max-md:text-[8px] max-md:rounded-xl
-            max-lg:px-2 max-lg:py-1 max-lg:text-[10px] max-lg:rounded-xl
-            max-xl:px-2 max-xl:py-1 max-xl:text-xs
-            max-2xl:px-3 max-2xl:py-1 max-2xl:text-sm"
+            className="dropbox-btn uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
+max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
+max-md:px-2 max-md:p-1 max-md:text-[10px] 
+max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
+max-xl:px-2 max-xl:p-1 max-xl:text-[12px]
+max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
             onClick={handleHomeClick}
           >
             Home

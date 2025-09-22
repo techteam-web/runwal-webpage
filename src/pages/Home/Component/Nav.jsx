@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { gsap } from "gsap";
+import { gsap } from "gsap"; // Keep this only for existing button effects
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Nav = ({
@@ -21,6 +21,10 @@ const Nav = ({
   
   // Click sound for navbar buttons
   const clickSoundRef = useRef(null);
+  
+  // Animation state - simplified for CSS
+  const [shouldShow, setShouldShow] = useState(false);
+  const [delayedShow, setDelayedShow] = useState(false);
 
   const handleMarkerGroupClick = (name) => {
     setActiveMarker("");
@@ -36,10 +40,57 @@ const Nav = ({
     }
   };
 
+  // Height sync (keep existing)
+  useEffect(() => {
+    const syncNavbarHeights = () => {
+      const allNavbars = document.querySelectorAll('.drop-container');
+      if (allNavbars.length > 1) {
+        let maxHeight = 0;
+        allNavbars.forEach(navbar => {
+          const height = navbar.offsetHeight;
+          if (height > maxHeight) {
+            maxHeight = height;
+          }
+        });
+        allNavbars.forEach(navbar => {
+          navbar.style.minHeight = `${maxHeight}px`;
+        });
+      }
+    };
+
+    const timer = setTimeout(syncNavbarHeights, 100);
+    window.addEventListener('resize', syncNavbarHeights);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', syncNavbarHeights);
+    };
+  }, []);
+
   const containerRef = useRef(null);
   const buttonRefs = useRef({});
   const [selectedButton, setSelectedButton] = useState(null);
 
+  // 👈 SIMPLE: Show with delay, then add animation class
+  useEffect(() => {
+    if (showNav) {
+      // Show the element first
+      setShouldShow(true);
+      
+      // Then trigger the animation after a delay
+      setTimeout(() => {
+        setDelayedShow(true);
+      }, 500); // 500ms delay
+    } else {
+      setDelayedShow(false);
+      // Hide after animation completes
+      setTimeout(() => {
+        setShouldShow(false);
+      }, 300); // Quick hide
+    }
+  }, [showNav]);
+
+  // Keep existing functions for button effects
   const animateGradientFromPoint = (x, y, name) => {
     const container = containerRef.current;
     if (!container) return;
@@ -59,7 +110,6 @@ const Nav = ({
       "--r": targetRadius,
     });
 
-    // Animate clicked button to "capture" the glow
     const btn = buttonRefs.current[name];
     if (btn) {
       gsap.killTweensOf(btn);
@@ -80,6 +130,7 @@ const Nav = ({
     target.style.setProperty("--b", `1`);
   };
 
+  // Keep existing ripple effects
   const rippleMouseMove = (e, btn) => {
     const rect = btn.getBoundingClientRect();
     const ripple = document.createElement("span");
@@ -103,7 +154,6 @@ const Nav = ({
 
     btn.appendChild(ripple);
 
-    // GSAP animation
     gsap.to(ripple, {
       scale: 4,
       duration: 1.5,
@@ -113,14 +163,15 @@ const Nav = ({
 
   const rippleMouseLeave = (e, btn) => {
     const ripple = btn.querySelector("span");
-    const rect = btn.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = e.clientX - rect.left - size / 2;
-    const y = e.clientY - rect.top - size / 2;
-    ripple.style.width = ripple.style.height = `${size}px`;
-    ripple.style.left = `${x}px`;
-    ripple.style.top = `${y}px`;
     if (ripple) {
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
       gsap.to(ripple, {
         opacity: 0,
         duration: 1,
@@ -139,7 +190,7 @@ const Nav = ({
     target.style.setProperty("--y", `500%`);
   };
 
-  // Hover effect for the dropdown panel (locations list)
+  // Keep existing location effects (simplified)
   const locationsRef = useRef(null);
   const handleLocationsMouseMove = (event) => {
     const target = event.currentTarget;
@@ -149,45 +200,14 @@ const Nav = ({
     target.style.setProperty("--lx", `${mouseX}px`);
     target.style.setProperty("--ly", `${mouseY}px`);
   };
+  
   const handleLocationsMouseLeave = (event) => {
     const target = event.currentTarget;
     target.style.setProperty("--lx", `50%`);
     target.style.setProperty("--ly", `50%`);
   };
 
-  // GSAP animation for the locations card
-  useEffect(() => {
-    if (locationsRef.current) {
-      if (activeGroupDropbox) {
-        // Animate in
-        gsap.fromTo(
-          locationsRef.current,
-          {
-            opacity: 0,
-            scale: 0.8,
-            y: 20,
-          },
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            duration: 1,
-            ease: "power3.inOut",
-          }
-        );
-      } else {
-        // Animate out
-        gsap.to(locationsRef.current, {
-          opacity: 0,
-          scale: 0.8,
-          y: 20,
-          duration: 1,
-          ease: "power2.in",
-        });
-      }
-    }
-  }, [activeGroupDropbox]);
-
+  // Keep existing marker logic
   useEffect(() => {
     if (activeMarker === "" && activeGroupDropbox !== "") {
       setActiveGroupeMarker(activeGroupDropbox);
@@ -196,7 +216,7 @@ const Nav = ({
     }
   }, [activeGroupDropbox, activeMarker, setActiveGroupeMarker]);
 
-  // Check if button is active based on current route
+  // Keep existing button active logic
   const isButtonActive = (name) => {
     if (name === "Home" && location.pathname === "/") return true;
     if (name === "View" && location.pathname === "/views") return true;
@@ -208,7 +228,7 @@ const Nav = ({
   return (
     <>
       <audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
-      {/* Desktop Menu */}
+      {/* Desktop Menu with Simple Tailwind Animation */}
       <div
         ref={containerRef}
         onMouseMove={handleContainerMouseMove}
@@ -218,17 +238,22 @@ const Nav = ({
        max-sm:gap-1 max-sm:bottom-1 max-sm:border-2 max-sm:p-0.5 
        max-md:gap-0 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between
        max-lg:gap-0 max-lg:bottom-2 max-lg:border-2 max-lg:p-1 max-lg:justify-between 
-       max-xl:p-2 max-xl:gap-0 max-xl:justify-between${showNav ? ' show' : ''}`}
+       max-xl:p-2 max-xl:gap-0 max-xl:justify-between
+       transition-all duration-700 ease-out
+       ${delayedShow 
+         ? 'translate-y-0 opacity-100 scale-100' 
+         : 'translate-y-24 opacity-0 scale-90'
+       }`}
         style={{
           "--x": "500%",
           "--y": "500%",
           "--r": "160px",
-          backgroundImage:
-            "radial-gradient(var(--r) var(--r) at var(--x) var(--y), rgba(255, 208, 117, 0.8), rgba(255,255,255,0) 40%)",
+          backgroundImage: "radial-gradient(var(--r) var(--r) at var(--x) var(--y), rgba(255, 208, 117, 0.8), rgba(255,255,255,0) 40%)",
+          display: shouldShow ? 'flex' : 'none',
         }}
       >
         {Object.keys(markersGroup).map((name) => (
-          <div key={name} className="flex items-center "  style={{ fontFamily: 'Zap, sans-serif' }}>
+          <div key={name} className="flex items-center " style={{ fontFamily: 'Zap, sans-serif' }}>
             <button
               ref={(el) => {
                 if (el) buttonRefs.current[name] = el;
@@ -244,7 +269,7 @@ const Nav = ({
               max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]
               "
               onClick={(e) => {
-                // Play click sound
+                // Keep all your existing onClick logic
                 if (clickSoundRef.current) {
                   clickSoundRef.current.currentTime = 0;
                   clickSoundRef.current.play();
@@ -260,7 +285,7 @@ const Nav = ({
                 // Handle routing to your existing pages
                 if (name === "Gallery") {
                   setShowSingleImage(true);
-                  navigate("/"); // Stay on home page but show gallery
+                  navigate("/");
                 } else if (name === "Home") {
                   if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
                   navigate("/");
@@ -345,7 +370,7 @@ const Nav = ({
                       onClick={() => clickHandle(path)}
                       className="overflow-hidden uppercase text-shadow-lg text-white p-1 px-3 rounded-md transition-all duration-300 cursor-pointer relative text-center 
                       max-sm:px-1 max-sm:p-0.5 max-sm:rounded-xs max-sm:text-[6px]  
-                      max-md:px-2 max-md:p-1 max-md:rounded-xs max-md:text-[9px]   
+                      max-md:px-2 max-md:p-1 max-md:rounded-xs max-sm:text-[9px]   
                       max-lg:px-2 max-lg:p-1 max-lg:rounded-sm max-lg:text-[12px]
                       max-2xl:px-2 max-2xl:p-1 max-2xl:rounded-sm max-2xl:text-[13px]
                       "

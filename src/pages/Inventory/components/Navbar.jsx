@@ -14,6 +14,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
   
   // Add useNavigate hook
   const navigate = useNavigate();
+  
 
   const floors = [
     { id: "home", label: "Home", isHome: true }, // Add Home button
@@ -260,11 +261,12 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
         className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-2 z-[99999] absolute bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
-         rounded-4xl flex justify-center items-center gap-16 
-         max-sm:gap-1 max-sm:bottom-1 max-sm:border-2 max-sm:p-0.5 
-         max-md:gap-0 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between
-         max-lg:gap-0 max-lg:bottom-2 max-lg:border-2 max-lg:p-1 max-lg:justify-between 
-         max-xl:p-2 max-xl:gap-0 max-xl:justify-between"
+         rounded-4xl flex justify-center items-center gap-8
+         max-sm:gap-0.5 max-sm:bottom-1 max-sm:border-1 max-sm:p-0.5 max-sm:rounded-2xl
+         max-md:gap-1 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between max-md:rounded-3xl
+         max-lg:gap-2 max-lg:bottom-2 max-lg:border-2 max-lg:p-0.5 max-lg:justify-between max-lg:rounded-3xl
+         max-xl:p-1 max-xl:gap-4 max-xl:justify-between
+         max-2xl:p-2 max-2xl:gap-6"
         style={{
           "--x": "500%",
           "--y": "500%",
@@ -282,12 +284,12 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
               }}
               onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
               onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-              className="dropbox-btn font-zap uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
-                max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
-                max-md:px-2 max-md:p-1 max-md:text-[10px] 
-                max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
-                max-xl:px-2 max-xl:p-1 max-xl:text-[12px]
-                max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
+              className="dropbox-btn uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
+max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
+max-md:px-2 max-md:p-1 max-md:text-[10px] 
+max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
+max-xl:px-2 max-xl:p-1 max-xl:text-[12px]
+max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
               onClick={(e) => handleFloorClick(floor.id, e)}
               style={
                 ((floor.id === "2" && showFloorPlans) || 
@@ -310,12 +312,12 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
             ref={unitsRef}
             onMouseMove={handleUnitsMouseMove}
             onMouseLeave={handleUnitsMouseLeave}
-            className="w-auto bottom-19 left-1/2 transform -translate-x-1/2 p-2 fixed z-[100000] flex gap-4 border-2 rounded-xl justify-center items-center bg-clip-padding backdrop-blur-3xl border-solid border-[rgb(187,174,99)] 
-            max-sm:bottom-7 max-sm:border-1 max-sm:rounded-md max-sm:gap-2 max-sm:p-1 
-            max-md:bottom-9 max-md:border-1 max-md:rounded-lg max-md:gap-3 max-md:p-1 
-            max-lg:bottom-13 max-lg:rounded-lg max-lg:gap-3 max-lg:p-1
-            max-xl:bottom-18 max-xl:p-2 max-xl:gap-4
-            max-2xl:bottom-17 max-2xl:p-2 max-2xl:gap-4"
+            className="w-auto bottom-16 left-1/2 transform -translate-x-1/2 p-2 fixed z-[100000] flex gap-2 border-2 rounded-xl justify-evenly items-center bg-clip-padding backdrop-blur-3xl border-solid border-[rgb(187,174,99)] 
+            max-sm:bottom-6 max-sm:border-1 max-sm:rounded-md max-sm:gap-1 max-sm:p-1 
+            max-md:bottom-7 max-md:border-1 max-md:rounded-lg max-md:gap-1 max-md:p-1 
+            max-lg:bottom-9 max-lg:rounded-lg max-lg:gap-1.5 max-lg:p-1.5
+            max-xl:bottom-12 max-xl:p-2 max-xl:gap-2
+            max-2xl:bottom-14 max-2xl:p-2 max-2xl:gap-2"
             style={{
               "--lx": "50%",
               "--ly": "50%",
@@ -337,11 +339,13 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
                 onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
                 onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
                 onClick={(e) => handleUnitClick(unit, e)}
-                className="overflow-hidden uppercase text-shadow-lg text-white p-2 px-4 rounded-md transition-all duration-300 cursor-pointer relative text-center flex-shrink-0
-                max-sm:px-2 max-sm:p-1 max-sm:rounded-xs max-sm:text-[8px]  
-                max-md:px-3 max-md:p-1.5 max-md:rounded-xs max-md:text-[10px]   
-                max-lg:px-3 max-lg:p-1.5 max-lg:rounded-sm max-lg:text-[12px]
-                max-2xl:px-4 max-2xl:p-2 max-2xl:rounded-sm max-2xl:text-[13px]"
+                className="overflow-hidden uppercase text-shadow-lg text-white rounded-md transition-all duration-300 cursor-pointer relative text-center 
+                px-2 py-1 text-xs
+                max-sm:px-1 max-sm:py-0.5 max-sm:rounded-sm max-sm:text-[6px]  
+                max-md:px-1.5 max-md:py-0.5 max-md:rounded-sm max-md:text-[7px]   
+                max-lg:px-2 max-lg:py-1 max-lg:rounded-sm max-lg:text-[9px]
+                max-xl:px-2 max-xl:py-1 max-xl:text-[10px]
+                max-2xl:px-3 max-2xl:py-1 max-2xl:text-xs"
                 style={
                   selectedUnit === unit.toString()
                     ? {

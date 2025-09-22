@@ -393,7 +393,7 @@ const handleExploreClick = useCallback(() => {
         const viewportH = window.innerHeight || 0;
         const cardH = targetCard.offsetHeight || 0;
         // Position so the card appears roughly centered
-        targetY = Math.max(0, current + relativeTop - (viewportH / 2 - cardH / 2));
+        targetY = Math.max(0, current + relativeTop - (viewportH / 2 - cardH / 2 + 100));
   // Store the stop position for scroll lock
   autoScrollStopYRef.current = targetY;
       }
@@ -405,7 +405,7 @@ const handleExploreClick = useCallback(() => {
       onComplete: () => {
         smoother.paused(false);
         cloudCanMoveRef.current = false; // stop further cloud movement
-        if (typeof setShowNav === 'function') setShowNav(true); // Show navbar after autoscroll
+        
         setAutoScrollComplete(true); // Mark auto-scroll as complete
       },
     });
@@ -460,7 +460,7 @@ const handleExploreClick = useCallback(() => {
     const smoother = ScrollSmoother.create({
       wrapper: ".container",
       content: ".content",
-      smooth: 4,
+      smooth: 2,
       effects: true,
       normalizeScroll: true,
     });
@@ -519,6 +519,13 @@ cardsRef.current.forEach((card, idx) => {
           overwrite: true,
           
         });
+        if (idx===0 && typeof setShowNav === 'function') {
+          console.log("🏛️ Card 0 (GRAND DOUBLE HEIGHT LOBBY) triggered!");
+  console.log("🏛️ setShowNav function type:", typeof setShowNav);
+  console.log("🏛️ Calling setShowNav(true)...");
+  setShowNav(true);
+  console.log("🏛️ setShowNav(true) called successfully");
+        }
       },
       onEnterBack: () => {
         gsap.set(card, { opacity: 1 });
@@ -582,61 +589,32 @@ cardsRef.current.forEach((card, idx) => {
   }, []);
 
   // Auto-trigger Explore when the user first scrolls (or uses keys/touch) before clicking the button
-  useEffect(() => {
-    if (showSingleImage) return; // only on landing state
+ // Auto-trigger animation on page load (replace the existing useEffect)
+useEffect(() => {
+  if (showSingleImage) return;
+  
+  // Set a delay to ensure everything is loaded
+  const autoTriggerDelay = 500; // 2 seconds after page load
+  
+  const autoTrigger = setTimeout(() => {
+    if (!exploreTriggeredRef.current) {
+      console.log("🎬 Auto-triggering explore animation...");
+      handleExploreClick();
+    }
+  }, autoTriggerDelay);
 
-    const isFromSoundToggle = (target) => {
-      try {
-        return !!(target && target.closest && target.closest('.sound-toggle'));
-      } catch {
-        return false;
-      }
-    };
+  return () => {
+    clearTimeout(autoTrigger);
+  };
+}, [showSingleImage, handleExploreClick]);
 
-    const trigger = () => {
-      if (!exploreTriggeredRef.current) {
-        handleExploreClick();
-      }
-    };
-
-    const onWheel = (e) => {
-      if (isFromSoundToggle(e.target)) return;
-      // Trigger on downward intent; remove check if you want any wheel to trigger
-      if (e.deltaY > 0) trigger();
-    };
-
-    const onKeyDown = (e) => {
-      if (isFromSoundToggle(e.target)) return;
-      const code = e.code || e.key;
-      if (["ArrowDown", "PageDown", "Space", " "].includes(code)) trigger();
-    };
-
-    let touched = false;
-    const onTouchStart = (e) => {
-      if (isFromSoundToggle(e.target)) return;
-      if (!touched) {
-        touched = true;
-        trigger();
-      }
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: true });
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-
-    return () => {
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('touchstart', onTouchStart);
-    };
-  }, [showSingleImage, handleExploreClick]);
 
   // Gallery scroll logic
   useEffect(() => {
     if (!showSingleImage) return;
 
     let canScroll = true;
-    const delay = 1200;
+    const delay = 1000;
 
     const handleWheel = (e) => {
       if (!canScroll) return;
@@ -915,9 +893,9 @@ gsap.to(words, {
                 <span className="card-label">{splitTextLetters("EXCLUSIVE CLUB LEVELS")}</span>
               </div>
               <div className="card card_2" ref={(el) => (cardsRef.current[1] = el)}>
-                <span className="gold-number">{splitTextLetters("2")}</span>
-                <span className="card-label">{splitTextLetters("PARKING BASEMENT")}</span>
-                <span className="gold-number">{splitTextLetters("9")}</span>
+                <span className="gold-number mb-[-2rem]">{splitTextLetters("2")}</span>
+                <span className="card-label mb-[-3rem]">{splitTextLetters("PARKING BASEMENT")}</span>
+                <span className="gold-number mt-[-1rem]">{splitTextLetters("9")}</span>
                 <span className="card-label card2text">{splitTextLetters("PARKING LEVELS")}</span>
               </div>
               <div className="card card_1" ref={(el) => (cardsRef.current[0] = el)}>

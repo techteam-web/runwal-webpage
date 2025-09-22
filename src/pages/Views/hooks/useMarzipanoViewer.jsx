@@ -55,11 +55,30 @@ window.fetch = function(...args) {
     return () => viewerInstance.destroy?.();
   }, []);
 
-  const switchScene = (sceneObj) => {
+  const switchScene = (sceneObj,preserveView = false) => {
     if (!sceneObj) return;
-    sceneObj.scene.switchTo();
+     // Store current camera position before switching
+  let currentViewParams = null;
+  if (preserveView && currentView) {
+    currentViewParams = {
+      yaw: currentView.yaw(),
+      pitch: currentView.pitch(),
+      fov: currentView.fov()
+    };
+    console.log("🎥 Preserving camera position:", currentViewParams);
+  }
+  
+  // Switch to new scene
+  sceneObj.scene.switchTo();
+  
+  // Apply preserved view or reset to initial
+  if (currentViewParams) {
+    sceneObj.view.setParameters(currentViewParams);
+  } else {
     sceneObj.view.setParameters(sceneObj.data.initialViewParameters);
-    setCurrentView(sceneObj.view);
+  }
+  
+  setCurrentView(sceneObj.view);
   };
 
   return { viewer, scenes, currentView, switchScene };

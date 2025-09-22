@@ -65,7 +65,7 @@ function Views() {
    
       <TitleBar/>
       <TimeButtons current={currentTime} onSelect={changeTime} />
-     {currentView ? <Compass view={currentView} /> : null}
+     
  </>
   );
 }
