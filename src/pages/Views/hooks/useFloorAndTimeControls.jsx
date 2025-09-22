@@ -26,7 +26,7 @@ export function useFloorAndTimeControls(scenes, switchScene) {
     const timeCode = timeCodes[timeKey];
     setCurrentTime(timeCode);
     const scene = getSceneByFloorAndTime(currentFloor, timeCode);
-    if (scene) switchScene(scene,true);
+    if (scene) switchScene(scene);
   };
 
   return { currentFloor, currentTime, changeFloor, changeTime };
