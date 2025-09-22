@@ -590,7 +590,7 @@ const Scene = ({ ready }) => {
                   </style>
                 </defs>
                 <g id="Layer_1-2" data-name="Layer 1">
-                  <text className="font-sign"
+                  <text className=""
                     transform="translate(.55 60.1)"
                     style={{
                       fill: "#414042",
@@ -600,6 +600,7 @@ const Scene = ({ ready }) => {
                       stroke: "#414042",
                       strokeMiterlimit: 10,
                       strokeWidth: "1.09px",
+                      fontFamily: "'Signature', cursive",
                     }}
                   >
                     <tspan className="cls-4" x={0} y={0}>

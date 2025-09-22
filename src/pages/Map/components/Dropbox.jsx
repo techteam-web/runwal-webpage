@@ -96,7 +96,6 @@ const Dropbox = ({
     // GSAP animation
     gsap.to(ripple, {
       scale: 4,
-      // opacity: 0,
       duration: 1.5,
       ease: "power2.out",
     });
@@ -129,6 +128,25 @@ const Dropbox = ({
     const target = event.currentTarget;
     target.style.setProperty("--x", `500%`);
     target.style.setProperty("--y", `500%`);
+  };
+
+  // Handle Home button click
+  const handleHomeClick = (e) => {
+    const container = containerRef.current;
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      animateGradientFromPoint(x, y, 'Home');
+    }
+    
+    // Close any active dropdowns
+    setActiveGroupDropbox("");
+    setActiveMarker("");
+    setActiveGroupeMarker("");
+    
+    // Navigate using window.location
+    window.location.href = "/";
   };
 
   // Hover effect for the dropdown panel (locations list)
@@ -188,8 +206,6 @@ const Dropbox = ({
     }
   }, [activeGroupDropbox, activeMarker, setActiveGroupeMarker]);
 
-  // linear-gradient(135deg, rgba(192,160,98,0.7), rgba(168,136,76,0.7))
-
   return (
     <>
       {/* Desktop Menu */}
@@ -197,38 +213,58 @@ const Dropbox = ({
         ref={containerRef}
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
-        className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-2 z-[99999] absolute bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
-       rounded-4xl flex justify-center items-center gap-16 
-       max-sm:gap-1 max-sm:bottom-1 max-sm:border-2 max-sm:p-0.5 
-       max-md:gap-0 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between
-       max-lg:gap-0 max-lg:bottom-2 max-lg:border-2 max-lg:p-1 max-lg:justify-between 
-       max-xl:p-2 max-xl:gap-0 max-xl:justify-between"
+        className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-1 z-[99999] absolute bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
+       rounded-4xl flex justify-center items-center gap-8
+       max-sm:gap-0.5 max-sm:bottom-1 max-sm:border-1 max-sm:p-0.5 max-sm:rounded-2xl
+       max-md:gap-1 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between max-md:rounded-3xl
+       max-lg:gap-2 max-lg:bottom-2 max-lg:border-2 max-lg:p-0.5 max-lg:justify-between max-lg:rounded-3xl
+       max-xl:p-1 max-xl:gap-4 max-xl:justify-between
+       max-2xl:p-2 max-2xl:gap-6"
         style={{
           "--x": "500%",
           "--y": "500%",
           "--r": "160px",
           backgroundImage:
             "radial-gradient(var(--r) var(--r) at var(--x) var(--y), rgba(255, 208, 117, 0.8), rgba(255,255,255,0) 40%)",
-
-          // backgroundColor: "rgba(103,84,48,0.3)",
         }}
       >
+        {/* Home Button */}
+        <div className="flex items-center" style={{ fontFamily: 'Zap, sans-serif' }}>
+          <button
+            ref={(el) => {
+              if (el) buttonRefs.current['Home'] = el;
+            }}
+            onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
+            onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
+            className="dropbox-btn  uppercase overflow-hidden text-shadow-lg rounded-2xl transition-all duration-300 cursor-pointer relative 
+            px-2 py-1 text-sm
+            max-sm:px-1 max-sm:py-0.5 max-sm:text-[7px] max-sm:rounded-lg
+            max-md:px-1.5 max-md:py-0.5 max-md:text-[8px] max-md:rounded-xl
+            max-lg:px-2 max-lg:py-1 max-lg:text-[10px] max-lg:rounded-xl
+            max-xl:px-2 max-xl:py-1 max-xl:text-xs
+            max-2xl:px-3 max-2xl:py-1 max-2xl:text-sm"
+            onClick={handleHomeClick}
+          >
+            Home
+          </button>
+        </div>
 
+        {/* Existing marker group buttons */}
         {Object.keys(markersGroup).map((name) => (
-          <div className="flex items-center">
+          <div className="flex items-center" key={name} style={{ fontFamily: 'Zap, sans-serif' }}>
             <button
               ref={(el) => {
                 if (el) buttonRefs.current[name] = el;
               }}
               onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
               onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-              className="dropbox-btn font-zap uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
-              max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
-              max-md:px-2 max-md:p-1 max-md:text-[10px] 
-              max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
-              max-xl:px-2 max-xl:p-1 max-xl:text-[12px]
-              max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]
-              "
+              className="dropbox-btn uppercase overflow-hidden text-shadow-lg rounded-2xl transition-all duration-300 cursor-pointer relative 
+              px-2 py-1 text-sm
+              max-sm:px-1 max-sm:py-0.5 max-sm:text-[7px] max-sm:rounded-lg
+              max-md:px-1.5 max-md:py-0.5 max-md:text-[8px] max-md:rounded-xl
+              max-lg:px-2 max-lg:py-1 max-lg:text-[10px] max-lg:rounded-xl
+              max-xl:px-2 max-xl:py-1 max-xl:text-xs
+              max-2xl:px-3 max-2xl:py-1 max-2xl:text-sm"
               onClick={(e) => {
                 const container = containerRef.current;
                 if (container) {
@@ -242,7 +278,7 @@ const Dropbox = ({
               style={
                 activeGroupDropbox === name
                   ? {
-                      backgroundColor: "#404566", ///////
+                      backgroundColor: "#404566",
                     }
                   : {}
               }
@@ -255,13 +291,12 @@ const Dropbox = ({
                   ref={locationsRef}
                   onMouseMove={handleLocationsMouseMove}
                   onMouseLeave={handleLocationsMouseLeave}
-                  className="w-auto bottom-19 left-1/2 transform -translate-x-1/2 p-2 fixed z-[100000] flex gap-2 border-2 rounded-xl justify-evenly items-center bg-clip-padding backdrop-blur-3xl border-solid border-[rgb(187,174,99)] 
-                  max-sm:bottom-7 max-sm:border-1 max-sm:rounded-md max-sm:gap-1 max-sm:p-1 
-                  max-md:bottom-9 max-md:border-1 max-md:rounded-lg max-md:gap-0 max-md:justify-between max-md:p-1 
-                  max-lg:bottom-13 max-lg:rounded-lg max-lg:gap-0 max-lg:justify-between max-lg:p-1
-                  max-xl:bottom-18 max-xl:p-2 max-xl:gap-0 max-xl:justify-between
-                  max-2xl:bottom-17 max-2xl:p-2 max-2xl:gap-0 max-2xl:justify-between
-                  "
+                  className="w-auto bottom-16 left-1/2 transform -translate-x-1/2 p-2 fixed z-[100000] flex gap-2 border-2 rounded-xl justify-evenly items-center bg-clip-padding backdrop-blur-3xl border-solid border-[rgb(187,174,99)] 
+                  max-sm:bottom-6 max-sm:border-1 max-sm:rounded-md max-sm:gap-1 max-sm:p-1 
+                  max-md:bottom-7 max-md:border-1 max-md:rounded-lg max-md:gap-1 max-md:p-1 
+                  max-lg:bottom-9 max-lg:rounded-lg max-lg:gap-1.5 max-lg:p-1.5
+                  max-xl:bottom-12 max-xl:p-2 max-xl:gap-2
+                  max-2xl:bottom-14 max-2xl:p-2 max-2xl:gap-2"
                   style={{
                     "--lx": "50%",
                     "--ly": "50%",
@@ -273,17 +308,19 @@ const Dropbox = ({
                     WebkitBackdropFilter: "blur(12px)",
                   }}
                 >
-                  {markersGroup[name]?.locations.map((path) => (
+                  {markersGroup[name]?.locations?.map((path) => (
                     <button
+                      key={path}
                       onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
                       onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
                       onClick={() => clickHandle(path)}
-                      className="overflow-hidden uppercase text-shadow-lg text-white p-1 px-3 rounded-md transition-all duration-300 cursor-pointer relative text-center 
-                      max-sm:px-1 max-sm:p-0.5 max-sm:rounded-xs max-sm:text-[6px]  
-                      max-md:px-2 max-md:p-1 max-md:rounded-xs max-md:text-[9px]   
-                      max-lg:px-2 max-lg:p-1 max-lg:rounded-sm max-lg:text-[12px]
-                      max-2xl:px-2 max-2xl:p-1 max-2xl:rounded-sm max-2xl:text-[13px]
-                      "
+                      className="overflow-hidden uppercase text-shadow-lg text-white rounded-md transition-all duration-300 cursor-pointer relative text-center 
+                      px-2 py-1 text-xs
+                      max-sm:px-1 max-sm:py-0.5 max-sm:rounded-sm max-sm:text-[6px]  
+                      max-md:px-1.5 max-md:py-0.5 max-md:rounded-sm max-md:text-[7px]   
+                      max-lg:px-2 max-lg:py-1 max-lg:rounded-sm max-lg:text-[9px]
+                      max-xl:px-2 max-xl:py-1 max-xl:text-[10px]
+                      max-2xl:px-3 max-2xl:py-1 max-2xl:text-xs"
                       style={
                         activeMarker === path
                           ? {
@@ -292,7 +329,7 @@ const Dropbox = ({
                           : {}
                       }
                     >
-                      {markers.find((marker) => marker.path === path)?.name}
+                      {markers?.find((marker) => marker.path === path)?.name}
                     </button>
                   ))}
                 </div>,

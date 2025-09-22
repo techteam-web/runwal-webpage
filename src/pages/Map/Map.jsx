@@ -82,7 +82,7 @@ const Map = () => {
   return (
     <>
       {!shouldShowExperience() ? (
-        <div className="w-full h-full fixed inset-0 flex flex-col gap-3 items-center justify-center bg-black text-white text-xl z-50 p-4 text-center">
+        <div className="w-full h-full fixed inset-0 flex flex-col gap-3 items-center justify-center bg-white text-white text-xl z-50 p-4 text-center">
           {!isLandscape && <p>Please rotate your device to landscape mode 📱↔️</p>}
 
           {isMobile && !isFullscreen && (

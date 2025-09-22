@@ -9,11 +9,12 @@ import Home from "./pages/Home/Home";
 import Views from "./pages/Views/Views";
 import { Routes, Route } from "react-router-dom";
 
+
 // Force scroll position to top on load/refresh and disable browser restoration
 if (typeof window !== 'undefined') {
   try {
     if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual'
+      window.history.scrollRestoration = 'auto'
     }
   } catch {
     // ignore

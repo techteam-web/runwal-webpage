@@ -1,22 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import "../App.css";
 
-export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeHighlight, compareMode,selectedFloorsForCompare=[] }) {
+export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeHighlight, compareMode, selectedFloorsForCompare = [] }) {
   const containerRef = useRef(null);
   const buttonRefs = useRef({});
   const unitsRef = useRef(null);
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [showUnits, setShowUnits] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  
+  // Add useNavigate hook
+  const navigate = useNavigate();
 
   const floors = [
+    { id: "home", label: "Home", isHome: true }, // Add Home button
     { id: "1", label: "Exclusive Club" },
     { id: "3", label: "Mansions" },
     { id: "4", label: "Parking Levels" },
     { id: "5", label: "Sky-Club" }
-    
   ];
 
   const unitNumbers = ["Duplex", "Duplex-R"];
@@ -152,7 +156,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
     }
   };
 
-  // NEW: Handle compare button click
+  // Handle compare button click
   const handleCompareClick = (e) => {
     const container = containerRef.current;
     if (container) {
@@ -166,7 +170,31 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
     setSelectedFloor(null);
   };
 
+  // Handle Home button click
+  const handleHomeClick = (e) => {
+    const container = containerRef.current;
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      animateGradientFromPoint(x, y, 'floor-home');
+    }
+    
+    // Navigate to home page
+    navigate("/");
+    
+    // Close any open units panel
+    if (showUnits) closeUnits();
+    setSelectedFloor(null);
+  };
+
   const handleFloorClick = (floorId, e) => {
+    // Handle Home button specially
+    if (floorId === "home") {
+      handleHomeClick(e);
+      return;
+    }
+
     const container = containerRef.current;
     if (container) {
       const rect = container.getBoundingClientRect();
@@ -226,7 +254,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
   }, [showUnits, isAnimating]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: 'Gotham-Office, sans-serif' }}>
+    <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: 'Zap, sans-serif' }}>
       <div
         ref={containerRef}
         onMouseMove={handleContainerMouseMove}
@@ -245,7 +273,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
             "radial-gradient(var(--r) var(--r) at var(--x) var(--y), rgba(255, 208, 117, 0.8), rgba(255,255,255,0) 40%)",
         }}
       >
-        {/* Floor Navigation Buttons */}
+        {/* Floor Navigation Buttons (including Home) */}
         {floors.map((floor) => (
           <div className="flex items-center" key={floor.id}>
             <button
@@ -275,9 +303,6 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
             </button>
           </div>
         ))}
-
-        {/* NEW: Compare Button */}
-        
 
         {/* Units Panel Portal */}
         {(showUnits || isAnimating) && createPortal(
@@ -331,28 +356,6 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
           </div>,
           document.body
         )}
-        {/* <button
-  ref={(el) => {
-    if (el) buttonRefs.current['compare'] = el;
-  }}
-  onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
-  onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-  className={`dropbox-btn font-zap uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
-    max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
-    max-md:px-2 max-md:p-1 max-md:text-[10px] 
-    max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
-    max-xl:px-2 max-xl:p-1 max-xl:text-[12px]
-    max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]`}
-  onClick={(e) => handleCompareClick(e)}
-  style={
-    compareMode
-      ? { backgroundColor: "#404566" }
-      : {}
-  }
->
-  
-  Find Your Apartment {selectedFloorsForCompare.length > 0 && `(${selectedFloorsForCompare.length})`}
-</button> */}
       </div>
     </div>
   );

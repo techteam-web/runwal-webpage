@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Nav = ({
   setActiveGroupeMarker,
@@ -14,6 +15,10 @@ const Nav = ({
   showNav,
   setShowSingleImage,
 }) => {
+  // React Router hooks
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   // Click sound for navbar buttons
   const clickSoundRef = useRef(null);
 
@@ -101,7 +106,6 @@ const Nav = ({
     // GSAP animation
     gsap.to(ripple, {
       scale: 4,
-      // opacity: 0,
       duration: 1.5,
       ease: "power2.out",
     });
@@ -124,7 +128,6 @@ const Nav = ({
         ease: "power1.out",
         onComplete: () => {
           ripple.remove();
-          
         },
       });
     }
@@ -193,7 +196,14 @@ const Nav = ({
     }
   }, [activeGroupDropbox, activeMarker, setActiveGroupeMarker]);
 
-  // linear-gradient(135deg, rgba(192,160,98,0.7), rgba(168,136,76,0.7))
+  // Check if button is active based on current route
+  const isButtonActive = (name) => {
+    if (name === "Home" && location.pathname === "/") return true;
+    if (name === "View" && location.pathname === "/views") return true;
+    if (name === "Floor plans" && location.pathname === "/inventory") return true;
+    if (name === "Map" && location.pathname === "/map") return true;
+    return activeGroupDropbox === name;
+  };
 
   return (
     <>
@@ -218,14 +228,15 @@ const Nav = ({
         }}
       >
         {Object.keys(markersGroup).map((name) => (
-          <div key={name} className="flex items-center">
+          <div key={name} className="flex items-center "  style={{ fontFamily: 'Zap, sans-serif' }}>
             <button
               ref={(el) => {
                 if (el) buttonRefs.current[name] = el;
               }}
+              
               onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
               onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-              className="dropbox-btn font-zap uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
+              className="dropbox-btn  uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
               max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
               max-md:px-2 max-md:p-1 max-md:text-[10px] 
               max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
@@ -245,51 +256,57 @@ const Nav = ({
                   const y = e.clientY - rect.top;
                   animateGradientFromPoint(x, y, name);
                 }
+
+                // Handle routing to your existing pages
                 if (name === "Gallery") {
                   setShowSingleImage(true);
+                  navigate("/"); // Stay on home page but show gallery
                 } else if (name === "Home") {
-                    if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
-                    window.__homeButtonClicked = true; // Set flag for smooth card5 animation
-                    setTimeout(() => {
-                      // Use the autoScrollStopYRef value from BuildingScroll.jsx
-                      const targetY = window.autoScrollStopYRef && window.autoScrollStopYRef.current != null ? window.autoScrollStopYRef.current : 1000;
-                      const smoother = window.ScrollSmoother ? window.ScrollSmoother.get && window.ScrollSmoother.get() : null;
-                      if (smoother && typeof smoother.scrollTo === 'function') {
-                        smoother.scrollTo(targetY, true);
+                  if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                  navigate("/");
+                  window.__homeButtonClicked = true;
+                  setTimeout(() => {
+                    const targetY = window.autoScrollStopYRef && window.autoScrollStopYRef.current != null ? window.autoScrollStopYRef.current : 1000;
+                    const smoother = window.ScrollSmoother ? window.ScrollSmoother.get && window.ScrollSmoother.get() : null;
+                    if (smoother && typeof smoother.scrollTo === 'function') {
+                      smoother.scrollTo(targetY, true);
+                    }
+                    const duration = 1400;
+                    const startY = window.scrollY;
+                    const diff = targetY - startY;
+                    let start;
+                    function easeInOutQuad(t) {
+                      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                    }
+                    function step(timestamp) {
+                      if (!start) start = timestamp;
+                      const elapsed = timestamp - start;
+                      const progress = Math.min(elapsed / duration, 1);
+                      const eased = easeInOutQuad(progress);
+                      window.scrollTo(0, startY + diff * eased);
+                      if (progress < 1) {
+                        window.requestAnimationFrame(step);
                       }
-                      // Always run fallback to guarantee smoothness
-                      const duration = 1400;
-                      const startY = window.scrollY;
-                      const diff = targetY - startY;
-                      let start;
-                      function easeInOutQuad(t) {
-                        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-                      }
-                      function step(timestamp) {
-                        if (!start) start = timestamp;
-                        const elapsed = timestamp - start;
-                        const progress = Math.min(elapsed / duration, 1);
-                        const eased = easeInOutQuad(progress);
-                        window.scrollTo(0, startY + diff * eased);
-                        if (progress < 1) {
-                          window.requestAnimationFrame(step);
-                        }
-                      }
-                      window.requestAnimationFrame(step);
-                    }, 200);
+                    }
+                    window.requestAnimationFrame(step);
+                  }, 200);
+                } else if (name === "View") {
+                  navigate("/views");
+                  if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                } else if (name === "Floor plans") {
+                  navigate("/inventory");
+                  if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
                 } else if (name === "Map") {
-                  // Handle Map button click - you can customize this action
-                  console.log("Map button clicked");
-                  // Example: Open Google Maps or a custom map component
-                  // window.open('https://maps.google.com', '_blank');
+                  navigate("/map");
+                  if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
                 } else {
                   handleDropBox(name);
                 }
               }}
               style={
-                activeGroupDropbox === name
+                isButtonActive(name)
                   ? {
-                      backgroundColor: "#404566", ///////
+                      backgroundColor: "#404566",
                     }
                   : {}
               }
@@ -320,8 +337,9 @@ const Nav = ({
                     WebkitBackdropFilter: "blur(12px)",
                   }}
                 >
-                  {markersGroup[name]?.locations.map((path) => (
+                  {markersGroup[name]?.locations?.map((path) => (
                     <button
+                      key={path}
                       onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
                       onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
                       onClick={() => clickHandle(path)}
@@ -339,7 +357,7 @@ const Nav = ({
                           : {}
                       }
                     >
-                      {markers.find((marker) => marker.path === path)?.name}
+                      {markers?.find((marker) => marker.path === path)?.name}
                     </button>
                   ))}
                 </div>,

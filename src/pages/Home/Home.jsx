@@ -19,7 +19,7 @@ function Home() {
   // Only top-level items, no sub-options
   const markersGroup = {
     Home: null,
-    Features: null,
+   
     "Floor plans": null,
     View: null,
     Gallery: null,

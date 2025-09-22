@@ -2,11 +2,11 @@
 <html lang="en">
   <head>
     <script>
-      // Ensure we always start at the very top, even before React mounts
+      // Combined scroll restoration and black screen fix
       (function () {
         try {
           if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
+            history.scrollRestoration = 'auto'; // Changed from 'manual' to 'auto'
           }
         } catch (e) {}
 
@@ -20,8 +20,56 @@
         // Run immediately and on bfcache restore
         reset();
         window.addEventListener('pageshow', function (e) {
-          if (e.persisted) reset();
+          if (e.persisted || (window.performance && window.performance.navigation.type === 2)) {
+            // Force reload on back/forward navigation to prevent black screen
+            window.location.reload();
+          }
         });
+
+        // Prevent blank screen issues with popstate (back button)
+        window.addEventListener('popstate', function(event) {
+          setTimeout(function() {
+            if (!document.body.innerHTML.trim() || document.body.style.display === 'none') {
+              window.location.reload();
+            }
+          }, 50);
+        });
+
+        // Ensure body is always visible when DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+          document.body.style.display = 'block';
+          document.body.style.visibility = 'visible';
+          document.body.style.opacity = '1';
+          document.documentElement.style.display = 'block';
+          document.documentElement.style.visibility = 'visible';
+        });
+
+        // Backup visibility fix
+        window.addEventListener('load', function() {
+          document.body.style.display = 'block';
+          document.body.style.visibility = 'visible';
+          document.body.style.opacity = '1';
+        });
+
+        // Force page refresh if content goes missing
+        let checkTimer;
+        const checkContent = function() {
+          const rootElement = document.getElementById('root');
+          if (rootElement && (!rootElement.innerHTML.trim() || rootElement.style.display === 'none')) {
+            window.location.reload();
+          }
+        };
+
+        // Check content periodically when navigating
+        window.addEventListener('popstate', function() {
+          checkTimer = setTimeout(checkContent, 100);
+        });
+
+        // Clear timer on successful navigation
+        window.addEventListener('DOMContentLoaded', function() {
+          clearTimeout(checkTimer);
+        });
+
       })();
     </script>
     <meta charset="UTF-8" />

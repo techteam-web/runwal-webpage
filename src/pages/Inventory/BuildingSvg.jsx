@@ -231,7 +231,7 @@ export default function BuildingOverlay() {
 
   // ✅ UPDATED: Simplified floor coloring (removed compare mode logic)
   const getFloorFillColor = (floor) => {
-    const isAvailable = floor.info.availability?.toLowerCase() === "true";
+    const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true';
 
     // When category filters (wardrobe/terrace/skyclub) are active, keep floors neutral
     if (activeHighlight === 'wardrobe' || activeHighlight === 'terrace' || activeHighlight === 'skyclub') {
