@@ -99,7 +99,7 @@ export default function Loader({ onFinished, videoSrc = "/video.mp4", dataReady 
           border: "1px solid #e0e0e0", // ✅ ADDED: Subtle border
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)", // ✅ ADDED: Subtle shadow
         }}>
-          Loading inventory data...
+          Loading ...
         </div>
       )}
     </div>
