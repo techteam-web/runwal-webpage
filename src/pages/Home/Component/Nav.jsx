@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap"; // Keep this only for existing button effects
 import { useNavigate, useLocation } from "react-router-dom";
+import useClickSound from "./useClickSound";
 
 const Nav = ({
   setActiveGroupeMarker,
@@ -20,7 +21,7 @@ const Nav = ({
   const location = useLocation();
   
   // Click sound for navbar buttons
-  const clickSoundRef = useRef(null);
+  const { playClickSound, playClickSoundSync, ClickAudio } = useClickSound();
   
   // Animation state - simplified for CSS
   const [shouldShow, setShouldShow] = useState(false);
@@ -32,6 +33,7 @@ const Nav = ({
   };
 
   const handleDropBox = (name) => {
+    // Don't play sound here - it's already played in onClick
     if (activeGroupDropbox === name) {
       setActiveGroupDropbox("");
     } else {
@@ -216,18 +218,19 @@ const Nav = ({
     }
   }, [activeGroupDropbox, activeMarker, setActiveGroupeMarker]);
 
-  // Keep existing button active logic
+  // ✅ UPDATED: Keep existing button active logic + add ISO
   const isButtonActive = (name) => {
     if (name === "Home" && location.pathname === "/") return true;
     if (name === "View" && location.pathname === "/views") return true;
     if (name === "Floor plans" && location.pathname === "/inventory") return true;
     if (name === "Map" && location.pathname === "/map") return true;
+    if (name === "ISO" && location.pathname === "/iso") return true; // ✅ ADD THIS
     return activeGroupDropbox === name;
   };
 
   return (
     <>
-      <audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
+      <ClickAudio />
       {/* Desktop Menu with Simple Tailwind Animation */}
       <div
         ref={containerRef}
@@ -235,11 +238,12 @@ const Nav = ({
         onMouseLeave={handleContainerMouseLeave}
         className={`drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-2 z-[99999] fixed bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
        rounded-4xl flex flex-1/5 justify-center items-center gap-3
-       max-sm:gap-1 max-sm:bottom-1 max-sm:border-2 max-sm:p-0.5 
-       max-md:gap-0 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between
+       max-sm:gap-1 max-sm:bottom-5 max-sm:border-2 max-sm:p-0.5 
+       max-md:gap-0 max-md:bottom-3 max-md:border-2 max-md:p-0.5 max-md:justify-between
        max-lg:gap-0 max-lg:bottom-2 max-lg:border-2 max-lg:p-0.5 max-lg:justify-between 
        max-xl:p-2 max-xl:gap-0 max-xl:justify-between
        transition-all duration-700 ease-out
+       max-sm:top-auto max-md:top-auto 
        ${delayedShow 
          ? 'translate-y-0 opacity-100 scale-100' 
          : 'translate-y-24 opacity-0 scale-90'
@@ -261,7 +265,7 @@ const Nav = ({
               
               onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
               onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-              className="dropbox-btn  uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
+              className="dropbox-btn uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
               max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
               max-md:px-2 max-md:p-1 max-md:text-[10px] 
               max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
@@ -269,11 +273,12 @@ const Nav = ({
               max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]
               "
               onClick={(e) => {
-                // Keep all your existing onClick logic
-                if (clickSoundRef.current) {
-                  clickSoundRef.current.currentTime = 0;
-                  clickSoundRef.current.play();
-                }
+                console.log('🖱️ Button clicked:', name); // Debug log
+                
+                // 👈 PLAY SOUND ONCE, FIRST
+                playClickSound();
+               
+                // Animation
                 const container = containerRef.current;
                 if (container) {
                   const rect = container.getBoundingClientRect();
@@ -282,49 +287,73 @@ const Nav = ({
                   animateGradientFromPoint(x, y, name);
                 }
 
-                // Handle routing to your existing pages
+                // Handle routing with delayed navigation (no multiple sound calls)
                 if (name === "Gallery") {
-                  setShowSingleImage(true);
-                  navigate("/");
-                } else if (name === "Home") {
-                  if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
-                  navigate("/");
-                  window.__homeButtonClicked = true;
                   setTimeout(() => {
-                    const targetY = window.autoScrollStopYRef && window.autoScrollStopYRef.current != null ? window.autoScrollStopYRef.current : 1000;
-                    const smoother = window.ScrollSmoother ? window.ScrollSmoother.get && window.ScrollSmoother.get() : null;
-                    if (smoother && typeof smoother.scrollTo === 'function') {
-                      smoother.scrollTo(targetY, true);
-                    }
-                    const duration = 1400;
-                    const startY = window.scrollY;
-                    const diff = targetY - startY;
-                    let start;
-                    function easeInOutQuad(t) {
-                      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-                    }
-                    function step(timestamp) {
-                      if (!start) start = timestamp;
-                      const elapsed = timestamp - start;
-                      const progress = Math.min(elapsed / duration, 1);
-                      const eased = easeInOutQuad(progress);
-                      window.scrollTo(0, startY + diff * eased);
-                      if (progress < 1) {
-                        window.requestAnimationFrame(step);
+                    setShowSingleImage(true);
+                    navigate("/");
+                  }, 400);
+                  
+                } else if (name === "Home") {
+                  setTimeout(() => {
+                    if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                    navigate("/");
+                    window.__homeButtonClicked = true;
+                    
+                    setTimeout(() => {
+                      const targetY = window.autoScrollStopYRef && window.autoScrollStopYRef.current != null ? window.autoScrollStopYRef.current : 1000;
+                      const smoother = window.ScrollSmoother ? window.ScrollSmoother.get && window.ScrollSmoother.get() : null;
+                      if (smoother && typeof smoother.scrollTo === 'function') {
+                        smoother.scrollTo(targetY, true);
                       }
-                    }
-                    window.requestAnimationFrame(step);
-                  }, 200);
+                      const duration = 1400;
+                      const startY = window.scrollY;
+                      const diff = targetY - startY;
+                      let start;
+                      function easeInOutQuad(t) {
+                        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                      }
+                      function step(timestamp) {
+                        if (!start) start = timestamp;
+                        const elapsed = timestamp - start;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const eased = easeInOutQuad(progress);
+                        window.scrollTo(0, startY + diff * eased);
+                        if (progress < 1) {
+                          window.requestAnimationFrame(step);
+                        }
+                      }
+                      window.requestAnimationFrame(step);
+                    }, 400);
+                  }, 400);
+                  
                 } else if (name === "View") {
-                  navigate("/views");
-                  if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                  setTimeout(() => {
+                    navigate("/views");
+                    if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                  }, 400);
+                  
                 } else if (name === "Floor plans") {
-                  navigate("/inventory");
-                  if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                  setTimeout(() => {
+                    navigate("/inventory");
+                    if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                  }, 400);
+                  
                 } else if (name === "Map") {
-                  navigate("/map");
-                  if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                  setTimeout(() => {
+                    navigate("/map");
+                    if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                  }, 400);
+                  
+                } else if (name === "Iso") {
+                  // ✅ ADD THIS: Handle ISO button click
+                  setTimeout(() => {
+                    navigate("/iso");
+                    if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
+                  }, 400);
+                  
                 } else {
+                  // For dropdown buttons - no navigation delay needed
                   handleDropBox(name);
                 }
               }}
@@ -338,6 +367,8 @@ const Nav = ({
             >
               {name}
             </button>
+
+            {/* Dropdown locations */}
             {activeGroupDropbox === name &&
               createPortal(
                 <div
@@ -367,9 +398,12 @@ const Nav = ({
                       key={path}
                       onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
                       onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-                      onClick={() => clickHandle(path)}
+                      onClick={() => {
+                        playClickSoundSync();
+                        clickHandle(path);
+                      }}
                       className="overflow-hidden uppercase text-shadow-lg text-white p-1 px-3 rounded-md transition-all duration-300 cursor-pointer relative text-center 
-                      max-sm:px-1 max-sm:p-0.5 max-sm:rounded-xs max-sm:text-[6px]  
+                      max-sm:px-1 max-sm:p-0.5 max-sm:rounded-xs  
                       max-md:px-2 max-md:p-1 max-md:rounded-xs max-sm:text-[9px]   
                       max-lg:px-2 max-lg:p-1 max-lg:rounded-sm max-lg:text-[12px]
                       max-2xl:px-2 max-2xl:p-1 max-2xl:rounded-sm max-2xl:text-[13px]

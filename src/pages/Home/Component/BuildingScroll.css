@@ -2,6 +2,7 @@
   left: 55% !important;
  
 }
+
 .card2text{
   text-align: center !important; 
 }
@@ -130,7 +131,7 @@
 /* ------------------------------
     Hero Text Cards - Desktop (Right Side Positioning Maintained)
 ------------------------------ */
-.card, .card_2, .card_3, .card_4, .card_5 {
+.card,.card_1, .card_2, .card_3, .card_4, .card_5 {
   color: rgb(255, 255, 255);
   padding: 30px 40px;
   position: absolute;
@@ -199,17 +200,14 @@ left: 50%; }
 }
 
 /* Keep only the LOBBY line in a single line; allow the paragraph to wrap normally */
-.card_1 .card-label {
+/* .card_1 .card-label {
   white-space: nowrap;
   overflow: visible;
   display: inline-block;
   line-height: 1.25;
-}
+} */
 
-/* Ensure the lobby label uses the same sizing as the paragraph above for visual alignment */
-.card_1 .card-label {
-  font-size: 1.9rem;
-}
+
 
 
 .top-right-image {
@@ -312,7 +310,10 @@ left: 50%; }
   overflow: hidden;
 }
 
-.single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image {
+.single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image,.fifth-gallery-image,
+.sixth-gallery-image,
+.seventh-gallery-image,
+.eighth-gallery-image {
   width: 100%;
   max-width: 100vw;
   height: 100vh;
@@ -395,7 +396,7 @@ right: 1%;
 .sixth-image-text-overlay,
 .seventh-image-text-overlay,
 .eighth-image-text-overlay {
-  animation: fadeInUp 1s ease-out forwards;
+  animation: fadeInUp 0.5s ease-out forwards;
 }
 
 @keyframes fadeInUp {
@@ -747,11 +748,11 @@ html::-webkit-scrollbar {
 }
 
 /* Fluid typography for better scaling across viewports */
-.card, .card_2, .card_3, .card_4, .card_5 {
+.card,.card_1, .card_2, .card_3, .card_4, .card_5 {
   font-size: clamp(1.6rem, 4.5vw, 3rem);
 }
 .card-label {
-  font-size: clamp(1.2rem, 3.2vw, 2.5rem);
+  font-size: clamp(0.1rem, 3.2vw, 2.5rem);
 }
 .gold-number {
   font-size: clamp(3.5rem, 10vw, 12rem);
@@ -850,19 +851,19 @@ html::-webkit-scrollbar {
   }
 
   /* Position golden number cards on the right side for mobile */
-  .card, .card_2, .card_3, .card_4, .card_5 {
+  .card,.card_1, .card_2, .card_3, .card_4, .card_5 {
     left: auto;
     right: 15px;
     transform: translateY(0);
     max-width: 70%;
     text-align: right;
   }
-  .card-label { font-size: 1.6rem; text-align: right; }
+  
   .gold-number { font-size: 6rem; text-align: right; }
   .card-paragraph { font-size: 1.15rem; line-height: 1.35; text-align: right; }
 
   /* Reposition cards to avoid overlap on small screens */
-  .card_1 { top: 200%; }
+  .card_1 { top: 190%; }
   .card_2 { top: 150%; }
   .card_3 { top: 120%; }
   .card_4 { top: 10%; }
@@ -882,7 +883,10 @@ html::-webkit-scrollbar {
   .single-image-text-overlay,
   .sec-image-text-overlay,
   .third-image-text-overlay,
-  .fourth-image-text-overlay {
+  .fourth-image-text-overlay,.fifth-image-text-overlay,
+.sixth-image-text-overlay,
+.seventh-image-text-overlay,
+.eighth-image-text-overlay {
     left: 50% !important;
     right: auto !important;
     transform: translate(-50%, -50%) !important;
@@ -917,9 +921,28 @@ html::-webkit-scrollbar {
 @media (max-width: 480px) {
   /* Small mobile enhancements */
   .content{
-    align-items: start;
+    align-items: center  !important;
+    background-position: 15%  !important;
+    text-align: center !important;
+    ;
+
+
+
     
   }
+  .single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image,.fifth-gallery-image,
+.sixth-gallery-image,
+.seventh-gallery-image,
+.eighth-gallery-image {
+  width: 100%;
+  
+  height: 100vh;
+  object-fit: cover;
+  flex-shrink: 0; 
+  opacity: 1;
+  transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
   .explore-btn {
     animation: pulseSmall 1.8s infinite;
     padding: 18px 35px;
@@ -948,6 +971,7 @@ html::-webkit-scrollbar {
 
   .bg-image {
     transition: transform 0.3s ease;
+    align-items: center !important;
   }
 
   .bg-image:active {
@@ -955,16 +979,16 @@ html::-webkit-scrollbar {
   }
 
  
-  .card, .card_2, .card_3, .card_4, .card_5 {
-    left: auto;
-    right: 10px;
+  .card,.card_1, .card_2, .card_3, .card_4, .card_5 {
+    left: 5% !important;
+    
     transform: translateY(0);
-    max-width: 75%;
-    text-align: right;
+    max-width: auto;
+    text-align: center;
   }
-  .card-label { font-size: 1.35rem; text-align: right; }
-  .gold-number { font-size: 4.2rem; text-align: right; }
-  .card-paragraph { font-size: 1.05rem; text-align: right; }
+  .card-label { font-size: 1rem; text-align: center; }
+  .gold-number { font-size: 4.2rem; text-align: center; }
+  .card-paragraph { font-size: 1.05rem; text-align: center; }
 
 
   .scroll-to-gallery-btn { top: 255%; padding: 10px 22px; font-size: 0.9rem; }

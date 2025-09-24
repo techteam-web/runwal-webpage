@@ -614,7 +614,7 @@ useEffect(() => {
     if (!showSingleImage) return;
 
     let canScroll = true;
-    const delay = 1000;
+    const delay = 1800;
 
     const handleWheel = (e) => {
       if (!canScroll) return;
@@ -733,14 +733,14 @@ useEffect(() => {
   // Animation directions
   if (currentIndex === 0 || currentIndex === 4 || currentIndex === 6) {
     // bottom to top
-    gsap.fromTo(currentItem, { yPercent: 100 }, { yPercent: 0, duration: 0.5, ease: "power3.out" });
+    gsap.fromTo(currentItem, { yPercent: 100 }, { yPercent: 0, duration: 1, ease: "power2.out" });
   } else if (currentIndex === 1) {
-    gsap.fromTo(currentItem, { xPercent: -100 }, { xPercent: 0, duration: 0.5, ease: "power3.out" });
+    gsap.fromTo(currentItem, { xPercent: -100 }, { xPercent: 0, duration: 1, ease: "power2.out" });
   } else if (currentIndex === 2 || currentIndex === 5) {
-    gsap.fromTo(currentItem, { xPercent: 100 }, { xPercent: 0, duration: 0.5, ease: "power3.out" });
+    gsap.fromTo(currentItem, { xPercent: 100 }, { xPercent: 0, duration: 1, ease: "power2.out" });
   } else if (currentIndex === 3 || currentIndex === 7) {
     // top to bottom
-    gsap.fromTo(currentItem, { yPercent: -100 }, { yPercent: 0, duration: 0.5, ease: "power3.out" });
+    gsap.fromTo(currentItem, { yPercent: -100 }, { yPercent: 0, duration: 1, ease: "power2.out" });
   }
 galleryItems.forEach((item, idx) => {
   if (!item) return;
@@ -839,39 +839,7 @@ gsap.to(words, {
           <p className="sub-heading" ref={headingRef}>NEXT TO THE GOVERNOR'S ESTATE MALABAR HILL</p>
 
 <audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
-{/* <button
-  className="explore-btn"
-  ref={exploreBtnRef}
-  onClick={handleExploreClick}
-  onMouseEnter={(e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
 
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const deltaX = x - centerX;
-    const deltaY = y - centerY;
-    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-
-    let startX = '-100%';
-    let startY = '0';
-
-    if (angle > -67.5 && angle <= -22.5) { startX = '100%'; startY = '-100%'; }       // top-right
-    else if (angle > -112.5 && angle <= -67.5) { startX = '0'; startY = '-100%'; }   // top
-    else if (angle > -157.5 && angle <= -112.5) { startX = '-100%'; startY = '-100%'; } // top-left
-    else if (angle > 157.5 || angle <= -157.5) { startX = '-100%'; startY = '0'; }   // left
-    else if (angle > 112.5 && angle <= 157.5) { startX = '-100%'; startY = '100%'; } // bottom-left
-    else if (angle > 67.5 && angle <= 112.5) { startX = '0'; startY = '100%'; }      // bottom
-    else if (angle > 22.5 && angle <= 67.5) { startX = '100%'; startY = '100%'; }    // bottom-right
-    else { startX = '100%'; startY = '0'; }                                          // right
-
-    e.currentTarget.style.setProperty('--start-x', startX);
-    e.currentTarget.style.setProperty('--start-y', startY);
-  }}
->
-  <span>EXPLORE MORE</span>
-</button> */}
 
           {/* <button className="explore-btn" ref={exploreBtnRef} onClick={handleExploreClick}>Explore more</button> */}
           <img src="/Asset_4.svg" alt="Logo" className="landing-logo" ref={logoRef} />
@@ -894,12 +862,12 @@ gsap.to(words, {
               </div>
               <div className="card card_2" ref={(el) => (cardsRef.current[1] = el)}>
                 <span className="gold-number mb-[-2rem]">{splitTextLetters("2")}</span>
-                <span className="card-label mb-[-3rem]">{splitTextLetters("PARKING BASEMENT")}</span>
+                <span className="card-label mb-[-3rem] md:mb-[-1rem] max-sm:mb-[0rem]">{splitTextLetters("PARKING BASEMENT")}</span>
                 <span className="gold-number mt-[-1rem]">{splitTextLetters("9")}</span>
                 <span className="card-label card2text">{splitTextLetters("PARKING LEVELS")}</span>
               </div>
-              <div className="card card_1" ref={(el) => (cardsRef.current[0] = el)}>
-                <span className="card-label">
+              <div className="card card_1 max-sm:text-sm" ref={(el) => (cardsRef.current[0] = el)}>
+                <span className="card-label max-sm:text-sm max-sm:left-10">
                   {splitTextLetters("GRAND DOUBLE HEIGHT LOBBY")}
                   
                 </span>

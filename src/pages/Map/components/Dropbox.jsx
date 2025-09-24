@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
+import useClickSound from "../../Home/Component/useClickSound";
 
 const Dropbox = ({
   setActiveGroupeMarker,
@@ -29,6 +30,7 @@ const Dropbox = ({
   const containerRef = useRef(null);
   const buttonRefs = useRef({});
   const [selectedButton, setSelectedButton] = useState(null);
+  const {playClickSound, ClickAudio} = useClickSound();
 
   const animateGradientFromPoint = (x, y, name) => {
     const container = containerRef.current;
@@ -209,6 +211,7 @@ const Dropbox = ({
   return (
     <>
       {/* Desktop Menu */}
+      <ClickAudio/>
       <div
         ref={containerRef}
         onMouseMove={handleContainerMouseMove}
@@ -242,7 +245,7 @@ max-md:px-2 max-md:p-1 max-md:text-[10px]
 max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
 max-xl:px-2 max-xl:p-1 max-xl:text-[12px]
 max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
-            onClick={handleHomeClick}
+            onClick={(e) => {handleHomeClick(e); playClickSound();}}
           >
             Home
           </button>
@@ -265,6 +268,7 @@ max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
               max-xl:px-2 max-xl:py-1 max-xl:text-xs
               max-2xl:px-3 max-2xl:py-1 max-2xl:text-sm"
               onClick={(e) => {
+                playClickSound();
                 const container = containerRef.current;
                 if (container) {
                   const rect = container.getBoundingClientRect();
@@ -313,7 +317,7 @@ max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
                       key={path}
                       onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
                       onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-                      onClick={() => clickHandle(path)}
+                      onClick={() => {playClickSound(); clickHandle(path)}}
                       className="overflow-hidden uppercase text-shadow-lg text-white rounded-md transition-all duration-300 cursor-pointer relative text-center 
                       px-2 py-1 text-xs
                       max-sm:px-1 max-sm:py-0.5 max-sm:rounded-sm max-sm:text-[6px]  

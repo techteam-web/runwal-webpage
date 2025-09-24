@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Experience from "./components/Experience";
-import Loader from "./components/Loader";
+import MusicBtn from "../Home/Component/MusicBtn";
 
 const Map = () => {
   const [isLandscape, setIsLandscape] = useState(true);
@@ -10,9 +10,7 @@ const Map = () => {
 
   // Detect mobile once on mount
   useEffect(() => {
-    const mobileCheck = /Mobi|Android|iPhone|iPod/i.test(
-      navigator.userAgent
-    );
+    const mobileCheck = /Mobi|Android|iPhone|iPod/i.test(navigator.userAgent);
     setIsMobile(mobileCheck);
   }, []);
 
@@ -30,7 +28,7 @@ const Map = () => {
     document.addEventListener("webkitfullscreenchange", updateStatus);
     document.addEventListener("msfullscreenchange", updateStatus);
 
-    updateStatus(); // run once
+    updateStatus();
 
     return () => {
       document.removeEventListener("fullscreenchange", updateStatus);
@@ -66,29 +64,29 @@ const Map = () => {
     if (el.requestFullscreen) {
       el.requestFullscreen();
     } else if (el.webkitRequestFullscreen) {
-      el.webkitRequestFullscreen(); // Safari
+      el.webkitRequestFullscreen();
     } else if (el.msRequestFullscreen) {
-      el.msRequestFullscreen(); // IE/Edge
+      el.msRequestFullscreen();
     }
   };
 
   // 🚀 Rendering logic
   const shouldShowExperience = () => {
-    if (!isLandscape) return false; // must be landscape
-    if (isMobile && !isFullscreen) return false; // mobile requires fullscreen
-    return true; // desktop or mobile in fullscreen
+    if (!isLandscape) return false;
+    if (isMobile && !isFullscreen) return false;
+    return true;
   };
 
   return (
     <>
       {!shouldShowExperience() ? (
-        <div className="w-full h-full fixed inset-0 flex flex-col gap-3 items-center justify-center bg-white text-white text-xl z-50 p-4 text-center">
+        <div className="w-full h-full fixed inset-0 flex flex-col gap-3 items-center justify-center bg-white text-black text-xl z-50 p-4 text-center">
           {!isLandscape && <p>Please rotate your device to landscape mode 📱↔️</p>}
 
           {isMobile && !isFullscreen && (
             <button
               onClick={goFullscreen}
-              className="mt-4 bg-white text-black px-6 py-3 rounded-lg shadow-md hover:bg-gray-200"
+              className="mt-4 bg-black text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-800"
             >
               Enter Fullscreen mode
             </button>
@@ -99,6 +97,8 @@ const Map = () => {
           <Experience />
         </div>
       )}
+      
+      <MusicBtn audioSrc="/backgroundsound.mp3" />
     </>
   );
 };

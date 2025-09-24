@@ -1,9 +1,10 @@
 
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import BuildingScroll from "./Component/BuildingScroll";
 
 import Nav from "./Component/Nav";
+import Loader from "../Map/components/Loader";
 
 
 function Home() {
@@ -33,7 +34,8 @@ function Home() {
     "Floor plans": null,
     View: null,
     Gallery: null,
-    Map: null
+    Map: null,
+    Iso: null
   };
 
   const clickHandle = (path) => {
@@ -44,6 +46,7 @@ function Home() {
 
   return (
     <div className="App">
+      <Suspense fallback={<Loader/>}>
       <BuildingScroll setShowNav={debugSetShowNav} showSingleImage={showSingleImage} setShowSingleImage={setShowSingleImage} />
       <Nav
         showNav={showNav}
@@ -56,7 +59,7 @@ function Home() {
         clickHandle={clickHandle}
         setShowSingleImage={setShowSingleImage}
       />
-      
+      </Suspense>
     </div>
   );
 }

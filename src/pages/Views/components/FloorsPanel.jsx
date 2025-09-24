@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import "../App.css";
+import useClickSound from "../../Home/Component/useClickSound";
 
 export default function FloorsPanel({ current, onSelect }) {
   const floors = [
@@ -13,6 +14,7 @@ export default function FloorsPanel({ current, onSelect }) {
   const containerRef = useRef(null);
   const buttonRefs = useRef({});
   const [selectedButton, setSelectedButton] = useState(null);
+  const {playClickSound, ClickAudio} = useClickSound();
 
   // Handle Home button click
   const handleHomeClick = (e) => {
@@ -201,6 +203,7 @@ export default function FloorsPanel({ current, onSelect }) {
   return (
     <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-[99999]
     max-sm:bottom-1 max-md:bottom-1 max-lg:bottom-2">
+      <ClickAudio/>
       <div
         ref={containerRef}
         onMouseMove={handleContainerMouseMove}
@@ -228,7 +231,7 @@ export default function FloorsPanel({ current, onSelect }) {
             }}
             onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
             onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-            onClick={handleHomeClick}
+            onClick={(e) => {handleHomeClick(e); playClickSound();}}
             className="dropbox-btn uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
 max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
 max-md:px-2 max-md:p-1 max-md:text-[10px] 
@@ -248,7 +251,7 @@ max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
               }}
               onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
               onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-              onClick={(e) => handleFloorClick(floor.id, e)}
+              onClick={(e) => {playClickSound(); handleFloorClick(floor.id, e)}}
               className="dropbox-btn font-zap uppercase overflow-hidden text-shadow-lg rounded-2xl transition-all duration-300 cursor-pointer relative 
               px-2 py-1 text-lg
               max-sm:px-1 max-sm:py-0.5 max-sm:text-[7px] max-sm:rounded-lg

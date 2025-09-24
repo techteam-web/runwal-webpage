@@ -21,11 +21,16 @@
 @font-face {
     font-family: Zap;
     src: url('/assets/fonts/bodoni-six-itc-bold-italic-os-5871d33e4dc4a.ttf');
+    
 }
 
 @font-face {
     font-family: Zap-Bold;
     src: url('/assets/fonts/zapf-humanist-601-bt-bold.ttf');
+}
+@font-face {
+    font-family: Goth;
+    src: url('/assets/fonts/GOTHMBOK.TTF');
 }
 
 @import 'tailwindcss';

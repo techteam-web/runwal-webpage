@@ -677,6 +677,7 @@ const Scene = ({ ready }) => {
         </Detailed>
       </Center>
       <Environment files="/sunrise.exr" environmentIntensity={0.5} />
+      
     </>
   );
 };

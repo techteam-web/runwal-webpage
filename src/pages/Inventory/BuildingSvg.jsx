@@ -4,10 +4,13 @@ import FloorInfoCard from "./components/FloorInfoCard";
 import FloorPlanModal from "./components/FloorPlanModal";
 import Navbar from "./components/Navbar";
 import FloorSelectionModal from "./components/FloorSelectionModal";
+import MusicBtn from "../Home/Component/MusicBtn";
+import Loader from "../Map/components/Loader";
 
 export default function BuildingOverlay() {
   const [floors, setFloors] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [dataReady, setDataReady] = useState(false); // ✅ API data ready
+  const [showUI, setShowUI] = useState(false);       // ✅ UI should be visible
   const [error, setError] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('Connecting...');
   const [updateStatus, setUpdateStatus] = useState('');
@@ -20,7 +23,7 @@ export default function BuildingOverlay() {
   const [showFloorPlans, setShowFloorPlans] = useState(false);
   const [floorPlanModal, setFloorPlanModal] = useState(null);
 
-  // ✅ NEW: Individual floor to comparison flow states
+  // Individual floor to comparison flow states
   const [showFloorSelectionModal, setShowFloorSelectionModal] = useState(false);
   const [preSelectedFloor, setPreSelectedFloor] = useState(null);
 
@@ -28,7 +31,7 @@ export default function BuildingOverlay() {
   const [compareMode, setCompareMode] = useState(false);
   const [selectedFloorsForCompare, setSelectedFloorsForCompare] = useState([]);
 
-  // Highlight modal (Option A)
+  // Highlight modal
   const [highlightPlanModal, setHighlightPlanModal] = useState(null);
 
   // Filter/active state: 'wardrobe' | 'terrace' | 'skyclub' | 'floorPlan' | 'unit' | null
@@ -72,7 +75,7 @@ export default function BuildingOverlay() {
     }
   };
 
-  // WebSocket & data (unchanged)
+  // WebSocket & data
   useEffect(() => {
     const socket = io('https://inventory-page-x73n.onrender.com', {
       transports: ['websocket', 'polling'],
@@ -99,27 +102,40 @@ export default function BuildingOverlay() {
     return () => { socket.disconnect(); };
   }, []);
 
+  // ✅ FIXED: Separate data loading from UI showing
   const fetchInitialFloors = async () => {
     try {
-      setLoading(true);
       setError(null);
-      const response = await fetch("https://inventory-page-x73n.onrender.com/api/floors");
-      const data = await response.json();
+      
+      const apiCall = fetch("https://inventory-page-x73n.onrender.com/api/floors")
+        .then(response => response.json());
+      
+      const minimumDelay = new Promise(resolve => 
+        setTimeout(resolve, 4000)
+      );
+      
+      const [data] = await Promise.all([apiCall, minimumDelay]);
+      
       if (data.success && Array.isArray(data.data)) {
         setFloors(data.data);
         setLastUpdate(new Date().toLocaleTimeString());
+        console.log("✅ API data loaded, waiting for loader transition");
+        setDataReady(true); // ✅ Mark data as ready, but don't show UI yet
       } else {
         throw new Error(data.error || 'Failed to load floors');
       }
     } catch (err) {
       console.error("Error fetching initial floors:", err);
       setError(err.message);
-    } finally {
-      setLoading(false);
+      setShowUI(true); // ✅ Show error immediately
     }
   };
 
-
+  // ✅ FIXED: Only show UI after loader fade transition completes
+  const handleLoaderFinished = () => {
+    console.log("✅ Loader fade completed, showing UI");
+    setShowUI(true);
+  };
 
   // Smart hover - only on desktop
   const handleFloorMouseEnter = (floor, event) => {
@@ -142,12 +158,10 @@ export default function BuildingOverlay() {
     }
   };
 
-  // ✅ UPDATED: Direct to FloorPlanModal, removed old compare mode logic
   const handleFloorClick = (floor, event) => {
     const isMobile = window.matchMedia('(hover: none)').matches;
     
     if (isMobile) {
-      // Mobile: First tap shows info, second tap opens floor plan
       if (selectedFloor?.id === floor.id) {
         const hasPlan = floor.info["has-floor-plan"];
         if (hasPlan) {
@@ -156,17 +170,16 @@ export default function BuildingOverlay() {
         }
       } else {
         setSelectedFloor(floor);
+        
         setCardPosition({ 
-          x: window.innerWidth / 2 - 160, 
-          y: event.clientY - 100 
+          x: 0,
+          y: 0
         });
         
-       const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true' || floor.info.availability === true;
-
+        const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true' || floor.info.availability === true;
         const activeFill = isAvailable ? "rgba(208, 170, 45, 0.28)" : "rgba(255, 0, 0, 0.28)";
         event.target.style.fill = activeFill;
         
-        // Auto-hide after 3 seconds
         setTimeout(() => {
           if (selectedFloor?.id === floor.id) {
             setSelectedFloor(null);
@@ -177,23 +190,20 @@ export default function BuildingOverlay() {
         if ('vibrate' in navigator) navigator.vibrate(50);
       }
     } else {
-      // Desktop: Direct click opens floor plan
       const hasPlan = floor.info["has-floor-plan"];
       if (hasPlan) setFloorPlanModal(floor);
     }
   };
 
-  // ✅ NEW: Handle opening comparison modal from FloorPlanModal
   const handleOpenComparison = (floor) => {
     setPreSelectedFloor(floor);
     setLockedFloor(floor);
     setShowFloorSelectionModal(true);
     setTimeout(() => {
-    setFloorPlanModal(null);
-  }, 200);
+      setFloorPlanModal(null);
+    }, 200);
   };
 
-  // ✅ UPDATED: Removed compare mode from navbar selection
   const handleNavbarSelect = (type, value) => {
     if (type === "unit") {
       const newSelectedUnit = value === selectedUnit ? null : value;
@@ -231,10 +241,8 @@ export default function BuildingOverlay() {
     }
   };
 
-  // ✅ UPDATED: Simplified floor coloring (removed compare mode logic)
   const getFloorFillColor = (floor) => {
-   const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true' || floor.info.availability === true;
-
+    const isAvailable = String(floor.info.availability || '').toLowerCase() === 'true' || floor.info.availability === true;
 
     // When category filters (wardrobe/terrace/skyclub) are active, keep floors neutral
     if (activeHighlight === 'wardrobe' || activeHighlight === 'terrace' || activeHighlight === 'skyclub') {
@@ -256,7 +264,6 @@ export default function BuildingOverlay() {
     return "rgba(0, 0, 0, 0.22)";
   };
 
-  // Smart category overlays - no hover on mobile
   const renderCategoryOverlays = () => {
     const keys = ['wardrobe', 'terrace', 'skyclub'];
     return keys.map(key => {
@@ -306,180 +313,191 @@ export default function BuildingOverlay() {
     });
   };
 
-  // Loading (unchanged)
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#CFB284] mx-auto mb-4"></div>
-          <p className="text-[#CFB284] text-lg">Loading floor data...</p>
-          <p className="text-gray-500 text-sm mt-2">Establishing real-time connection...</p>
-          <p className="text-xs text-gray-400 mt-1">Status: {connectionStatus}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error (unchanged)
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center max-w-md">
-          <div className="text-red-500 mb-4">
-            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Unable to Load Floor Data</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-[#CFB284] text-white rounded-lg hover:bg-[#b8a073] transition-colors duration-200"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // UI - KEEPING ALL YOUR EXISTING POSITIONS
+  // ✅ FIXED: Use Views pattern - always render UI with overlay loader
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden bg-[#dedbd4]">
-      {/* Logo */}
-      <div className="fixed top-4 right-10 z-40">
-        <img 
-          src="/logo.svg" 
-          alt="Logo" 
-          className="w-16 h-16 sm:w-20 sm:h-20 md:w-30 md:h-30 object-contain"
+    <>
+      {/* ✅ Show loader overlay while needed */}
+      {(!dataReady || !showUI) && (
+        <Loader
+          videoSrc="/video.mp4"
+          onFinished={handleLoaderFinished}
+          dataReady={dataReady}
         />
-      </div>
+      )}
 
-      {/* Main Building Container */}
-      <div className="relative w-full h-full flex items-center justify-center">
-        <svg
-          ref={svgRef}
-          viewBox="0 0 377 210.92149"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full"
-          preserveAspectRatio="xMidYMid slice"
-          style={{
-            minWidth:'100%',
-            minHeight:'100%',
-          }}
-        >
-          {/* Background image */}
-          <image
-            href="/building.svg"
-            x="0"
-            y="0"
-            width="381.7"
-            height="210.92149"
-            preserveAspectRatio="xMidYMid meet"
-          />
-
-          {/* Category overlays */}
-          <g transform="translate(86,0)">
-            {renderCategoryOverlays()}
-          </g>
-
-          {/* Floor paths */}
-          <g transform="translate(85,0)">
-            {floors.map((floor) => (
-              <path
-                key={floor.id}
-                id={floor.id}
-                d={floor.d}
-                fill={getFloorFillColor(floor)}
-                className="cursor-pointer transition-colors duration-200"
-                onMouseEnter={(event) => handleFloorMouseEnter(floor, event)}
-                onMouseLeave={(event) => handleFloorMouseLeave(floor, event)}
-                onClick={(event) => handleFloorClick(floor, event)}
-                vectorEffect="non-scaling-stroke"
+      {/* ✅ BuildingOverlay UI - Always rendered, controlled by opacity */}
+      <div 
+        className="fixed inset-0 w-full h-full overflow-hidden bg-[#dedbd4]"
+        style={{
+          opacity: (dataReady && showUI) ? 1 : 0,
+          transition: 'opacity 0.3s ease-in',
+          pointerEvents: (dataReady && showUI) ? 'auto' : 'none'
+        }}
+      >
+        {/* Error state */}
+        {error ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-center max-w-md">
+              <div className="text-red-500 mb-4">
+                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">Unable to Load Floor Data</h2>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-4 py-2 bg-[#CFB284] text-white rounded-lg hover:bg-[#b8a073] transition-colors duration-200"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Logo */}
+            <div className="fixed top-4 right-10 z-40">
+              <img 
+                src="/logo.svg" 
+                alt="Logo" 
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-30 md:h-30 object-contain"
               />
-            ))}
-          </g>
-        </svg>
-      </div>
+            </div>
 
-      {/* Floor Info Card */}
-      {selectedFloor && (
-        <div
-          className="fixed z-20 pointer-events-none"
-          style={{ left: cardPosition.x, top: cardPosition.y, transform: "translate(10px, -50%)" }}
-        >
-          <div className="pointer-events-auto">
-            <FloorInfoCard
-              info={selectedFloor.info}
-              onClose={() => setSelectedFloor(null)}
+            {/* Main Building Container */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              <svg
+                ref={svgRef}
+                viewBox="0 0 377 210.92149"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full h-full"
+                preserveAspectRatio="xMidYMid slice"
+                style={{
+                  minWidth:'100%',
+                  minHeight:'100%',
+                }}
+              >
+                {/* Background image */}
+                <image
+                  href="/building.svg"
+                  x="0"
+                  y="0"
+                  width="381.7"
+                  height="210.92149"
+                  preserveAspectRatio="xMidYMid meet"
+                />
+
+                {/* Category overlays */}
+                <g transform="translate(86,0)">
+                  {renderCategoryOverlays()}
+                </g>
+
+                {/* Floor paths */}
+                <g transform="translate(85,0)">
+                  {floors.map((floor) => (
+                    <path
+                      key={floor.id}
+                      id={floor.id}
+                      d={floor.d}
+                      fill={getFloorFillColor(floor)}
+                      className="cursor-pointer transition-colors duration-200"
+                      onMouseEnter={(event) => handleFloorMouseEnter(floor, event)}
+                      onMouseLeave={(event) => handleFloorMouseLeave(floor, event)}
+                      onClick={(event) => handleFloorClick(floor, event)}
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  ))}
+                </g>
+              </svg>
+            </div>
+
+            {/* Floor Info Card */}
+            {selectedFloor && (
+              <div className={`
+                ${window.matchMedia('(hover: none)').matches 
+                  ? 'fixed top-4 left-4 right-4 z-20' 
+                  : 'fixed z-20 pointer-events-none'
+                }
+              `}
+              style={window.matchMedia('(hover: none)').matches 
+                ? {} 
+                : { left: cardPosition.x, top: cardPosition.y, transform: "translate(10px, -50%)" }
+              }>
+                <div className="pointer-events-auto">
+                  <FloorInfoCard
+                    info={selectedFloor.info}
+                    onClose={() => setSelectedFloor(null)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Mobile hint */}
+            {selectedFloor && window.matchMedia('(hover: none)').matches && (
+              <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-25">
+                <div className="bg-black/80 text-white px-3 py-1 rounded-lg text-sm backdrop-blur-sm">
+                  Tap again to view floor plan
+                </div>
+              </div>
+            )}
+
+            {/* Navbar */}
+            <div className="fixed bottom-0 left-0 right-0 z-30">
+              <Navbar 
+                onSelect={handleNavbarSelect} 
+                selectedUnit={selectedUnit}
+                showFloorPlans={showFloorPlans}
+                activeHighlight={activeHighlight}
+                compareMode={false}
+              />
+            </div>
+
+            {/* Floor Plan Modal */}
+            {floorPlanModal && (
+              <FloorPlanModal
+                floor={floorPlanModal}
+                onClose={() => setFloorPlanModal(null)}
+                onOpenComparison={handleOpenComparison}
+              />
+            )}
+
+            {/* Highlight Plan Modal */}
+            {highlightPlanModal && (
+              <FloorPlanModal
+                highlight={highlightPlanModal}
+                onClose={() => {
+                  setHighlightPlanModal(null);
+                  setActiveHighlight(null);
+                }}
+              />
+            )}
+
+            {/* Floor Selection Modal */}
+            <FloorSelectionModal
+              show={showFloorSelectionModal}
+              onClose={() => {
+                setShowFloorSelectionModal(false);
+                setPreSelectedFloor(null);
+                setLockedFloor(null);
+              }}
+              floors={floors}
+              selectedFloorsForCompare={selectedFloorsForCompare}
+              preSelectedFloor={preSelectedFloor}
+              lockedFloor={lockedFloor}
+              onFloorSelect={(floor) => {
+                const isSelected = selectedFloorsForCompare.some(f => f.id === floor.id);
+                if (isSelected) {
+                  setSelectedFloorsForCompare(prev => prev.filter(f => f.id !== floor.id));
+                } else {
+                  if (selectedFloorsForCompare.length < 4) {
+                    setSelectedFloorsForCompare(prev => [...prev, floor]);
+                  }
+                }
+              }}
             />
-          </div>
-        </div>
-      )}
-
-      {/* Mobile hint - only shows on mobile when floor is selected */}
-      {selectedFloor && window.matchMedia('(hover: none)').matches && (
-        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-25">
-          <div className="bg-black/80 text-white px-3 py-1 rounded-lg text-sm backdrop-blur-sm">
-            Tap again to view floor plan
-          </div>
-        </div>
-      )}
-
-      {/* Navbar */}
-      <div className="fixed bottom-0 left-0 right-0 z-30">
-        <Navbar 
-          onSelect={handleNavbarSelect} 
-          selectedUnit={selectedUnit}
-          showFloorPlans={showFloorPlans}
-          activeHighlight={activeHighlight}
-          compareMode={false} // ✅ Always false since comparison is accessed from floor modal
-        />
+          </>
+        )}
       </div>
-
-      {/* ✅ Floor Plan Modal with comparison button */}
-      {floorPlanModal && (
-        <FloorPlanModal
-          floor={floorPlanModal}
-          onClose={() => setFloorPlanModal(null)}
-          onOpenComparison={handleOpenComparison} // ✅ NEW: Pass comparison handler
-        />
-      )}
-
-      {/* Highlight Plan Modal */}
-      {highlightPlanModal && (
-        <FloorPlanModal
-          highlight={highlightPlanModal}
-          onClose={() => {
-            setHighlightPlanModal(null);
-            setActiveHighlight(null);
-          }}
-        />
-      )}
-
-      {/* ✅ Floor Selection Modal with pre-selection support */}
-      <FloorSelectionModal
-        show={showFloorSelectionModal}
-        onClose={() => {
-          setShowFloorSelectionModal(false);
-          setPreSelectedFloor(null); // ✅ Clear pre-selection on close
-          setLockedFloor(null); // Clear locked floor on close
-        }}
-        floors={floors}
-        selectedFloorsForCompare={selectedFloorsForCompare}
-        preSelectedFloor={preSelectedFloor} // ✅ NEW: Pass pre-selected floor
-        lockedFloor={lockedFloor}
-        onFloorSelect={(floor) => {
-          const isSelected = selectedFloorsForCompare.some(f => f.id === floor.id);
-          if (isSelected) {
-            setSelectedFloorsForCompare(prev => prev.filter(f => f.id !== floor.id));
-          } else {
-            if (selectedFloorsForCompare.length < 4) {
-              setSelectedFloorsForCompare(prev => [...prev, floor]);
-            }
-          }
-        }}
-      />
-    </div>
+    </>
   );
 }

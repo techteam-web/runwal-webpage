@@ -1,117 +1,107 @@
-// FullscreenLoader.jsx
-import { Html, useProgress } from "@react-three/drei";
-import { useEffect, useState } from "react";
+// components/Loader.jsx - WHITE BACKGROUND VERSION
+import { useRef, useState, useEffect } from "react";
 
-export default function Loader({ onFinished }) {
-  const { active, loaded, total, progress, item } = useProgress();
-  const [visible, setVisible] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState("Initializing...");
+export default function Loader({ onFinished, videoSrc = "/video.mp4", dataReady = false }) {
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    console.log("Loading progress:", active, loaded, total, progress, item);
-    
-    // Update connection status based on progress
-    if (progress < 25) {
-      setConnectionStatus("Loading assets...");
-    } else if (progress < 50) {
-      setConnectionStatus("Establishing connection...");
-    } else if (progress < 75) {
-      setConnectionStatus("Syncing data...");
-    } else if (progress < 100) {
-      setConnectionStatus("Finalizing...");
-    } else {
-      setConnectionStatus("Ready!");
-    }
+    const video = videoRef.current;
+    if (!video) return;
 
-    if (progress === 100) {
-      const timeout = setTimeout(() => {
-        setVisible(false);
-        onFinished?.(); // notify parent when done
-      }, 800);
-      return () => clearTimeout(timeout);
+    const handleVideoLoaded = () => {
+      const desiredDuration = 4;
+      const actualDuration = video.duration;
+      const playbackRate = Math.max(actualDuration / desiredDuration, 1.2);
+      
+      video.playbackRate = playbackRate;
+      console.log(`✅ Video: ${actualDuration}s at ${playbackRate}x speed`);
+      video.play().catch(e => console.warn("Video play failed:", e));
+    };
+
+    const handleVideoEnded = () => {
+      console.log("✅ Video playback completed");
+      setVideoEnded(true);
+    };
+
+    video.addEventListener('loadedmetadata', handleVideoLoaded);
+    video.addEventListener('ended', handleVideoEnded);
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleVideoLoaded);
+      video.removeEventListener('ended', handleVideoEnded);
+    };
+  }, []);
+
+  // ✅ FIXED: Only start fade when BOTH video ended AND data is ready
+  useEffect(() => {
+    if (videoEnded && dataReady && !isTransitioning) {
+      console.log("✅ Both video ended and data ready - starting fade transition");
+      setIsTransitioning(true);
+      
+      // ✅ Call onFinished AFTER fade completes
+      setTimeout(() => {
+        console.log("✅ Fade transition completed - calling onFinished");
+        onFinished?.();
+      }, 300); // Match the CSS transition duration exactly
     }
-  }, [progress, onFinished]);
+  }, [videoEnded, dataReady, isTransitioning, onFinished]);
 
   return (
-    <Html>
-      <div
+    <div 
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        background: "white", // ✅ CHANGED: White background instead of black
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+        opacity: isTransitioning ? 0 : 1,
+        transition: "opacity 0.8s ease-out"
+      }}
+    >
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        muted
+        playsInline
+        preload="auto"
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          background: "linear-gradient(to bottom, #0f172a, #1e293b)", // slate gradient
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          opacity: visible ? 1 : 0,
-          transition: "opacity 0.6s ease",
-          pointerEvents: visible ? "all" : "none",
+          width: "100vw",
+          height: "100vh",
+          objectFit: "cover",
+          // ✅ OPTIONAL: Add border radius or adjust video for white background
+          borderRadius: "0px", // You can add border radius if needed
         }}
-      >
-        <div style={{ textAlign: "center" }}>
-          {/* Spinning loader */}
-          <div
-            style={{
-              width: "48px",
-              height: "48px",
-              border: "2px solid transparent",
-              borderBottom: "2px solid #CFB284",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-              margin: "0 auto 16px auto",
-            }}
-          ></div>
-          
-          {/* Main loading text */}
-          <p
-            style={{
-              color: "#CFB284",
-              fontSize: "18px",
-              margin: "0 0 8px 0",
-              fontFamily: "sans-serif",
-            }}
-          >
-            Loading floor data... {progress.toFixed(0)}%
-          </p>
-          
-          {/* Sub message */}
-          <p
-            style={{
-              color: "#6b7280",
-              fontSize: "14px",
-              margin: "0 0 4px 0",
-              fontFamily: "sans-serif",
-            }}
-          >
-            Establishing real-time connection...
-          </p>
-          
-          {/* Status */}
-          <p
-            style={{
-              color: "#9ca3af",
-              fontSize: "12px",
-              margin: "0",
-              fontFamily: "sans-serif",
-            }}
-          >
-            Status: {connectionStatus}
-          </p>
+        onError={(e) => {
+          console.error("❌ Video error:", e.target.error);
+          setVideoEnded(true); // Treat error as video ended
+        }}
+      />
+      
+      {/* ✅ Loading indicator with white background styling */}
+      {videoEnded && !dataReady && (
+        <div style={{
+          position: "absolute",
+          bottom: "30px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          color: "black", // ✅ CHANGED: Black text on white background
+          fontSize: "16px",
+          background: "rgba(255,255,255,0.9)", // ✅ CHANGED: White background
+          padding: "15px 25px",
+          borderRadius: "25px",
+          border: "1px solid #e0e0e0", // ✅ ADDED: Subtle border
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)", // ✅ ADDED: Subtle shadow
+        }}>
+          Loading inventory data...
         </div>
-
-        {/* CSS Animation */}
-        <style>
-          {`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}
-        </style>
-      </div>
-    </Html>
+      )}
+    </div>
   );
 }

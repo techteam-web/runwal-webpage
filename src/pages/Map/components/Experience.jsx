@@ -2,8 +2,9 @@ import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import Scene from "./Scene";
 import React, { Suspense, useState } from "react";
-import { Html, useProgress } from "@react-three/drei";
-import Loader from "./Loader";
+import {Loader } from "@react-three/drei";
+
+import MusicBtn from "../../Home/Component/MusicBtn";
 
 
 const Experience = () => {
@@ -29,12 +30,15 @@ const Experience = () => {
           scene.fog = new THREE.Fog("#89CFF1", 300, 600); // exponential fog
         }}
       >
-          <Suspense fallback={<Loader/>}>
+         <Suspense fallback={null }>
             <Scene ready={ready} />
-          </Suspense>
-          
+
+        </Suspense>
+
           
       </Canvas>
+      <Loader />
+      
       
     </>
   );

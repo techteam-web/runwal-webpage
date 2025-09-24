@@ -1,0 +1,50 @@
+@font-face {
+    font-family: Giaza;
+    src: url("/fonts/GIAZA.OTF");
+}
+
+@font-face {
+    font-family: Cera Bold;
+    src: url("/fonts/CERA\ PRO\ BOLD.OTF");
+}
+
+@font-face {
+    font-family: Signature;
+    src: url('/fonts/BRITTANYSIGNATURE.TTF')
+}
+
+@font-face {
+    font-family: Celine;
+    src: url('/fonts/Celine Peach Sans.TTF')
+}
+
+@font-face {
+    font-family: Zap;
+    src: url('/fonts/bodoni-six-itc-bold-italic-os-5871d33e4dc4a.ttf');
+}
+
+@font-face {
+    font-family: Zap-Bold;
+    src: url('/fonts/zapf-humanist-601-bt-bold.ttf');
+}
+
+@import 'tailwindcss';
+
+@theme{
+    --font-giaza: Giaza, "sans-serif";
+    --font-cera: Cera Bold, "sans-serif";
+    --font-sign: Signature, 'sans-serif';
+    --font-celine: Celine, 'sans-serif';
+    --font-zap: Zap, 'sans-serif';
+    --font-zap-bold: Zap-Bold, 'sans-serif';
+}
+
+.drop-container::before{
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    background-color: rgba(103,84,48,0.3);
+    background: linear-gradient(135deg, rgba(192,160,98,0.7), rgba(168,136,76,0.7));
+    z-index: -777;
+}

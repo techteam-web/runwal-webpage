@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+import useClickSound from "../../Home/Component/useClickSound";
 
 export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeHighlight, compareMode, selectedFloorsForCompare = [] }) {
   const containerRef = useRef(null);
@@ -11,6 +12,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [showUnits, setShowUnits] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const {playClickSound, ClickAudio} = useClickSound();
   
   // Add useNavigate hook
   const navigate = useNavigate();
@@ -256,13 +258,14 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
 
   return (
     <div className="w-full h-full flex items-center justify-center" style={{ fontFamily: 'Zap, sans-serif' }}>
+      <ClickAudio/>
       <div
         ref={containerRef}
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={handleContainerMouseLeave}
         className="drop-container overflow-hidden w-fit h-fit text-nowrap text-white bottom-2 left-1/2 transform -translate-x-1/2 p-2 z-[99999] absolute bg-clip-padding backdrop-blur-sm border-4 border-[#385270]
          rounded-4xl flex justify-center items-center gap-3
-         max-sm:gap-0.5 max-sm:bottom-1 max-sm:border-1 max-sm:p-0.5 max-sm:rounded-2xl
+         max-sm:gap-0.5 max-sm:bottom-3 max-sm:border-1 max-sm:p-0.5 max-sm:rounded-2xl
          max-md:gap-1 max-md:bottom-1 max-md:border-2 max-md:p-0.5 max-md:justify-between max-md:rounded-3xl
          max-lg:gap-2 max-lg:bottom-2 max-lg:border-2 max-lg:p-0.5 max-lg:justify-between max-lg:rounded-3xl
          max-xl:p-1 max-xl:gap-4 max-xl:justify-between
@@ -290,7 +293,7 @@ max-md:px-2 max-md:p-1 max-md:text-[10px]
 max-lg:px-2 max-lg:p-1 max-lg:text-[12px]
 max-xl:px-2 max-xl:p-1 max-xl:text-[12px]
 max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
-              onClick={(e) => handleFloorClick(floor.id, e)}
+              onClick={(e) => {playClickSound(); handleFloorClick(floor.id, e)}}
               style={
                 ((floor.id === "2" && showFloorPlans) || 
                  (floor.id === "3" && showUnits) || 
@@ -313,7 +316,7 @@ max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
             onMouseMove={handleUnitsMouseMove}
             onMouseLeave={handleUnitsMouseLeave}
             className="w-auto bottom-16 left-1/2 transform -translate-x-1/2 p-2 fixed z-[100000] flex gap-2 border-2 rounded-xl justify-evenly items-center bg-clip-padding backdrop-blur-3xl border-solid border-[rgb(187,174,99)] 
-            max-sm:bottom-6 max-sm:border-1 max-sm:rounded-md max-sm:gap-1 max-sm:p-1 
+            max-sm:bottom-10 max-sm:border-1 max-sm:rounded-md max-sm:gap-1 max-sm:p-1 
             max-md:bottom-7 max-md:border-1 max-md:rounded-lg max-md:gap-1 max-md:p-1 
             max-lg:bottom-9 max-lg:rounded-lg max-lg:gap-1.5 max-lg:p-1.5
             max-xl:bottom-12 max-xl:p-2 max-xl:gap-2
@@ -338,10 +341,10 @@ max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]"
                 }}
                 onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
                 onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
-                onClick={(e) => handleUnitClick(unit, e)}
+                onClick={(e) => {playClickSound(); handleUnitClick(unit, e)}}
                 className="overflow-hidden uppercase text-shadow-lg text-white rounded-md transition-all duration-300 cursor-pointer relative text-center 
                 px-2 py-1 text-xs
-                max-sm:px-1 max-sm:py-0.5 max-sm:rounded-sm max-sm:text-[6px]  
+                max-sm:px-1 max-sm:py-0.5 max-sm:rounded-sm max-sm:text-[6px]
                 max-md:px-1.5 max-md:py-0.5 max-md:rounded-sm max-md:text-[7px]   
                 max-lg:px-2 max-lg:py-1 max-lg:rounded-sm max-lg:text-[9px]
                 max-xl:px-2 max-xl:py-1 max-xl:text-[10px]
