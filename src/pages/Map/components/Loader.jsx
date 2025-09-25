@@ -1,4 +1,4 @@
-// components/Loader.jsx - WHITE BACKGROUND VERSION
+// components/Loader.jsx - RESPONSIVE TAILWIND VERSION
 import { useRef, useState, useEffect } from "react";
 
 export default function Loader({ onFinished, videoSrc = "/video.mp4", dataReady = false }) {
@@ -50,56 +50,52 @@ export default function Loader({ onFinished, videoSrc = "/video.mp4", dataReady 
 
   return (
     <div 
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        background: "white", // ✅ CHANGED: White background instead of black
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        opacity: isTransitioning ? 0 : 1,
-        transition: "opacity 0.8s ease-out"
-      }}
+      className={`
+        fixed inset-0 w-full h-full bg-white 
+        flex items-center justify-center 
+        z-[9999] transition-opacity duration-700 ease-out
+        ${isTransitioning ? 'opacity-0' : 'opacity-100'}
+      `}
     >
+      {/* ✅ RESPONSIVE VIDEO - Fits all screen sizes properly */}
       <video
         ref={videoRef}
         src={videoSrc}
         muted
         playsInline
         preload="auto"
-        style={{
-          width: "100vw",
-          height: "100vh",
-          objectFit: "cover",
-          // ✅ OPTIONAL: Add border radius or adjust video for white background
-          borderRadius: "0px", // You can add border radius if needed
-        }}
+        className={`
+          w-screen h-screen object-cover
+          max-sm:w-full max-sm:h-full max-sm:object-cover
+          max-md:w-full max-md:h-full max-md:object-cover
+          max-lg:w-full max-lg:h-full max-lg:object-cover
+        `}
         onError={(e) => {
           console.error("❌ Video error:", e.target.error);
           setVideoEnded(true); // Treat error as video ended
         }}
       />
       
-      {/* ✅ Loading indicator with white background styling */}
+      {/* ✅ RESPONSIVE LOADING INDICATOR */}
       {videoEnded && !dataReady && (
-        <div style={{
-          position: "absolute",
-          bottom: "30px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          color: "black", // ✅ CHANGED: Black text on white background
-          fontSize: "16px",
-          background: "rgba(255,255,255,0.9)", // ✅ CHANGED: White background
-          padding: "15px 25px",
-          borderRadius: "25px",
-          border: "1px solid #e0e0e0", // ✅ ADDED: Subtle border
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)", // ✅ ADDED: Subtle shadow
-        }}>
-          Loading ...
+        <div 
+          className={`
+            absolute 
+            bottom-4 left-1/2 transform -translate-x-1/2
+            max-sm:bottom-3 max-sm:px-4 max-sm:py-2 max-sm:text-sm
+            max-md:bottom-4 max-md:px-5 max-md:py-3 max-md:text-base
+            max-lg:bottom-5 max-lg:px-6 max-lg:py-3 max-lg:text-base
+            xl:bottom-6 xl:px-7 xl:py-4 xl:text-lg
+            text-black bg-white/90 
+            px-6 py-4 rounded-full 
+            border border-gray-200 
+            shadow-lg backdrop-blur-sm
+            text-base font-medium
+            transition-all duration-300
+            max-w-[90vw] text-center
+          `}
+        >
+          Loading...
         </div>
       )}
     </div>

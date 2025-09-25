@@ -56,13 +56,17 @@ const Page = () => {
         <>
             {/* ✅ Full screen container with image as background */}
             <div 
-                className="fixed inset-0 w-full h-full"
+                className="fixed inset-0 w-full h-full
+        bg-cover bg-no-repeat bg-center
+        max-sm:bg-[23%] 
+        
+        
+        max-md:bg-left
+        lg:bg-center "
                 style={{
-                    backgroundImage: "url('/img8_crop.jpg')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat"
-                }}
+                    backgroundImage: "url('/img8_crop.jpg')"
+        }
+                }
             >
                 {/* ✅ Logo at top right */}
                 <div className="fixed top-4 right-4 z-50">
