@@ -36,6 +36,7 @@ const Gallery = ({
   const [galleryIndex, setGalleryIndex] = useState(startIndex);
   const [showText, setShowText] = useState(false);
   const prevGalleryIndexRef = useRef(startIndex);
+  const [isExiting, setIsExiting] = useState(false);
   
   // ✅ Add animation lock to prevent double animations
   const isAnimatingRef = useRef(false);
@@ -45,7 +46,7 @@ const Gallery = ({
   const textRefs = useRef([]);
   const imgRefs = useRef([]);
 
-  // Default gallery data
+  // ✅ UPDATED: Default gallery data WITHOUT img8_crop.jpg
   const defaultGalleryData = [
     {
       src: "/Gallery/carsection.jpg",
@@ -103,21 +104,12 @@ const Gallery = ({
       animationDirection: "right-to-left",
       hasMarginTop: true
     },
-    {
-      src: "/Gallery/img8_crop.jpg",
-      alt: "New Gallery Image",
-      className: "seventh-gallery-image",
-      textOverlayClass: "seventh-image-text-overlay from-bottom",
-      heading: "A Private Sky Mansion, Designed to Tower Over the City.",
-      description: "Craft your legacy in Mumbai's most prestigious enclave.",
-      animationDirection: "bottom-to-top",
-      useSimpleText: true
-    },
+    // ✅ REMOVED: img8_crop.jpg image entry
     {
       src: "/Gallery/img8_crop_sky.jpg",
       alt: "Contact Image",
-      className: "eighth-gallery-image",
-      textOverlayClass: "eighth-image-text-overlay from-top",
+      className: "eighth-gallery-image", // ✅ UPDATED: Changed from seventh to eighth since we removed one
+      textOverlayClass: "eighth-image-text-overlay from-top", // ✅ UPDATED: Class name updated
       heading: "Contact Us",
       description: "If you have any questions or want to know more, feel free to reach out:",
       extraContent: [
@@ -140,12 +132,27 @@ const Gallery = ({
   }, [galleryData.length]);
 
   // Reset gallery when opened
-  useEffect(() => {
-    if (isVisible && galleryIndex !== startIndex) {
+ useEffect(() => {
+  if (isVisible) {
+    console.log('🎬 Gallery opening - resetting all states');
+    
+    // Reset all states for fresh start
+    setIsExiting(false);           // ✅ Reset exit animation state
+    setShowText(false);            // Reset text animation state
+    isAnimatingRef.current = false; // Reset animation lock
+    
+    // Reset to starting index if different
+    if (galleryIndex !== startIndex) {
       setGalleryIndex(startIndex);
       prevGalleryIndexRef.current = startIndex;
     }
-  }, [isVisible, startIndex]);
+  } else {
+    // ✅ Clean up when gallery closes
+    setIsExiting(false);
+    setShowText(false);
+    console.log('🚪 Gallery closed - cleaned up states');
+  }
+}, [isVisible, startIndex]);
 
   // Gallery scroll logic
   useEffect(() => {
@@ -155,19 +162,27 @@ const Gallery = ({
     const delay = 1800;
 
     const handleWheel = (e) => {
-      if (!canScroll || isAnimatingRef.current) return; // ✅ Check animation lock
-      
-      if (e.deltaY > 0) {
-        setGalleryIndex((prev) => Math.min(prev + 1, galleryData.length - 1));
-      } else if (e.deltaY < 0) {
-        setGalleryIndex((prev) => Math.max(prev - 1, 0));
+  if (!canScroll || isAnimatingRef.current || isExiting) return;
+  
+  if (e.deltaY > 0) {
+    setGalleryIndex((prev) => Math.min(prev + 1, galleryData.length - 1));
+  } else if (e.deltaY < 0) {
+    setGalleryIndex((prev) => {
+      if (prev === 0) {
+        console.log('🚪 Scrolling up from first image - exiting gallery');
+        // ✅ SMOOTH EXIT: Animate out before closing
+        setIsExiting(true);
+        setTimeout(() => {
+          onClose();
+        }, 500); // Match your exit animation duration
+        return prev;
       }
-      canScroll = false;
-      setTimeout(() => {
-        canScroll = true;
-      }, delay);
-    };
-
+      return Math.max(prev - 1, 0);
+    });
+  }
+  canScroll = false;
+  setTimeout(() => canScroll = true, delay);
+};
     const handleKeyDown = (e) => {
       if (!canScroll || isAnimatingRef.current) return; // ✅ Check animation lock
       
@@ -380,7 +395,14 @@ const Gallery = ({
   if (!isVisible) return null;
 
   return (
-    <div className="single-image-gallery-container">
+      <div 
+    className={`single-image-gallery-container ${isExiting ? 'exiting' : ''}`}
+    style={{
+      transition: isExiting ? 'opacity 0.5s ease-out, transform 0.5s ease-out' : 'none',
+      opacity: isExiting ? 0 : 1,
+      transform: isExiting ? 'translateY(-20px)' : 'translateY(0)'
+    }}
+  >
       {/* Gallery Progress Indicator */}
       <div className="gallery-progress">
         {galleryData.map((_, i) => (
