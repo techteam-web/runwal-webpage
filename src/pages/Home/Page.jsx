@@ -2,10 +2,10 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Nav from "./Component/Nav";
 import "./Component/BuildingScroll.css"; // ✅ Import the CSS file
 import Gallery from "./Component/Gallery";
-import { useHomeReloadRedirect } from "../Views/hooks/useHomeRedirect";
+
 
 const Page = () => {
-    // useHomeReloadRedirect()
+    
     const [activeGroupeMarker, setActiveGroupeMarker] = useState("");
     const [activeGroupDropbox, setActiveGroupDropbox] = useState("");
     const [activeMarker, setActiveMarker] = useState("");
