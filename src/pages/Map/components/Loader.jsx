@@ -51,10 +51,10 @@ export default function Loader({ onFinished, videoSrc = "/video.mp4", dataReady 
   return (
     <div 
       className={`
-        fixed inset-0 w-full h-full bg-white 
+        fixed  inset-0 w-full h-full bg-white 
         flex items-center justify-center 
         z-[9999] transition-opacity duration-700 ease-out
-        ${isTransitioning ? 'opacity-0' : 'opacity-100'}
+        ${isTransitioning ? 'opacity-0' : 'opacity-100' }
       `}
     >
       {/* ✅ RESPONSIVE VIDEO - Fits all screen sizes properly */}
@@ -66,7 +66,7 @@ export default function Loader({ onFinished, videoSrc = "/video.mp4", dataReady 
         preload="auto"
         className={`
           w-screen h-screen object-cover
-          max-sm:w-full max-sm:h-full max-sm:object-cover
+          max-sm:hidden max-sm:h-full max-sm:object-cover
           max-md:w-full max-md:h-full max-md:object-cover
           max-lg:w-full max-lg:h-full max-lg:object-cover
         `}
@@ -75,6 +75,24 @@ export default function Loader({ onFinished, videoSrc = "/video.mp4", dataReady 
           setVideoEnded(true); // Treat error as video ended
         }}
       />
+      <div className="absolute inset-0 max-lg:hidden max-md:hidden max-sm:flex w-full h-full bg-[#f6f6f6] flex items-center justify-center">
+        <video
+        ref={videoRef}
+        src={videoSrc}
+        muted
+        playsInline
+        preload="auto"
+        className={`
+          w-fit h-fit object-cover
+       
+        `}
+        onError={(e) => {
+          console.error("❌ Video error:", e.target.error);
+          setVideoEnded(true); // Treat error as video ended
+        }}
+      />
+
+      </div>
       
       {/* ✅ RESPONSIVE LOADING INDICATOR */}
       {videoEnded && !dataReady && (
