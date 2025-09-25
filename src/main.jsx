@@ -67,7 +67,7 @@ createRoot(document.getElementById('root')).render(
   <AudioProvider>
     <Routes>
       <Route path="/" element={<Home />} />
-      {/* <Route path="/home" element={<Page />} /> */}
+      <Route path="/home" element={<Page />} />
       <Route path="/map" element={<Map />} />
       <Route path="/inventory" element={<Inventory />} />
       <Route path="/views" element={<Views />} />

@@ -27,7 +27,7 @@ export default function FloorsPanel({ current, onSelect }) {
     }
     
     // Navigate using window.location
-    window.location.href = "/";
+    window.location.href = "/home";
   };
 
   // Animation function

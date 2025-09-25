@@ -38,7 +38,7 @@ const Navbar = ({ currentIndex, setCurrentIndex, navList }) => {
     }
     
     // Navigate using window.location
-    window.location.href = "/";
+    window.location.href = "/home";
   };
 
   // Animation function from Dropbox component

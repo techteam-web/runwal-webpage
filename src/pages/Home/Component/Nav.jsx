@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { gsap } from "gsap"; // Keep this only for existing button effects
+import { gsap } from "gsap";
 import { useNavigate, useLocation } from "react-router-dom";
 import useClickSound from "./useClickSound";
+import Gallery from "./Gallery"; // ✅ Import Gallery component
 
 const Nav = ({
   setActiveGroupeMarker,
@@ -27,13 +28,15 @@ const Nav = ({
   const [shouldShow, setShouldShow] = useState(false);
   const [delayedShow, setDelayedShow] = useState(false);
 
+  // ✅ ADD: Gallery state for Nav component
+  const [showGallery, setShowGallery] = useState(false);
+
   const handleMarkerGroupClick = (name) => {
     setActiveMarker("");
     setActiveGroupeMarker(name);
   };
 
   const handleDropBox = (name) => {
-    // Don't play sound here - it's already played in onClick
     if (activeGroupDropbox === name) {
       setActiveGroupDropbox("");
     } else {
@@ -73,22 +76,18 @@ const Nav = ({
   const buttonRefs = useRef({});
   const [selectedButton, setSelectedButton] = useState(null);
 
-  // 👈 SIMPLE: Show with delay, then add animation class
+  // Show with delay, then add animation class
   useEffect(() => {
     if (showNav) {
-      // Show the element first
       setShouldShow(true);
-      
-      // Then trigger the animation after a delay
       setTimeout(() => {
         setDelayedShow(true);
-      }, 500); // 500ms delay
+      }, 500);
     } else {
       setDelayedShow(false);
-      // Hide after animation completes
       setTimeout(() => {
         setShouldShow(false);
-      }, 300); // Quick hide
+      }, 300);
     }
   }, [showNav]);
 
@@ -192,7 +191,7 @@ const Nav = ({
     target.style.setProperty("--y", `500%`);
   };
 
-  // Keep existing location effects (simplified)
+  // Keep existing location effects
   const locationsRef = useRef(null);
   const handleLocationsMouseMove = (event) => {
     const target = event.currentTarget;
@@ -218,19 +217,28 @@ const Nav = ({
     }
   }, [activeGroupDropbox, activeMarker, setActiveGroupeMarker]);
 
-  // ✅ UPDATED: Keep existing button active logic + add ISO
+  // Button active logic with Gallery
   const isButtonActive = (name) => {
-    if (name === "Home" && location.pathname === "/") return true;
+    if (name === "Gallery" && showGallery) return true;
+    if (name === "Home" && location.pathname === "/home") return true;
     if (name === "View" && location.pathname === "/views") return true;
     if (name === "Floor plans" && location.pathname === "/inventory") return true;
     if (name === "Map" && location.pathname === "/map") return true;
-    if (name === "ISO" && location.pathname === "/iso") return true; // ✅ ADD THIS
+    if (name === "Iso" && location.pathname === "/iso") return true;
     return activeGroupDropbox === name;
   };
 
   return (
     <>
       <ClickAudio />
+      
+      {/* ✅ Gallery Component - Rendered globally */}
+      <Gallery
+        isVisible={showGallery}
+        onClose={() => setShowGallery(false)}
+        startIndex={0}
+      />
+
       {/* Desktop Menu with Simple Tailwind Animation */}
       <div
         ref={containerRef}
@@ -273,9 +281,9 @@ const Nav = ({
               max-2xl:px-2 max-2xl:p-1 max-2xl:text-[14px]
               "
               onClick={(e) => {
-                console.log('🖱️ Button clicked:', name); // Debug log
+                console.log('🖱️ Button clicked:', name);
                 
-                // 👈 PLAY SOUND ONCE, FIRST
+                // Play sound once, first
                 playClickSound();
                
                 // Animation
@@ -287,17 +295,25 @@ const Nav = ({
                   animateGradientFromPoint(x, y, name);
                 }
 
-                // Handle routing with delayed navigation (no multiple sound calls)
+                // ✅ CRITICAL: Set flag when navigating FROM /home
+                const currentPath = location.pathname;
+                console.log('🔍 Current path before navigation:', currentPath);
+                
+                if (currentPath === '/' || currentPath === '/home') {
+                  sessionStorage.setItem('cameFromRoot', 'true');
+                  console.log('✅ Flag set - user navigating from /home to', name);
+                }
+
+                // Gallery handling - no navigation, just open gallery
                 if (name === "Gallery") {
                   setTimeout(() => {
-                    setShowSingleImage(true);
-                    navigate("/");
+                    setShowGallery(true);
                   }, 400);
                   
                 } else if (name === "Home") {
                   setTimeout(() => {
                     if (typeof setShowSingleImage === 'function') setShowSingleImage(false);
-                    navigate("/");
+                    navigate("/home");
                     window.__homeButtonClicked = true;
                     
                     setTimeout(() => {
@@ -346,7 +362,6 @@ const Nav = ({
                   }, 400);
                   
                 } else if (name === "Iso") {
-                  // ✅ ADD THIS: Handle ISO button click
                   setTimeout(() => {
                     navigate("/iso");
                     if (typeof setShowSingleImage === 'function') setShowSingleImage(false);

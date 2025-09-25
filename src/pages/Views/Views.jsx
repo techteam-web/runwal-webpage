@@ -13,9 +13,11 @@ import { useFloorAndTimeControls } from "./hooks/useFloorAndTimeControls";
 import Navbar from './components/Navbar';
 import MusicBtn from '../Home/Component/MusicBtn';
 import Loader from '../Map/components/Loader';
+import { useBackButtonOverride } from './hooks/useBackButtonOverride';
 
 function Views() {
   // ✅ NEW: Loader states
+  useBackButtonOverride();
   const [isLoading, setIsLoading] = useState(true);
   const [showLoader, setShowLoader] = useState(true);
   const initialized = useRef(false);
@@ -87,6 +89,7 @@ function Views() {
   return (
     <>
       {/* ✅ Show loader overlay while needed */}
+      
       {(isLoading || showLoader) && (
         <Loader
           videoSrc="/video.mp4"

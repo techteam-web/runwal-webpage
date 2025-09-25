@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Experience from "./components/Experience";
 import MusicBtn from "../Home/Component/MusicBtn";
+import { useBackButtonOverride } from "../Views/hooks/useBackButtonOverride";
 
 const Map = () => {
+  useBackButtonOverride();
   const [isLandscape, setIsLandscape] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);

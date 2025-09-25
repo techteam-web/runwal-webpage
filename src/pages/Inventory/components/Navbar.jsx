@@ -184,7 +184,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, activeH
     }
     
     // Navigate to home page
-    navigate("/");
+    navigate("/home");
     
     // Close any open units panel
     if (showUnits) closeUnits();

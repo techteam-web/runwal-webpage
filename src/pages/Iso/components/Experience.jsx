@@ -16,6 +16,7 @@ import Scene from "./Scene";
 import * as THREE from "three";
 import { GoChevronLeft, GoChevronRight } from "react-icons/go";
 import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
+import { useBackButtonOverride } from "../../Views/hooks/useBackButtonOverride";
 
 gsap.registerPlugin(useGSAP);
 
@@ -33,6 +34,7 @@ const SEPERATION_DISTANCE = (2 * Math.PI) / FLOOR_LENGHT;
 const RADIUS = 40; // circle radius
 
 const Experience = () => {
+  useBackButtonOverride();
   const modelsRef = useRef([]);
   const circleGroupRef = useRef();
   const containerRef = useRef(null);
@@ -406,7 +408,7 @@ const Experience = () => {
           // backgroundColor: "rgba(103,84,48,0.3)",
         }}
       >
-        <a href="/">
+        <a href="/home">
         <button
         
           onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}

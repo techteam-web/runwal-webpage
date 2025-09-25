@@ -148,7 +148,7 @@ const Dropbox = ({
     setActiveGroupeMarker("");
     
     // Navigate using window.location
-    window.location.href = "/";
+    window.location.href = "/home";
   };
 
   // Hover effect for the dropdown panel (locations list)

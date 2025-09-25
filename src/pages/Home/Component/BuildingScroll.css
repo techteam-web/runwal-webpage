@@ -2,6 +2,64 @@
   left: 55% !important;
  
 }
+/* ✅ Gallery Component Fixes */
+.single-image-gallery-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 10000 !important; /* Very high z-index */
+    background: black; /* Solid background */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow: hidden !important;
+}
+
+.gallery-item {
+    position: absolute !important;
+    width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow: hidden !important;
+}
+
+/* Ensure gallery images fill the screen */
+.single-gallery-image,
+.sec-gallery-image,
+.third-gallery-image,
+.fourth-gallery-image,
+.fifth-gallery-image,
+.sixth-gallery-image,
+.seventh-gallery-image,
+.eighth-gallery-image {
+    width: 100vw !important;
+    height: 100vh !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+/* Progress dots positioning */
+.gallery-progress {
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10001 !important;
+}
+
+/* Close button positioning */
+.gallery-close-btn {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 10001 !important;
+}
 
 .card2text{
   text-align: center !important; 
@@ -144,7 +202,7 @@
   text-align: right;
 }
 
-.card_1 { top: 260%; }
+.card_1 { top: 255%; }
 .card_2 { top: 180%; }
 .card_3 { top: 148%; }
 .card_4 { top: 0%; }
@@ -810,9 +868,16 @@ html::-webkit-scrollbar {
     text-align: right;
   }
   
-  .card-label { font-size: 2.1rem; text-align: right; }
-  .gold-number { font-size: 8rem; text-align: right; }
-  .card-paragraph { font-size: 1.6rem; text-align: right; }
+  .card-label { font-size: 1.5rem; text-align: right; }
+  .gold-number { font-size: 6rem; text-align: right; }
+  .card-paragraph { font-size: 1rem; text-align: right; }
+  .card_1 { top: 200%; }
+.card_2 { top: 140%; }
+.card_3 { top: 120%; }
+.card_4 { top: 0%; }
+.card_5 { top: -50%;
+}
+  
 }
 
 @media (max-width: 768px) {
@@ -863,7 +928,7 @@ html::-webkit-scrollbar {
   .card-paragraph { font-size: 1.15rem; line-height: 1.35; text-align: right; }
 
   /* Reposition cards to avoid overlap on small screens */
-  .card_1 { top: 190%; }
+  .card_1 { top: 170%; }
   .card_2 { top: 150%; }
   .card_3 { top: 120%; }
   .card_4 { top: 10%; }
@@ -929,6 +994,9 @@ html::-webkit-scrollbar {
 
 
     
+  }
+  .card_1{
+    top:190%
   }
   .single-gallery-image, .sec-gallery-image, .third-gallery-image, .fourth-gallery-image,.fifth-gallery-image,
 .sixth-gallery-image,
