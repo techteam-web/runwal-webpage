@@ -182,7 +182,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
       </div>
 
       {/* Right-aligned Button */}
-      <div className="flex-1 flex justify-end">
+      {/* <div className="flex-1 flex justify-end">
         {floor && !isHighlight && (
           <button
             onClick={handleOpenComparison}
@@ -193,7 +193,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
             <span className="md:hidden text-xs">Compare</span>
           </button>
         )}
-      </div>
+      </div> */}
     </div>
   </div>
 )}

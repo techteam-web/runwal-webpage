@@ -424,10 +424,17 @@ const APP_DATA = {
   "name": "Project Title",
   "settings": {
     "mouseViewMode": "drag",
-    "autorotateEnabled": false,
+    "autorotateEnabled": true,
     "fullscreenButton": false,
-    "viewControlButtons": false
-  }
+    "viewControlButtons": false,
+    "interactiveCursor": {
+      "enabled": true,
+      "defaultSensitivity": 0.05,
+      "smoothing": 0.1,
+      "constraints": {
+        "pitch": { "min": -Math.PI/3, "max": Math.PI/3 }
+      }
+  }}
 };
 
 export default APP_DATA;

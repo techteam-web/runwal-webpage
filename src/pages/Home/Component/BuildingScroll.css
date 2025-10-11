@@ -145,7 +145,7 @@
   min-height: 500vh;
   width: 100%;
   max-width: 100vw;
-  background-image: url("/Bigimg_2.jpg");
+  background-image: url("/Bigimg_2.webp");
   
   --bg-crop-left: 0%;
   background-size: cover;

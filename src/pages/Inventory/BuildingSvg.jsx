@@ -279,7 +279,7 @@ export default function BuildingOverlay() {
           key={`cat-${key}`}
           d={area.d}
           fill={fill}
-          className="cursor-pointer transition-all duration-200"
+          className="cursor-default transition-all duration-200"
           style={{
             filter:
               activeHighlight === key
@@ -296,18 +296,18 @@ export default function BuildingOverlay() {
             const isMobile = window.matchMedia('(hover: none)').matches;
             if (!isMobile) setHoverHighlight(prev => (prev === key ? null : prev));
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            const isMobile = window.matchMedia('(hover: none)').matches;
-            if (isMobile && 'vibrate' in navigator) navigator.vibrate(50);
+          // onClick={(e) => {
+          //   e.stopPropagation();
+          //   const isMobile = window.matchMedia('(hover: none)').matches;
+          //   if (isMobile && 'vibrate' in navigator) navigator.vibrate(50);
             
-            setActiveHighlight(key);
-            setHighlightPlanModal({
-              id: key,
-              name: area.name,
-              planImages: Array.isArray(area.planImages) ? area.planImages : []
-            });
-          }}
+          //   setActiveHighlight(key);
+          //   setHighlightPlanModal({
+          //     id: key,
+          //     name: area.name,
+          //     planImages: Array.isArray(area.planImages) ? area.planImages : []
+          //   });
+          // }}
         />
       );
     });
