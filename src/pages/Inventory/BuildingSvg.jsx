@@ -1,144 +1,122 @@
-  import { useState, useRef, useEffect } from "react";
-  import io from 'socket.io-client';
+import { useState, useRef, useEffect } from "react";
+import io from 'socket.io-client';
 
-  import FloorPlanModal from "./components/FloorPlanModal";
-  import Navbar from "./components/Navbar";
-  import FloorSelectionModal from "./components/FloorSelectionModal";
+import FloorPlanModal from "./components/FloorPlanModal";
+import Navbar from "./components/Navbar";
+import FloorSelectionModal from "./components/FloorSelectionModal";
 
-  import Loader from "../Map/components/Loader";
+export default function BuildingOverlay() {
+  const [floors, setFloors] = useState([]);
+  const [error, setError] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState('Connecting...');
+  const [updateStatus, setUpdateStatus] = useState('');
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [isDuplexActive, setIsDuplexActive] = useState(false);
 
+  // Floor states
+  const [selectedFloor, setSelectedFloor] = useState(null);
+  const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
+  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [showFloorPlans, setShowFloorPlans] = useState(false);
+  const [floorPlanModal, setFloorPlanModal] = useState(null);
 
-  export default function BuildingOverlay() {
-    const [floors, setFloors] = useState([]);
-    const [dataReady, setDataReady] = useState(false);
-    const [showUI, setShowUI] = useState(false);
-    const [error, setError] = useState(null);
-    const [connectionStatus, setConnectionStatus] = useState('Connecting...');
-    const [updateStatus, setUpdateStatus] = useState('');
-    const [lastUpdate, setLastUpdate] = useState(null);
-    const [isDuplexActive, setIsDuplexActive] = useState(false);
+  // Individual floor to comparison flow states
+  const [showFloorSelectionModal, setShowFloorSelectionModal] = useState(false);
+  const [preSelectedFloor, setPreSelectedFloor] = useState(null);
 
+  // Compare functionality states
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedFloorsForCompare, setSelectedFloorsForCompare] = useState([]);
 
-    // Floor states
-    const [selectedFloor, setSelectedFloor] = useState(null);
-    const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
-    const [selectedUnit, setSelectedUnit] = useState(null);
-    const [showFloorPlans, setShowFloorPlans] = useState(false);
-    const [floorPlanModal, setFloorPlanModal] = useState(null);
+  // Highlight modal
+  const [highlightPlanModal, setHighlightPlanModal] = useState(null);
 
-    // Individual floor to comparison flow states
-    const [showFloorSelectionModal, setShowFloorSelectionModal] = useState(false);
-    const [preSelectedFloor, setPreSelectedFloor] = useState(null);
+  // Filter/active state
+  const [activeHighlight, setActiveHighlight] = useState(null);
 
-    // Compare functionality states
-    const [compareMode, setCompareMode] = useState(false);
-    const [selectedFloorsForCompare, setSelectedFloorsForCompare] = useState([]);
+  // Hover state for category overlays
+  const [hoverHighlight, setHoverHighlight] = useState(null);
+  const [lockedFloor, setLockedFloor] = useState(null);
 
-    // Highlight modal
-    const [highlightPlanModal, setHighlightPlanModal] = useState(null);
+  const svgRef = useRef(null);
+  const socketRef = useRef(null);
 
-    // Filter/active state
-    const [activeHighlight, setActiveHighlight] = useState(null);
+  // Category overlays with their plan images
+  const HIGHLIGHT_AREAS = {
+    wardrobe: {
+      name: "Wardrobe Areas",
+      activeFill: "rgba(139, 92, 246, 0.60)",
+      hoverFill: "rgba(139, 92, 246, 0.50)",
+      d: "m 90.723317,145.66639 12.821743,-1.69155 c 0,0 -1.715,0.13584 0.017,0 1.73197,-0.13584 4.87331,0.0509 4.87331,0.0509 l 1.73197,0.20376 0.71317,0.0849 0.62827,0.1698 0.62826,0.22075 0.44149,0.18678 0.32262,0.1698 0.39054,0.28866 0.22074,0.23773 0.0679,0.1698 0.0679,0.27168 0.017,0.37357 0.017,6.77508 c 0,0 0.47544,-0.0849 -0.66223,-0.40752 -1.13767,-0.32263 -3.15831,-0.57733 -3.15831,-0.57733 l -1.17163,-0.11886 -0.96787,-0.034 -5.04311,0.017 -1.25653,0.0509 -0.98485,0.0679 -11.138989,1.20559 0.0849,-7.02979 z",
+      planImages: ["/floor-plans/C1.webp", "/floor-plans/C2.webp"]
+    },
+    terrace: {
+      name: "Parking / Terrace",
+      activeFill: "rgba(16, 185, 129, 0.60)",
+      hoverFill: "rgba(16, 185, 129, 0.50)",
+      d: "m 89.378556,154.11918 -0.240136,32.22622 24.78202,0.19211 0.048,-32.99466 c 0,0 1.36877,0.69639 -0.1681,-0.048 -1.53687,-0.74442 -3.45796,-1.10462 -3.45796,-1.10462 l -3.26584,-0.21612 -4.03429,0.12006 -13.807805,1.29674 z",
+    },
+    skyclub: {
+      name: "Sky Club",
+      activeFill: "rgba(135, 206, 235, 0.60)",
+      hoverFill: "rgba(135, 206, 235, 0.50)",
+      d: "m 89.426583,37.749353 13.159447,-5.859315 c 0,0 -2.20925,0.480272 0,0 2.20925,-0.480271 3.74612,-0.288163 3.74612,-0.288163 0,0 -1.87306,-0.288163 0.14408,0.09605 2.01714,0.384217 3.07374,1.00857 3.07374,1.00857 0,0 -1.34476,-0.864489 0.14408,0.04803 1.48884,0.912516 3.65006,3.794146 3.65006,3.794146 L 113.152,36.020375 c 0,0 -0.76843,1.440815 0,0 0.76844,-1.440815 0.81647,-5.379043 0.81647,-5.379043 0,0 0.33619,1.200679 0,0 -0.3362,-1.200679 -0.96055,-2.737549 -0.96055,-2.737549 0,0 0.38422,-0.144081 -0.91251,-1.68095 -1.29674,-1.536869 -3.1698,-2.641494 -3.1698,-2.641494 l -1.777,-0.768435 -1.44082,-0.144081 -1.15265,0.09605 -0.91252,-0.04803 -0.48027,0.09605 -1.20068,0.528299 -11.862706,5.523124 c 0,0 0.240135,-0.624353 -0.720408,1.056598 -0.960543,1.680951 -0.09605,1.921086 -0.09605,1.921086 0,0 -1.056598,-0.576326 -0.192113,0.33619 0.864489,0.912516 1.536869,0.576326 1.440815,0.912516 -0.09605,0.336191 -0.720407,0.336191 -0.144077,1.440816 0.576326,1.104625 -0.816463,1.728978 -0.816463,1.728978",
+    }
+  };
 
-    // Hover state for category overlays
-    const [hoverHighlight, setHoverHighlight] = useState(null);
-    const [lockedFloor, setLockedFloor] = useState(null);
+  // WebSocket & data
+  useEffect(() => {
+    const socket = io('https://inventory-page-x73n.onrender.com', {
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
+    });
 
-    const svgRef = useRef(null);
-    const socketRef = useRef(null);
+    socketRef.current = socket;
 
-    // Category overlays with their plan images
-    const HIGHLIGHT_AREAS = {
-      wardrobe: {
-        name: "Wardrobe Areas",
-        activeFill: "rgba(139, 92, 246, 0.60)",
-        hoverFill: "rgba(139, 92, 246, 0.50)",
-        d: "m 90.723317,145.66639 12.821743,-1.69155 c 0,0 -1.715,0.13584 0.017,0 1.73197,-0.13584 4.87331,0.0509 4.87331,0.0509 l 1.73197,0.20376 0.71317,0.0849 0.62827,0.1698 0.62826,0.22075 0.44149,0.18678 0.32262,0.1698 0.39054,0.28866 0.22074,0.23773 0.0679,0.1698 0.0679,0.27168 0.017,0.37357 0.017,6.77508 c 0,0 0.47544,-0.0849 -0.66223,-0.40752 -1.13767,-0.32263 -3.15831,-0.57733 -3.15831,-0.57733 l -1.17163,-0.11886 -0.96787,-0.034 -5.04311,0.017 -1.25653,0.0509 -0.98485,0.0679 -11.138989,1.20559 0.0849,-7.02979 z",
-        planImages: ["/floor-plans/C1.webp", "/floor-plans/C2.webp"]
-      },
-      terrace: {
-        name: "Parking / Terrace",
-        activeFill: "rgba(16, 185, 129, 0.60)",
-        hoverFill: "rgba(16, 185, 129, 0.50)",
-        d: "m 89.378556,154.11918 -0.240136,32.22622 24.78202,0.19211 0.048,-32.99466 c 0,0 1.36877,0.69639 -0.1681,-0.048 -1.53687,-0.74442 -3.45796,-1.10462 -3.45796,-1.10462 l -3.26584,-0.21612 -4.03429,0.12006 -13.807805,1.29674 z",
-      },
-      skyclub: {
-        name: "Sky Club",
-        activeFill: "rgba(135, 206, 235, 0.60)",
-        hoverFill: "rgba(135, 206, 235, 0.50)",
-        d: "m 89.426583,37.749353 13.159447,-5.859315 c 0,0 -2.20925,0.480272 0,0 2.20925,-0.480271 3.74612,-0.288163 3.74612,-0.288163 0,0 -1.87306,-0.288163 0.14408,0.09605 2.01714,0.384217 3.07374,1.00857 3.07374,1.00857 0,0 -1.34476,-0.864489 0.14408,0.04803 1.48884,0.912516 3.65006,3.794146 3.65006,3.794146 L 113.152,36.020375 c 0,0 -0.76843,1.440815 0,0 0.76844,-1.440815 0.81647,-5.379043 0.81647,-5.379043 0,0 0.33619,1.200679 0,0 -0.3362,-1.200679 -0.96055,-2.737549 -0.96055,-2.737549 0,0 0.38422,-0.144081 -0.91251,-1.68095 -1.29674,-1.536869 -3.1698,-2.641494 -3.1698,-2.641494 l -1.777,-0.768435 -1.44082,-0.144081 -1.15265,0.09605 -0.91252,-0.04803 -0.48027,0.09605 -1.20068,0.528299 -11.862706,5.523124 c 0,0 0.240135,-0.624353 -0.720408,1.056598 -0.960543,1.680951 -0.09605,1.921086 -0.09605,1.921086 0,0 -1.056598,-0.576326 -0.192113,0.33619 0.864489,0.912516 1.536869,0.576326 1.440815,0.912516 -0.09605,0.336191 -0.720407,0.336191 -0.144077,1.440816 0.576326,1.104625 -0.816463,1.728978 -0.816463,1.728978",
-      }
-    };
+    socket.on('connect', () => setConnectionStatus('Connected'));
+    socket.on('disconnect', () => setConnectionStatus('Disconnected'));
+    socket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
+      setConnectionStatus('Connection Error');
+    });
 
-    // WebSocket & data
-    useEffect(() => {
-      const socket = io('https://inventory-page-x73n.onrender.com', {
-        transports: ['websocket', 'polling'],
-        withCredentials: true,
-      });
+    socket.on('floorsUpdated', (update) => {
+      setFloors(update.data);
+      setLastUpdate(new Date().toLocaleTimeString());
+      setUpdateStatus(`Updated from ${update.source} (${update.count} floors)`);
+      setTimeout(() => setUpdateStatus(''), 3000);
+    });
 
-      socketRef.current = socket;
+    fetchInitialFloors();
+    return () => { socket.disconnect(); };
+  }, []);
 
-      socket.on('connect', () => setConnectionStatus('Connected'));
-      socket.on('disconnect', () => setConnectionStatus('Disconnected'));
-      socket.on('connect_error', (error) => {
-        console.error('WebSocket connection error:', error);
-        setConnectionStatus('Connection Error');
-      });
-
-      socket.on('floorsUpdated', (update) => {
-        setFloors(update.data);
+  const fetchInitialFloors = async () => {
+    try {
+      setError(null);
+      
+      const response = await fetch("https://inventory-page-x73n.onrender.com/api/floors");
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.data)) {
+        setFloors(data.data);
         setLastUpdate(new Date().toLocaleTimeString());
-        setUpdateStatus(`Updated from ${update.source} (${update.count} floors)`);
-        setTimeout(() => setUpdateStatus(''), 3000);
-      });
-
-      fetchInitialFloors();
-      return () => { socket.disconnect(); };
-    }, []);
-
-    const fetchInitialFloors = async () => {
-      try {
-        setError(null);
-        
-        const apiCall = fetch("https://inventory-page-x73n.onrender.com/api/floors")
-          .then(response => response.json());
-        
-        const minimumDelay = new Promise(resolve => 
-          setTimeout(resolve, 4000)
-        );
-        
-        const [data] = await Promise.all([apiCall, minimumDelay]);
-        
-        if (data.success && Array.isArray(data.data)) {
-          setFloors(data.data);
-          setLastUpdate(new Date().toLocaleTimeString());
-          console.log("✅ API data loaded, waiting for loader transition");
-          setDataReady(true);
-        } else {
-          throw new Error(data.error || 'Failed to load floors');
-        }
-      } catch (err) {
-        console.error("Error fetching initial floors:", err);
-        setError(err.message);
-        setShowUI(true);
+        console.log("✅ API data loaded");
+      } else {
+        throw new Error(data.error || 'Failed to load floors');
       }
-    };
+    } catch (err) {
+      console.error("Error fetching initial floors:", err);
+      setError(err.message);
+    }
+  };
 
-    const handleLoaderFinished = () => {
-      console.log("✅ Loader fade completed, showing UI");
-      setShowUI(true);
-    };
-
-    // ✅ UPDATED: All floors highlight with golden color
-    // ✅ UPDATED: Highlight ALL floors when hovering over ANY floor
   const handleFloorMouseEnter = (floor, event) => {
     const isMobile = window.matchMedia('(hover: none)').matches;
     if (!isMobile && !compareMode) {
       setSelectedFloor(floor);
       setCardPosition({ x: event.clientX + 10, y: event.clientY + 10 });
       
-      // ✅ Highlight ALL floors
       if (svgRef.current) {
         const allFloorPaths = svgRef.current.querySelectorAll('path[id^="floor"]');
         allFloorPaths.forEach(path => {
@@ -153,11 +131,9 @@
     if (!isMobile && !compareMode) {
       setSelectedFloor(null);
       
-      // ✅ Reset ALL floors to their default colors
       if (svgRef.current) {
         const allFloorPaths = svgRef.current.querySelectorAll('path[id^="floor"]');
         allFloorPaths.forEach(path => {
-          // Find the floor data for this path
           const floorId = path.id;
           const floorData = floors.find(f => f.id === floorId);
           if (floorData) {
@@ -168,68 +144,63 @@
     }
   };
 
-    // ✅ UPDATED: All floors use golden color on click
-    const handleFloorClick = (floor, event) => {
-      const isMobile = window.matchMedia('(hover: none)').matches;
-      
-      if (isMobile) {
-        if (selectedFloor?.id === floor.id) {
-          const hasPlan = floor.info["has-floor-plan"];
-          if (hasPlan) {
-            setFloorPlanModal(floor);
-            setSelectedFloor(null);
-          }
-        } else {
-          setSelectedFloor(floor);
-          
-          setCardPosition({ 
-            x: 0,
-            y: 0
-          });
-          
-          const activeFill = "rgba(208, 170, 45, 0.28)";
-          event.target.style.fill = activeFill;
-          
-          setTimeout(() => {
-            if (selectedFloor?.id === floor.id) {
-              setSelectedFloor(null);
-              event.target.style.fill = getFloorFillColor(floor);
-            }
-          }, 3000);
-          
-          if ('vibrate' in navigator) navigator.vibrate(50);
+  const handleFloorClick = (floor, event) => {
+    const isMobile = window.matchMedia('(hover: none)').matches;
+    
+    if (isMobile) {
+      if (selectedFloor?.id === floor.id) {
+        const hasPlan = floor.info["has-floor-plan"];
+        if (hasPlan) {
+          setFloorPlanModal(floor);
+          setSelectedFloor(null);
         }
       } else {
-        const hasPlan = floor.info["has-floor-plan"];
-        if (hasPlan) setFloorPlanModal(floor);
+        setSelectedFloor(floor);
+        
+        setCardPosition({ 
+          x: 0,
+          y: 0
+        });
+        
+        const activeFill = "rgba(208, 170, 45, 0.28)";
+        event.target.style.fill = activeFill;
+        
+        setTimeout(() => {
+          if (selectedFloor?.id === floor.id) {
+            setSelectedFloor(null);
+            event.target.style.fill = getFloorFillColor(floor);
+          }
+        }, 3000);
+        
+        if ('vibrate' in navigator) navigator.vibrate(50);
       }
-    };
+    } else {
+      const hasPlan = floor.info["has-floor-plan"];
+      if (hasPlan) setFloorPlanModal(floor);
+    }
+  };
 
-    const handleOpenComparison = (floor) => {
-      setPreSelectedFloor(floor);
-      setLockedFloor(floor);
-      setShowFloorSelectionModal(true);
-      setTimeout(() => {
-        setFloorPlanModal(null);
-      }, 200);
-    };
+  const handleOpenComparison = (floor) => {
+    setPreSelectedFloor(floor);
+    setLockedFloor(floor);
+    setShowFloorSelectionModal(true);
+    setTimeout(() => {
+      setFloorPlanModal(null);
+    }, 200);
+  };
 
-    const handleNavbarSelect = (type, value) => {
+  const handleNavbarSelect = (type, value) => {
     if (type === "duplex") {
-      // ✅ Toggle Duplex highlighting
       const newDuplexActive = !isDuplexActive;
       setIsDuplexActive(newDuplexActive);
       
-      // ✅ Highlight all floors when Duplex is clicked
       if (svgRef.current) {
         const allFloorPaths = svgRef.current.querySelectorAll('path[id^="floor"]');
         if (newDuplexActive) {
-          // Highlight all floors
           allFloorPaths.forEach(path => {
             path.style.fill = "rgba(208, 170, 45, 0.28)";
           });
         } else {
-          // Reset all floors to default colors
           allFloorPaths.forEach(path => {
             const floorId = path.id;
             const floorData = floors.find(f => f.id === floorId);
@@ -279,215 +250,195 @@
     }
   };
 
-
-    // ✅ UPDATED: Removed isAvailable checks
-    const getFloorFillColor = (floor) => {
-      if (activeHighlight === 'wardrobe' || activeHighlight === 'terrace' || activeHighlight === 'skyclub') {
-        return "rgba(0, 0, 0, 0.22)";
-      }
-
-      if (activeHighlight === 'floorPlan') {
-        const hasFloorPlan = floor.info["has-floor-plan"];
-        return hasFloorPlan ? "#d0aa2d92" : "rgba(0, 0, 0, 0.10)";
-      }
-
-      if (activeHighlight === 'unit' && selectedUnit) {
-        const matchesUnit = floor.info.bhk === selectedUnit;
-        if (matchesUnit) return "rgba(208, 170, 45, 0.28)";
-        return "rgba(0, 0, 0, 0.10)";
-      }
-
+  const getFloorFillColor = (floor) => {
+    if (activeHighlight === 'wardrobe' || activeHighlight === 'terrace' || activeHighlight === 'skyclub') {
       return "rgba(0, 0, 0, 0.22)";
-    };
+    }
 
-    const renderCategoryOverlays = () => {
-      const keys = ['wardrobe', 'terrace', 'skyclub'];
-      return keys.map(key => {
-        const area = HIGHLIGHT_AREAS[key];
-        if (!area) return null;
+    if (activeHighlight === 'floorPlan') {
+      const hasFloorPlan = floor.info["has-floor-plan"];
+      return hasFloorPlan ? "#d0aa2d92" : "rgba(0, 0, 0, 0.10)";
+    }
 
-        let fill = "rgba(0,0,0,0.10)";
-        if (activeHighlight === key) fill = area.activeFill;
-        else if (hoverHighlight === key) fill = area.hoverFill;
+    if (activeHighlight === 'unit' && selectedUnit) {
+      const matchesUnit = floor.info.bhk === selectedUnit;
+      if (matchesUnit) return "rgba(208, 170, 45, 0.28)";
+      return "rgba(0, 0, 0, 0.10)";
+    }
 
-        const hasFloorPlan = area.planImages && Array.isArray(area.planImages) && area.planImages.length > 0;
+    return "rgba(0, 0, 0, 0.22)";
+  };
 
-        return (
-          <path
-            key={`cat-${key}`}
-            d={area.d}
-            fill={fill}
-            className={hasFloorPlan ? "cursor-pointer transition-all duration-200" : "transition-all duration-200"}
-            style={{
-              filter:
-                activeHighlight === key
-                  ? "drop-shadow(0 0 6px rgba(0,0,0,0.15))"
-                  : hoverHighlight === key
-                  ? "drop-shadow(0 0 4px rgba(0,0,0,0.12))"
-                  : "none",
-              pointerEvents: hasFloorPlan ? "auto" : "none"
-            }}
-            onClick={hasFloorPlan ? (e) => {
-              e.stopPropagation();
-              const isMobile = window.matchMedia('(hover: none)').matches;
-              if (isMobile && 'vibrate' in navigator) navigator.vibrate(50);
-              
-              setActiveHighlight(key);
-              setHighlightPlanModal({
-                id: key,
-                name: area.name,
-                planImages: Array.isArray(area.planImages) ? area.planImages : []
-              });
-            } : undefined}
-          />
-        );
-      });
-    };
+  const renderCategoryOverlays = () => {
+    const keys = ['wardrobe', 'terrace', 'skyclub'];
+    return keys.map(key => {
+      const area = HIGHLIGHT_AREAS[key];
+      if (!area) return null;
 
-    return (
-      <>
-        {(!dataReady || !showUI) && (
-          <Loader
-            videoSrc="/video.mp4"
-            onFinished={handleLoaderFinished}
-            dataReady={dataReady}
-          />
-        )}
+      let fill = "rgba(0,0,0,0.10)";
+      if (activeHighlight === key) fill = area.activeFill;
+      else if (hoverHighlight === key) fill = area.hoverFill;
 
-        <div 
-          className="fixed inset-0 w-full h-full overflow-hidden bg-[#dedbd4]"
+      const hasFloorPlan = area.planImages && Array.isArray(area.planImages) && area.planImages.length > 0;
+
+      return (
+        <path
+          key={`cat-${key}`}
+          d={area.d}
+          fill={fill}
+          className={hasFloorPlan ? "cursor-pointer transition-all duration-200" : "transition-all duration-200"}
           style={{
-            opacity: (dataReady && showUI) ? 1 : 0,
-            transition: 'opacity 0.3s ease-in',
-            pointerEvents: (dataReady && showUI) ? 'auto' : 'none'
+            filter:
+              activeHighlight === key
+                ? "drop-shadow(0 0 6px rgba(0,0,0,0.15))"
+                : hoverHighlight === key
+                ? "drop-shadow(0 0 4px rgba(0,0,0,0.12))"
+                : "none",
+            pointerEvents: hasFloorPlan ? "auto" : "none"
           }}
-        >
-          {error ? (
-            <div className="flex items-center justify-center h-screen">
-              <div className="text-center max-w-md">
-                <div className="text-red-500 mb-4">
-                  <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-bold text-gray-800 mb-2">Unable to Load Floor Data</h2>
-                <p className="text-gray-600 mb-4">{error}</p>
-                <button 
-                  onClick={() => window.location.reload()} 
-                  className="px-4 py-2 bg-[#CFB284] text-white rounded-lg hover:bg-[#b8a073] transition-colors duration-200"
-                >
-                  Try Again
-                </button>
-              </div>
+          onClick={hasFloorPlan ? (e) => {
+            e.stopPropagation();
+            const isMobile = window.matchMedia('(hover: none)').matches;
+            if (isMobile && 'vibrate' in navigator) navigator.vibrate(50);
+            
+            setActiveHighlight(key);
+            setHighlightPlanModal({
+              id: key,
+              name: area.name,
+              planImages: Array.isArray(area.planImages) ? area.planImages : []
+            });
+          } : undefined}
+        />
+      );
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 w-full h-full overflow-hidden bg-[#dedbd4]">
+      {error ? (
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center max-w-md">
+            <div className="text-red-500 mb-4">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
-          ) : (
-            <>
-              <div className="fixed top-4 right-10 z-40">
-                <img 
-                  src="/logo.svg" 
-                  alt="Logo" 
-                  className="w-16 h-16 sm:w-20 sm:h-20 md:w-30 md:h-30 object-contain"
-                />
-              </div>
-
-              <div className="relative w-full h-full flex items-center justify-center">
-                <svg
-                  ref={svgRef}
-                  viewBox="0 0 377 210.92149"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-full h-full"
-                  preserveAspectRatio="xMidYMid slice"
-                  style={{
-                    minWidth:'100%',
-                    minHeight:'100%',
-                  }}
-                >
-                  <image
-                    href="/building.svg"
-                    x="0"
-                    y="0"
-                    width="381.7"
-                    height="210.92149"
-                    preserveAspectRatio="xMidYMid meet"
-                  />
-
-                  <g transform="translate(86,0)">
-                    {renderCategoryOverlays()}
-                  </g>
-
-                  <g transform="translate(85,0)">
-                    {floors.map((floor) => (
-                      <path
-                        key={floor.id}
-                        id={floor.id}
-                        d={floor.d}
-                        fill={getFloorFillColor(floor)}
-                        className="cursor-pointer transition-colors duration-200"
-                        onMouseEnter={(event) => handleFloorMouseEnter(floor, event)}
-                        onMouseLeave={(event) => handleFloorMouseLeave(floor, event)}
-                        onClick={(event) => handleFloorClick(floor, event)}
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    ))}
-                  </g>
-                </svg>
-              </div>
-
-              <div className="fixed bottom-0 left-0 right-0 z-30">
-              <Navbar 
-    onSelect={handleNavbarSelect} 
-    selectedUnit={selectedUnit}
-    showFloorPlans={showFloorPlans}
-    activeHighlight={activeHighlight}
-    compareMode={false}
-    isDuplexActive={isDuplexActive}
-  />
-
-              </div>
-
-              {floorPlanModal && (
-                <FloorPlanModal
-                  floor={floorPlanModal}
-                  onClose={() => setFloorPlanModal(null)}
-                  onOpenComparison={handleOpenComparison}
-                />
-              )}
-
-              {highlightPlanModal && (
-                <FloorPlanModal
-                  highlight={highlightPlanModal}
-                  onClose={() => {
-                    setHighlightPlanModal(null);
-                    setActiveHighlight(null);
-                  }}
-                />
-              )}
-
-              <FloorSelectionModal
-                show={showFloorSelectionModal}
-                onClose={() => {
-                  setShowFloorSelectionModal(false);
-                  setPreSelectedFloor(null);
-                  setLockedFloor(null);
-                }}
-                floors={floors}
-                selectedFloorsForCompare={selectedFloorsForCompare}
-                preSelectedFloor={preSelectedFloor}
-                lockedFloor={lockedFloor}
-                onFloorSelect={(floor) => {
-                  const isSelected = selectedFloorsForCompare.some(f => f.id === floor.id);
-                  if (isSelected) {
-                    setSelectedFloorsForCompare(prev => prev.filter(f => f.id !== floor.id));
-                  } else {
-                    if (selectedFloorsForCompare.length < 4) {
-                      setSelectedFloorsForCompare(prev => [...prev, floor]);
-                    }
-                  }
-                }}
-              />
-            </>
-          )}
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Unable to Load Floor Data</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-[#CFB284] text-white rounded-lg hover:bg-[#b8a073] transition-colors duration-200"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
-      </>
-    );
-  }
+      ) : (
+        <>
+          <div className="fixed top-4 right-10 z-40">
+            <img 
+              src="/logo.svg" 
+              alt="Logo" 
+              className="w-16 h-16 sm:w-20 sm:h-20 md:w-30 md:h-30 object-contain"
+            />
+          </div>
+
+          <div className="relative w-full h-full flex items-center justify-center">
+            <svg
+              ref={svgRef}
+              viewBox="0 0 377 210.92149"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-full h-full"
+              preserveAspectRatio="xMidYMid slice"
+              style={{
+                minWidth:'100%',
+                minHeight:'100%',
+              }}
+            >
+              <image
+                href="/building.svg"
+                x="0"
+                y="0"
+                width="381.7"
+                height="210.92149"
+                preserveAspectRatio="xMidYMid meet"
+              />
+
+              <g transform="translate(86,0)">
+                {renderCategoryOverlays()}
+              </g>
+
+              <g transform="translate(85,0)">
+                {floors.map((floor) => (
+                  <path
+                    key={floor.id}
+                    id={floor.id}
+                    d={floor.d}
+                    fill={getFloorFillColor(floor)}
+                    className="cursor-pointer transition-colors duration-200"
+                    onMouseEnter={(event) => handleFloorMouseEnter(floor, event)}
+                    onMouseLeave={(event) => handleFloorMouseLeave(floor, event)}
+                    onClick={(event) => handleFloorClick(floor, event)}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+              </g>
+            </svg>
+          </div>
+
+          <div className="fixed bottom-0 left-0 right-0 z-30">
+            <Navbar 
+              onSelect={handleNavbarSelect} 
+              selectedUnit={selectedUnit}
+              showFloorPlans={showFloorPlans}
+              activeHighlight={activeHighlight}
+              compareMode={false}
+              isDuplexActive={isDuplexActive}
+            />
+          </div>
+
+          {floorPlanModal && (
+            <FloorPlanModal
+              floor={floorPlanModal}
+              onClose={() => setFloorPlanModal(null)}
+              onOpenComparison={handleOpenComparison}
+            />
+          )}
+
+          {highlightPlanModal && (
+            <FloorPlanModal
+              highlight={highlightPlanModal}
+              onClose={() => {
+                setHighlightPlanModal(null);
+                setActiveHighlight(null);
+              }}
+            />
+          )}
+
+          <FloorSelectionModal
+            show={showFloorSelectionModal}
+            onClose={() => {
+              setShowFloorSelectionModal(false);
+              setPreSelectedFloor(null);
+              setLockedFloor(null);
+            }}
+            floors={floors}
+            selectedFloorsForCompare={selectedFloorsForCompare}
+            preSelectedFloor={preSelectedFloor}
+            lockedFloor={lockedFloor}
+            onFloorSelect={(floor) => {
+              const isSelected = selectedFloorsForCompare.some(f => f.id === floor.id);
+              if (isSelected) {
+                setSelectedFloorsForCompare(prev => prev.filter(f => f.id !== floor.id));
+              } else {
+                if (selectedFloorsForCompare.length < 4) {
+                  setSelectedFloorsForCompare(prev => [...prev, floor]);
+                }
+              }
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
+}
