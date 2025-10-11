@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect } from "react";
-import io from 'socket.io-client';
+// ✅ Remove socket.io import
+// import io from 'socket.io-client';
+
+// ✅ Import local data
+
 
 import FloorPlanModal from "./components/FloorPlanModal";
 import Navbar from "./components/Navbar";
 import FloorSelectionModal from "./components/FloorSelectionModal";
+import { DEFAULT_PLAN_IMAGES, floorsData } from "./data";
 
 export default function BuildingOverlay() {
   const [floors, setFloors] = useState([]);
   const [error, setError] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState('Connecting...');
-  const [updateStatus, setUpdateStatus] = useState('');
-  const [lastUpdate, setLastUpdate] = useState(null);
   const [isDuplexActive, setIsDuplexActive] = useState(false);
 
   // Floor states
@@ -39,7 +41,6 @@ export default function BuildingOverlay() {
   const [lockedFloor, setLockedFloor] = useState(null);
 
   const svgRef = useRef(null);
-  const socketRef = useRef(null);
 
   // Category overlays with their plan images
   const HIGHLIGHT_AREAS = {
@@ -64,52 +65,16 @@ export default function BuildingOverlay() {
     }
   };
 
-  // WebSocket & data
+  // ✅ Load data from local file
   useEffect(() => {
-    const socket = io('https://inventory-page-x73n.onrender.com', {
-      transports: ['websocket', 'polling'],
-      withCredentials: true,
-    });
-
-    socketRef.current = socket;
-
-    socket.on('connect', () => setConnectionStatus('Connected'));
-    socket.on('disconnect', () => setConnectionStatus('Disconnected'));
-    socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
-      setConnectionStatus('Connection Error');
-    });
-
-    socket.on('floorsUpdated', (update) => {
-      setFloors(update.data);
-      setLastUpdate(new Date().toLocaleTimeString());
-      setUpdateStatus(`Updated from ${update.source} (${update.count} floors)`);
-      setTimeout(() => setUpdateStatus(''), 3000);
-    });
-
-    fetchInitialFloors();
-    return () => { socket.disconnect(); };
-  }, []);
-
-  const fetchInitialFloors = async () => {
     try {
-      setError(null);
-      
-      const response = await fetch("https://inventory-page-x73n.onrender.com/api/floors");
-      const data = await response.json();
-      
-      if (data.success && Array.isArray(data.data)) {
-        setFloors(data.data);
-        setLastUpdate(new Date().toLocaleTimeString());
-        console.log("✅ API data loaded");
-      } else {
-        throw new Error(data.error || 'Failed to load floors');
-      }
+      setFloors(floorsData);
+      console.log("✅ Local floor data loaded");
     } catch (err) {
-      console.error("Error fetching initial floors:", err);
-      setError(err.message);
+      console.error("Error loading floor data:", err);
+      setError("Failed to load floor data");
     }
-  };
+  }, []);
 
   const handleFloorMouseEnter = (floor, event) => {
     const isMobile = window.matchMedia('(hover: none)').matches;
@@ -144,14 +109,16 @@ export default function BuildingOverlay() {
     }
   };
 
+  // ✅ Updated to use floor.plans instead of floor.info
   const handleFloorClick = (floor, event) => {
     const isMobile = window.matchMedia('(hover: none)').matches;
+    const plans = DEFAULT_PLAN_IMAGES;
     
     if (isMobile) {
       if (selectedFloor?.id === floor.id) {
-        const hasPlan = floor.info["has-floor-plan"];
-        if (hasPlan) {
-          setFloorPlanModal(floor);
+        // ✅ Check if floor has plans
+        if (plans && plans.length > 0) {
+          setFloorPlanModal({ id: floor.id, plans });
           setSelectedFloor(null);
         }
       } else {
@@ -175,8 +142,10 @@ export default function BuildingOverlay() {
         if ('vibrate' in navigator) navigator.vibrate(50);
       }
     } else {
-      const hasPlan = floor.info["has-floor-plan"];
-      if (hasPlan) setFloorPlanModal(floor);
+      // ✅ Desktop click - open modal with plans
+      if (plans && plans.length > 0) {
+        setFloorPlanModal({ id: floor.id, plans });
+      }
     }
   };
 
@@ -250,18 +219,19 @@ export default function BuildingOverlay() {
     }
   };
 
+  // ✅ Updated to use floor.plans instead of floor.info
   const getFloorFillColor = (floor) => {
     if (activeHighlight === 'wardrobe' || activeHighlight === 'terrace' || activeHighlight === 'skyclub') {
       return "rgba(0, 0, 0, 0.22)";
     }
 
     if (activeHighlight === 'floorPlan') {
-      const hasFloorPlan = floor.info["has-floor-plan"];
+      const hasFloorPlan = Array.isArray(floor.plans) && floor.plans.length > 0;
       return hasFloorPlan ? "#d0aa2d92" : "rgba(0, 0, 0, 0.10)";
     }
 
     if (activeHighlight === 'unit' && selectedUnit) {
-      const matchesUnit = floor.info.bhk === selectedUnit;
+      const matchesUnit = floor.bhk === selectedUnit;
       if (matchesUnit) return "rgba(208, 170, 45, 0.28)";
       return "rgba(0, 0, 0, 0.10)";
     }
