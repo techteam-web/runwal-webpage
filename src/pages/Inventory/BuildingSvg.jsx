@@ -51,27 +51,21 @@ export default function BuildingOverlay() {
       activeFill: "rgba(139, 92, 246, 0.60)",
       hoverFill: "rgba(139, 92, 246, 0.50)",
       d: "m 90.723317,145.66639 12.821743,-1.69155 c 0,0 -1.715,0.13584 0.017,0 1.73197,-0.13584 4.87331,0.0509 4.87331,0.0509 l 1.73197,0.20376 0.71317,0.0849 0.62827,0.1698 0.62826,0.22075 0.44149,0.18678 0.32262,0.1698 0.39054,0.28866 0.22074,0.23773 0.0679,0.1698 0.0679,0.27168 0.017,0.37357 0.017,6.77508 c 0,0 0.47544,-0.0849 -0.66223,-0.40752 -1.13767,-0.32263 -3.15831,-0.57733 -3.15831,-0.57733 l -1.17163,-0.11886 -0.96787,-0.034 -5.04311,0.017 -1.25653,0.0509 -0.98485,0.0679 -11.138989,1.20559 0.0849,-7.02979 z",
-      planImages: ["/floor-plans/club1.webp", "/floor-plans/club2.webp"]
+      planImages: ["/floor-plans/C1.jpg", "/floor-plans/C2.jpg"]
     },
     terrace: {
       name: "Parking / Terrace",
       activeFill: "rgba(16, 185, 129, 0.60)",
       hoverFill: "rgba(16, 185, 129, 0.50)",
       d: "m 89.378556,154.11918 -0.240136,32.22622 24.78202,0.19211 0.048,-32.99466 c 0,0 1.36877,0.69639 -0.1681,-0.048 -1.53687,-0.74442 -3.45796,-1.10462 -3.45796,-1.10462 l -3.26584,-0.21612 -4.03429,0.12006 -13.807805,1.29674 z",
-      planImages: [
-        "/floor-plans/parking1.webp",
-        "/floor-plans/parking2.webp",
-        "/floor-plans/parking3.webp",
-        "/floor-plans/parking4.webp",
-        "/floor-plans/parking5.webp",
-      ]
+     
     },
     skyclub: {
       name: "Sky Club",
       activeFill: "rgba(135, 206, 235, 0.60)",
       hoverFill: "rgba(135, 206, 235, 0.50)",
       d: "m 89.426583,37.749353 13.159447,-5.859315 c 0,0 -2.20925,0.480272 0,0 2.20925,-0.480271 3.74612,-0.288163 3.74612,-0.288163 0,0 -1.87306,-0.288163 0.14408,0.09605 2.01714,0.384217 3.07374,1.00857 3.07374,1.00857 0,0 -1.34476,-0.864489 0.14408,0.04803 1.48884,0.912516 3.65006,3.794146 3.65006,3.794146 L 113.152,36.020375 c 0,0 -0.76843,1.440815 0,0 0.76844,-1.440815 0.81647,-5.379043 0.81647,-5.379043 0,0 0.33619,1.200679 0,0 -0.3362,-1.200679 -0.96055,-2.737549 -0.96055,-2.737549 0,0 0.38422,-0.144081 -0.91251,-1.68095 -1.29674,-1.536869 -3.1698,-2.641494 -3.1698,-2.641494 l -1.777,-0.768435 -1.44082,-0.144081 -1.15265,0.09605 -0.91252,-0.04803 -0.48027,0.09605 -1.20068,0.528299 -11.862706,5.523124 c 0,0 0.240135,-0.624353 -0.720408,1.056598 -0.960543,1.680951 -0.09605,1.921086 -0.09605,1.921086 0,0 -1.056598,-0.576326 -0.192113,0.33619 0.864489,0.912516 1.536869,0.576326 1.440815,0.912516 -0.09605,0.336191 -0.720407,0.336191 -0.144077,1.440816 0.576326,1.104625 -0.816463,1.728978 -0.816463,1.728978",
-      planImages: ["/floor-plans/skyclub.webp"]
+     
     }
   };
 
@@ -265,53 +259,50 @@ export default function BuildingOverlay() {
   };
 
   const renderCategoryOverlays = () => {
-    const keys = ['wardrobe', 'terrace', 'skyclub'];
-    return keys.map(key => {
-      const area = HIGHLIGHT_AREAS[key];
-      if (!area) return null;
+  const keys = ['wardrobe', 'terrace', 'skyclub'];
+  return keys.map(key => {
+    const area = HIGHLIGHT_AREAS[key];
+    if (!area) return null;
 
-      let fill = "rgba(0,0,0,0.10)";
-      if (activeHighlight === key) fill = area.activeFill;
-      else if (hoverHighlight === key) fill = area.hoverFill;
+    let fill = "rgba(0,0,0,0.10)";
+    if (activeHighlight === key) fill = area.activeFill;
+    else if (hoverHighlight === key) fill = area.hoverFill;
 
-      return (
-        <path
-          key={`cat-${key}`}
-          d={area.d}
-          fill={fill}
-          className="cursor-default transition-all duration-200"
-          style={{
-            filter:
-              activeHighlight === key
-                ? "drop-shadow(0 0 6px rgba(0,0,0,0.15))"
-                : hoverHighlight === key
-                ? "drop-shadow(0 0 4px rgba(0,0,0,0.12))"
-                : "none"
-          }}
-          onMouseEnter={() => {
-            const isMobile = window.matchMedia('(hover: none)').matches;
-            if (!isMobile) setHoverHighlight(key);
-          }}
-          onMouseLeave={() => {
-            const isMobile = window.matchMedia('(hover: none)').matches;
-            if (!isMobile) setHoverHighlight(prev => (prev === key ? null : prev));
-          }}
-          // onClick={(e) => {
-          //   e.stopPropagation();
-          //   const isMobile = window.matchMedia('(hover: none)').matches;
-          //   if (isMobile && 'vibrate' in navigator) navigator.vibrate(50);
-            
-          //   setActiveHighlight(key);
-          //   setHighlightPlanModal({
-          //     id: key,
-          //     name: area.name,
-          //     planImages: Array.isArray(area.planImages) ? area.planImages : []
-          //   });
-          // }}
-        />
-      );
-    });
-  };
+    // ✅ Check if area has planImages
+    const hasFloorPlan = area.planImages && Array.isArray(area.planImages) && area.planImages.length > 0;
+
+    return (
+      <path
+        key={`cat-${key}`}
+        d={area.d}
+        fill={fill}
+        className={hasFloorPlan ? "cursor-pointer transition-all duration-200" : "transition-all duration-200"}
+        style={{
+          filter:
+            activeHighlight === key
+              ? "drop-shadow(0 0 6px rgba(0,0,0,0.15))"
+              : hoverHighlight === key
+              ? "drop-shadow(0 0 4px rgba(0,0,0,0.12))"
+              : "none",
+          pointerEvents: hasFloorPlan ? "auto" : "none"
+        }}
+        onClick={hasFloorPlan ? (e) => {
+          e.stopPropagation();
+          const isMobile = window.matchMedia('(hover: none)').matches;
+          if (isMobile && 'vibrate' in navigator) navigator.vibrate(50);
+          
+          setActiveHighlight(key);
+          setHighlightPlanModal({
+            id: key,
+            name: area.name,
+            planImages: Array.isArray(area.planImages) ? area.planImages : []
+          });
+        } : undefined}
+      />
+    );
+  });
+};
+
 
   // ✅ FIXED: Use Views pattern - always render UI with overlay loader
   return (

@@ -87,7 +87,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     >
       <div
         ref={modalRef}
-        className="relative bg-white rounded-2xl shadow-2xl max-w-7xl max-h-[95vh] w-full overflow-hidden"
+        className="relative bg-[#FFF7EA] rounded-2xl shadow-2xl max-w-4xl max-h-[95vh] w-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -102,7 +102,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
         </button>
 
         {/* Main Image area */}
-        <div className="relative h-[70vh] flex items-center justify-center bg-gray-50"> {/* ✅ Reduced height for button space */}
+        <div className="relative h-[70vh] flex items-center justify-center bg-[#FFF7EA]"> {/* ✅ Reduced height for button space */}
           <img
             src={images[currentImageIndex]}
             alt={`${titlePrefix} ${currentImageIndex + 1}`}
@@ -160,10 +160,10 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
 
         {/* Dots */}
         {images.length > 1 && (
-  <div className="py-4 bg-white border-t border-gray-100">
-    <div className="flex items-center justify-between px-4">
+  <div className="py-4 bg-[#FFF7EA] border-t border-gray-100">
+    
       {/* Left spacer for balance */}
-      <div className="flex-1"></div>
+     
       
       {/* Centered Dots */}
       <div className="flex items-center justify-center space-x-3 flex-shrink-0">
@@ -195,7 +195,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
         )}
       </div> */}
     </div>
-  </div>
+ 
 )}
 
       </div>
