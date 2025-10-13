@@ -11,6 +11,7 @@ import { Routes, Route } from "react-router-dom";
 import { AudioProvider } from './pages/Home/Component/AudioContext.jsx'
 import Page from './pages/Home/Page.jsx'
 import Iso from './pages/Iso/Iso.jsx'
+import Gallery from './pages/Gallery/Gallery.jsx'
 
 
 // Force scroll position to top on load/refresh and disable browser restoration
@@ -72,6 +73,7 @@ createRoot(document.getElementById('root')).render(
       <Route path="/inventory" element={<Inventory />} />
       <Route path="/views" element={<Views />} />
       <Route path="/iso" element={<Iso />} />
+      <Route path="/gallery" element={<Gallery />} />
     </Routes>
     </AudioProvider>
   </BrowserRouter>
