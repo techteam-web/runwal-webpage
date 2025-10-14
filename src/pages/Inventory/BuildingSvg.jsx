@@ -159,65 +159,74 @@ export default function BuildingOverlay() {
   };
 
   const handleNavbarSelect = (type, value) => {
-    if (type === "duplex") {
-      const newDuplexActive = !isDuplexActive;
-      setIsDuplexActive(newDuplexActive);
-      
-      if (svgRef.current) {
-        const allFloorPaths = svgRef.current.querySelectorAll('path[id^="floor"]');
-        if (newDuplexActive) {
-          allFloorPaths.forEach(path => {
-            path.style.fill = "rgba(208, 170, 45, 0.28)";
-          });
-        } else {
-          allFloorPaths.forEach(path => {
-            const floorId = path.id;
-            const floorData = floors.find(f => f.id === floorId);
-            if (floorData) {
-              path.style.fill = getFloorFillColor(floorData);
-            }
-          });
-        }
+  if (type === "duplex") {
+    const newDuplexActive = !isDuplexActive;
+    setIsDuplexActive(newDuplexActive);
+    
+    // ✅ Open floor plan modal when duplex is activated
+    if (newDuplexActive) {
+      const plans = DEFAULT_PLAN_IMAGES;
+      if (plans && plans.length > 0) {
+        setFloorPlanModal({ id: 'duplex', plans });
       }
-      
+    }
+    
+    if (svgRef.current) {
+      const allFloorPaths = svgRef.current.querySelectorAll('path[id^="floor"]');
+      if (newDuplexActive) {
+        allFloorPaths.forEach(path => {
+          path.style.fill = "rgba(208, 170, 45, 0.28)";
+        });
+      } else {
+        allFloorPaths.forEach(path => {
+          const floorId = path.id;
+          const floorData = floors.find(f => f.id === floorId);
+          if (floorData) {
+            path.style.fill = getFloorFillColor(floorData);
+          }
+        });
+      }
+    }
+    
+    setActiveHighlight(null);
+    setShowFloorPlans(false);
+    setSelectedUnit(null);
+  } else if (type === "floorPlan") {
+    const newShowFloorPlans = !showFloorPlans;
+    setShowFloorPlans(newShowFloorPlans);
+    setActiveHighlight(newShowFloorPlans ? 'floorPlan' : null);
+    setSelectedUnit(null);
+    setIsDuplexActive(false);
+  } else if (type === "floor") {
+    if (value === "1") {
+      setActiveHighlight(prev => prev === 'wardrobe' ? null : 'wardrobe');
+      setShowFloorPlans(false);
+      setSelectedUnit(null);
+      setIsDuplexActive(false);
+    } else if (value === "4") {
+      setActiveHighlight(prev => prev === 'terrace' ? null : 'terrace');
+      setShowFloorPlans(false);
+      setSelectedUnit(null);
+      setIsDuplexActive(false);
+    } else if (value === "5") {
+      setActiveHighlight(prev => prev === 'skyclub' ? null : 'skyclub');
+      setShowFloorPlans(false);
+      setSelectedUnit(null);
+      setIsDuplexActive(false);
+    } else {
       setActiveHighlight(null);
       setShowFloorPlans(false);
       setSelectedUnit(null);
-    } else if (type === "floorPlan") {
-      const newShowFloorPlans = !showFloorPlans;
-      setShowFloorPlans(newShowFloorPlans);
-      setActiveHighlight(newShowFloorPlans ? 'floorPlan' : null);
-      setSelectedUnit(null);
       setIsDuplexActive(false);
-    } else if (type === "floor") {
-      if (value === "1") {
-        setActiveHighlight(prev => prev === 'wardrobe' ? null : 'wardrobe');
-        setShowFloorPlans(false);
-        setSelectedUnit(null);
-        setIsDuplexActive(false);
-      } else if (value === "4") {
-        setActiveHighlight(prev => prev === 'terrace' ? null : 'terrace');
-        setShowFloorPlans(false);
-        setSelectedUnit(null);
-        setIsDuplexActive(false);
-      } else if (value === "5") {
-        setActiveHighlight(prev => prev === 'skyclub' ? null : 'skyclub');
-        setShowFloorPlans(false);
-        setSelectedUnit(null);
-        setIsDuplexActive(false);
-      } else {
-        setActiveHighlight(null);
-        setShowFloorPlans(false);
-        setSelectedUnit(null);
-        setIsDuplexActive(false);
-      }
     }
+  }
 
-    if (svgRef.current && type !== "duplex") {
-      const pathElements = svgRef.current.querySelectorAll('path[id^="floor"]');
-      pathElements.forEach(path => { path.style.fill = ''; });
-    }
-  };
+  if (svgRef.current && type !== "duplex") {
+    const pathElements = svgRef.current.querySelectorAll('path[id^="floor"]');
+    pathElements.forEach(path => { path.style.fill = ''; });
+  }
+};
+
 
   // ✅ Updated to use floor.plans instead of floor.info
   const getFloorFillColor = (floor) => {
@@ -368,12 +377,31 @@ export default function BuildingOverlay() {
           </div>
 
           {floorPlanModal && (
-            <FloorPlanModal
-              floor={floorPlanModal}
-              onClose={() => setFloorPlanModal(null)}
-              onOpenComparison={handleOpenComparison}
-            />
-          )}
+  <FloorPlanModal
+    floor={floorPlanModal}
+    onClose={() => {
+      // ✅ Reset duplex state if closing duplex modal
+      if (floorPlanModal.id === 'duplex') {
+        // ✅ Reset floor fill colors to default
+        if (svgRef.current) {
+          const allFloorPaths = svgRef.current.querySelectorAll('path[id^="floor"]');
+          allFloorPaths.forEach(path => {
+            path.style.fill = "rgba(0, 0, 0, 0.22)";
+          });
+        }
+        
+        // ✅ Reset duplex state
+        setIsDuplexActive(false);
+      }
+      
+      // ✅ Close modal
+      setFloorPlanModal(null);
+    }}
+    onOpenComparison={handleOpenComparison}
+  />
+)}
+
+
 
           {highlightPlanModal && (
             <FloorPlanModal

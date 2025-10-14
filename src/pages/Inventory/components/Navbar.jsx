@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useClickSound from "../../Home/Component/useClickSound";
 
@@ -7,11 +7,17 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, selecte
   const { playClickSound, ClickAudio } = useClickSound();
   const navigate = useNavigate();
 
+  // ✅ Reset selectedFloor when isDuplexActive becomes false
+  useEffect(() => {
+    if (!isDuplexActive && selectedFloor === "duplex") {
+      setSelectedFloor(null);
+    }
+  }, [isDuplexActive, selectedFloor]);
+
   const floors = [
     { id: "1", label: "Exclusive Club" },
-    { id: "duplex", label: "Duplex" },  // ✅ Replaced Mansions with Duplex
+    { id: "duplex", label: "Duplex" },
     { id: "4", label: "Parking Levels" },
-    { id: "5", label: "Sky-Club" }
   ];
 
   const handleHomeClick = () => {
@@ -41,7 +47,6 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, selecte
     <div style={{ fontFamily: 'Zap, sans-serif' }}>
       <ClickAudio />
       
-      {/* Main Navbar */}
       <div style={{
         position: 'fixed',
         bottom: '0px',
