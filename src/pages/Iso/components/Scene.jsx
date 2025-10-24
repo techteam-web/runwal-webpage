@@ -13,37 +13,37 @@ const Scene = ({
   current,
 }) => {
   const anglesRef = useRef([]);
-  const { LookX, LookY, LookZ, } =
-    useControls({
-      LookX: {
-        value: 45.00,
-        max: 100,
-        min: -100,
-        step: 0.001,
-      },
-      LookY: {
-        value: -3.52,
-        max: 100,
-        min: -100,
-        step: 0.001,
-      },
-      LookZ: {
-        value: 0.61,
-        max: 100,
-        min: -100,
-        step: 0.001,
-      },
+  // const { LookX, LookY, LookZ, } =
+  //   useControls({
+  //     LookX: {
+  //       value: 45.00,
+  //       max: 100,
+  //       min: -100,
+  //       step: 0.001,
+  //     },
+  //     LookY: {
+  //       value: -3.52,
+  //       max: 100,
+  //       min: -100,
+  //       step: 0.001,
+  //     },
+  //     LookZ: {
+  //       value: 0.61,
+  //       max: 100,
+  //       min: -100,
+  //       step: 0.001,
+  //     },
       
       
-    });
+  //   });
 
   useEffect(() => {
     if (!camera.current) return;
     // Make the orthographic camera look at the origin (0,0,0)
-    camera.current.lookAt(LookX, LookY, LookZ);
+    camera.current.lookAt(45.00, -3.52,  0.61);
 
     // If using OrbitControls, also update its target
-  }, [camera.current, LookX, LookY, LookZ]);
+  }, [camera.current]);
 
   useFrame(()=>{
     // console.log(camera.current)
@@ -120,7 +120,7 @@ const Scene = ({
             rotation={[0, anglesRef.current[ind], 0]} // makes each face the circle center
           >
             <group rotation={[0, Math.PI/5, 0]}> 
-              <Model />
+              <Model active={current==ind}/>
             </group>
           </group>
         );

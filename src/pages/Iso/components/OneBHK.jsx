@@ -1,93 +1,95 @@
-import React, { useRef } from 'react'
-import { useGLTF, useTexture } from '@react-three/drei'
-import { useControls } from 'leva';
+import React from "react";
+import { useGLTF, useTexture } from "@react-three/drei";
+import { DissolveMaterial } from "./DissolveMaterial";
+import * as THREE from "three";
+import DissolveMaterialAO from "./DissolveMaterialAO";
+import UpAnimate from "./UpAnimate";
+
+// ✅ centralize texture paths
+const texturePaths = {
+  mask: "/textures/fbm_noise.png",
+  plane: "textures/1BHK_2K/Plane.webp",
+  gold: "textures/1BHK_2K/Gold.webp",
+  livingroom: "textures/1BHK_2K/Livingroom.webp",
+  bedSofa: "textures/1BHK_2K/Bed_Sofa.webp",
+  bedroom: "textures/1BHK_2K/Bedroom.webp", // using ktx2 where possible
+  base: "textures/1BHK_2K/Base.webp",
+  floor: "textures/1BHK_2K/Floor.webp",
+  glass: "textures/1BHK_2K/Glasses.webp",
+};
+
+// ✅ preload all textures
+Object.values(texturePaths).forEach((path) => {
+  useTexture.preload(path);
+});
 
 export function OneBHK(props) {
-  const { nodes } = useGLTF('models/1BHK_Baked-v1.glb')
+  const { nodes } = useGLTF("models/1BHK_Baked-v1.glb");
 
-  const {colorOneBHk} = useControls({
-    colorOneBHk:{
-      value: '#B8AFA2'
-    }
-  })
+  // const {colorOneBHk} = useControls({
+  //   colorOneBHk:{
+  //     value: '#B8AFA2'
+  //   }
+  // })
 
-    //Plane texture
-    const planTexture = useTexture("textures/1BHK_Bakes/Plane.png");
-    planTexture.flipY = false;
+  // load all textures at once → only one suspension
+  const textures = useTexture(Object.values(texturePaths));
+  textures.forEach((tex) => (tex.flipY = false));
 
-    //Gold Texture
-    const goldTexture = useTexture('textures/1BHK_Bakes/Gold.png')
-    goldTexture.flipY = false;
+  // map back to names
+  const [
+    maskTex,
+    planeTexture,
+    goldTexture,
+    livingroomTexture,
+    bedSofaTexture,
+    bedroomTexture,
+    baseTexture,
+    floorTexture,
+    glassTexture,
+  ] = textures;
 
-    //Livingroom Texture
-    const livingroomTexture = useTexture('textures/1BHK_Bakes/Livingroom.png')
-    livingroomTexture.flipY = false;
-
-    //Livingroom Texture
-    const bedSofaTexture = useTexture('textures/1BHK_Bakes/Bed_Sofa.png')
-    bedSofaTexture.flipY = false;
-
-    //Livingroom Texture
-    const bedroomTexture = useTexture('textures/1BHK_Bakes/Bedroom.png')
-    bedroomTexture.flipY = false;
-
-    //base Texture
-    const baseTexture = useTexture('textures/1BHK_Bakes/Base.png')
-    baseTexture.flipY = false;
-
-    //Floor Texture
-    const floorTexture = useTexture('textures/1BHK_Bakes/Floor.png')
-    floorTexture.flipY = false;
-
-    //Glass Texture
-    const glassTexture = useTexture('textures/1BHK_Bakes/Glasses.png')
-    glassTexture.flipY = false;
-    
+  // repeat wrapping for mask
+  if (maskTex) {
+    maskTex.wrapS = maskTex.wrapT = THREE.RepeatWrapping;
+  }
 
   return (
     <group {...props} dispose={null}>
-      <mesh
-        geometry={nodes.Gold.geometry}
-      >
-        <meshBasicMaterial map={goldTexture}/>
+      <mesh geometry={nodes.Gold.geometry}>
+        {/* <meshBasicMaterial map={goldTexture} /> */}
+        <DissolveMaterial
+          map={goldTexture}
+          mask={maskTex}
+          active={props.active}
+        />
       </mesh>
-      <mesh
-        geometry={nodes.Livingroom.geometry}
-      >
-        <meshBasicMaterial map={livingroomTexture}/>
+      <mesh geometry={nodes.Livingroom.geometry}>
+        <DissolveMaterial map={livingroomTexture} mask={maskTex} active={props.active} />
       </mesh>
-      <mesh
-        geometry={nodes.Bed_Sofa.geometry}
-      >
-        <meshBasicMaterial map={bedSofaTexture}/>
+      <UpAnimate active={props.active}>
+
+      <mesh geometry={nodes.Bed_Sofa.geometry}>
+        <DissolveMaterial map={bedSofaTexture} mask={maskTex} active={props.active} />
       </mesh>
-      <mesh
-        geometry={nodes.Bedroom.geometry}
-        >
-          <meshBasicMaterial map={bedroomTexture}/>
-        </mesh>
-      <mesh
-        geometry={nodes.Base.geometry}
-      >
-        <meshBasicMaterial map={baseTexture}/>
+      </UpAnimate>
+      <mesh geometry={nodes.Bedroom.geometry}>
+        <DissolveMaterial map={bedroomTexture} mask={maskTex} active={props.active} />
       </mesh>
-      <mesh
-        geometry={nodes.Plane.geometry}
-      >
-        <meshBasicMaterial color={'#d0c6b7'} aoMap={planTexture}/>
+      <mesh geometry={nodes.Base.geometry}>
+        <DissolveMaterial map={baseTexture} mask={maskTex} active={props.active} />
       </mesh>
-      <mesh
-        geometry={nodes.Floor.geometry}
-      >
-        <meshBasicMaterial map={floorTexture}/>
+      <mesh geometry={nodes.Plane.geometry}>
+        <DissolveMaterialAO active={props.active} color={"#d0c6b7"} aoMap={planeTexture} />
       </mesh>
-      <mesh
-        geometry={nodes.Glasses.geometry}
-      >
-        <meshBasicMaterial map={glassTexture}/>
+      <mesh geometry={nodes.Floor.geometry}>
+        <DissolveMaterial map={floorTexture} mask={maskTex} active={props.active} />
+      </mesh>
+      <mesh geometry={nodes.Glasses.geometry}>
+        <DissolveMaterial map={glassTexture} mask={maskTex} active={props.active} />
       </mesh>
     </group>
-  )
+  );
 }
 
-useGLTF.preload('models/1BHK_Baked-v1.glb')
+useGLTF.preload("models/1BHK_Baked-v1.glb");

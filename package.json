@@ -30,7 +30,8 @@
     "sharp": "^0.34.3",
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.12",
-    "three": "^0.179.1"
+    "three": "^0.179.1",
+    "three-custom-shader-material": "^6.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
