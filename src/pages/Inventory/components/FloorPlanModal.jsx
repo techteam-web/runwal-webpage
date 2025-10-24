@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 /**
- * Updated FloorPlanModal with minimal data structure
+ * Updated FloorPlanModal with zoom functionality
  * Props:
  * - floor: { id, plans: [] }
  * - highlight: { id, name, planImages: [] }
@@ -101,20 +102,82 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
           </svg>
         </button>
 
-        {/* Main Image area */}
+        {/* Main Image area with Zoom */}
         <div className="relative h-[70vh] flex items-center justify-center bg-[#FFF7EA]">
-          <img
-            src={images[currentImageIndex]}
-            alt={`${titlePrefix} ${currentImageIndex + 1}`}
-            className="max-w-full max-h-full object-contain"
-            loading="lazy"
-            onLoad={() => console.log(`Image loaded: ${images[currentImageIndex]}`)}
-          />
+          <TransformWrapper
+            initialScale={1}
+            minScale={1}
+            maxScale={4}
+            centerOnInit={true}
+            wheel={{ step: 0.1 }}
+            doubleClick={{ mode: "reset" }}
+            panning={{ velocityDisabled: true }}
+          >
+            {({ zoomIn, zoomOut, resetTransform }) => (
+              <>
+                {/* Zoom Controls */}
+                <div className="absolute top-4 left-4 z-40 flex flex-col gap-2">
+                  <button
+                    onClick={() => zoomIn()}
+                    className="w-10 h-10 bg-white/90 hover:bg-white text-gray-800 rounded-lg shadow-lg flex items-center justify-center transition-all hover:scale-105"
+                    aria-label="Zoom in"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => zoomOut()}
+                    className="w-10 h-10 bg-white/90 hover:bg-white text-gray-800 rounded-lg shadow-lg flex items-center justify-center transition-all hover:scale-105"
+                    aria-label="Zoom out"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => resetTransform()}
+                    className="w-10 h-10 bg-white/90 hover:bg-white text-gray-800 rounded-lg shadow-lg flex items-center justify-center transition-all hover:scale-105"
+                    aria-label="Reset zoom"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
+                </div>
+
+                <TransformComponent
+                  wrapperStyle={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  contentStyle={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <img
+                    src={images[currentImageIndex]}
+                    alt={`${titlePrefix} ${currentImageIndex + 1}`}
+                    className="max-w-full max-h-full object-contain select-none"
+                    loading="lazy"
+                    draggable={false}
+                  />
+                </TransformComponent>
+              </>
+            )}
+          </TransformWrapper>
 
           {/* Golden Level Label */}
           <div
             className="
-              absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-20 select-none
+              absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-20 select-none pointer-events-none
               text-transparent bg-clip-text
               font-extrabold leading-tight
               px-2 md:px-3
@@ -135,7 +198,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
             <>
               <button
                 onClick={() => setCurrentImageIndex((i) => (i - 1 + images.length) % images.length)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 z-30"
                 aria-label="Previous image"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,7 +207,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
               </button>
               <button
                 onClick={() => setCurrentImageIndex((i) => (i + 1) % images.length)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 z-30"
                 aria-label="Next image"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
