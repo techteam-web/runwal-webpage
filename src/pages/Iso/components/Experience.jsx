@@ -502,7 +502,7 @@ const Experience = () => {
           // backgroundColor: "rgba(103,84,48,0.3)",
         }}
       >
-        
+        <a href="/home">
         <button
           onMouseEnter={(e) => rippleMouseMove(e, e.currentTarget)}
           onMouseLeave={(e) => rippleMouseLeave(e, e.currentTarget)}
@@ -517,6 +517,7 @@ const Experience = () => {
             }
             // handleDirect(ind); // 🔑 instead of switchTo(ind)
           }}
+          
           className={`dropbox-btn  uppercase overflow-hidden text-shadow-lg p-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer relative 
                   max-sm:px-1 max-sm:p-0.5 max-sm:text-[8px] 
                   max-md:px-2 max-md:p-1 max-md:text-[10px] 
@@ -533,6 +534,7 @@ const Experience = () => {
         >
           Go Back
         </button>
+        </a>
       </div>
     </>
   );

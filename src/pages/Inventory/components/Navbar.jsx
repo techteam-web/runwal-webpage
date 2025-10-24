@@ -15,6 +15,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, selecte
   }, [isDuplexActive, selectedFloor]);
 
   const floors = [
+    {id:"home", label:"Home"},
     { id: "1", label: "Exclusive Club" },
     { id: "duplex", label: "Duplex" },
     { id: "4", label: "Parking Levels" },
