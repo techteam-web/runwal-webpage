@@ -1,6 +1,7 @@
 // FloorSelectionModal.jsx
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { DEFAULT_PLAN_IMAGES } from "../data";
 
 export default function FloorSelectionModal({ 
   show, 
@@ -11,8 +12,8 @@ export default function FloorSelectionModal({
   preSelectedFloor = null, 
   lockedFloor = null 
 }) {
-  // Smart selection state - max 2 apartment types
-  const [selectedFloorsByType, setSelectedFloorsByType] = useState({});
+  // ✅ NEW: Simple comparison state - max 2 floors (any floors, not type-based)
+  const [selectedFloors, setSelectedFloors] = useState([]);
   const [activeHighlight, setActiveHighlight] = useState(null);
   const [hoverHighlight, setHoverHighlight] = useState(null);
   const [hoveredFloor, setHoveredFloor] = useState(null);
@@ -20,18 +21,14 @@ export default function FloorSelectionModal({
   
   const svgRef = useRef(null);
 
-  // ✅ Initialize with locked floor or pre-selected floor
+  // ✅ Initialize with locked floor
   useEffect(() => {
     if (show && lockedFloor) {
-      setSelectedFloorsByType({
-        [lockedFloor.info.bhk]: lockedFloor
-      });
+      setSelectedFloors([lockedFloor]);
     } else if (show && preSelectedFloor) {
-      setSelectedFloorsByType({
-        [preSelectedFloor.info.bhk]: preSelectedFloor
-      });
-    } else if (show && !preSelectedFloor && !lockedFloor) {
-      setSelectedFloorsByType({});
+      setSelectedFloors([preSelectedFloor]);
+    } else if (show) {
+      setSelectedFloors([]);
     }
   }, [show, preSelectedFloor, lockedFloor]);
 
@@ -57,142 +54,97 @@ export default function FloorSelectionModal({
     }
   };
 
-  // ✅ Get opposite apartment type
-  const getOppositeType = (type) => {
-    return type === 'Duplex' ? 'Duplex-R' : 'Duplex';
-  };
+  // ✅ NEW: Simple floor toggle - max 2 floors
+  // ✅ FIXED: Smart floor toggle - replace second floor instead of deselect
+const handleFloorToggle = (floor) => {
+  // Check if this floor is already selected
+  const isSelected = selectedFloors.some(f => f.id === floor.id);
+  
+  // If it's the locked floor, don't allow deselection
+  if (lockedFloor && floor.id === lockedFloor.id) {
+    return;
+  }
 
-  // ✅ UPDATED: Smart floor selection with locked floor logic
-  const handleFloorToggle = (floor) => {
-    // If there's a locked floor, prevent selecting same type
-    if (lockedFloor && floor.info.bhk === lockedFloor.info.bhk) {
-      return; // Cannot select same type as locked floor
-    }
-
-    const apartmentType = floor.info.bhk;
-    
-    setSelectedFloorsByType(prev => {
-      const newState = { ...prev };
-      
-      // ✅ Always keep locked floor in selection
-      if (lockedFloor) {
-        newState[lockedFloor.info.bhk] = lockedFloor;
-      }
-      
-      // ✅ Check if clicking the SAME floor again (toggle off)
-      if (newState[apartmentType]?.id === floor.id) {
-        // Remove the apartment type completely
-        delete newState[apartmentType];
-        return newState;
-      }
-      
-      // ✅ Check if apartment type exists but different floor (update)
-      if (newState[apartmentType]) {
-        // Update existing apartment type with new floor
-        newState[apartmentType] = floor;
-      } else {
-        // ✅ Add new apartment type (max 2 types total)
-        const currentTypes = Object.keys(newState);
-        if (currentTypes.length < 2) {
-          newState[apartmentType] = floor;
+  if (isSelected) {
+    // Remove floor from selection (only if not locked)
+    setSelectedFloors(prev => prev.filter(f => f.id !== floor.id));
+  } else {
+    // ✅ NEW LOGIC: If 2 floors already selected, replace the non-locked one
+    if (selectedFloors.length === 2) {
+      // Find which floor is NOT the locked floor and replace it
+      setSelectedFloors(prev => {
+        const lockedFloorInSelection = prev.find(f => lockedFloor && f.id === lockedFloor.id);
+        const otherFloor = prev.find(f => !lockedFloor || f.id !== lockedFloor.id);
+        
+        // Keep locked floor, replace the other one
+        if (lockedFloorInSelection) {
+          return [lockedFloorInSelection, floor];
+        } else {
+          // If no locked floor, replace the second floor (index 1)
+          return [prev[0], floor];
         }
-      }
-      
-      return newState;
-    });
-    
-    // Haptic feedback on mobile
-    if ('vibrate' in navigator) navigator.vibrate(30);
-  };
+      });
+    } else if (selectedFloors.length === 1) {
+      // Add as second floor
+      setSelectedFloors(prev => [...prev, floor]);
+    } else {
+      // First floor selection
+      setSelectedFloors([floor]);
+    }
+  }
+  
+  // Haptic feedback on mobile
+  if ('vibrate' in navigator) navigator.vibrate(30);
+};
 
-  // ✅ UPDATED: Remove apartment type (prevent removing locked floor)
-  const removeApartmentType = (apartmentType) => {
+
+  // ✅ NEW: Remove specific floor
+  const removeFloor = (floorId) => {
     // Prevent removing locked floor
-    if (lockedFloor && apartmentType === lockedFloor.info.bhk) {
+    if (lockedFloor && floorId === lockedFloor.id) {
       return;
     }
     
-    setSelectedFloorsByType(prev => {
-      const newState = { ...prev };
-      delete newState[apartmentType];
-      return newState;
-    });
+    setSelectedFloors(prev => prev.filter(f => f.id !== floorId));
   };
 
-  // ✅ UPDATED: Clear all selections (keep locked floor)
+  // ✅ NEW: Clear all selections (keep locked floor)
   const clearAllSelections = () => {
     if (lockedFloor) {
-      setSelectedFloorsByType({
-        [lockedFloor.info.bhk]: lockedFloor
-      });
+      setSelectedFloors([lockedFloor]);
     } else {
-      setSelectedFloorsByType({});
+      setSelectedFloors([]);
     }
   };
 
-  // Get selected floors array for SVG highlighting
-  const selectedFloorsArray = Object.values(selectedFloorsByType);
-
-  // ✅ FIXED: Floor fill color with proper locked floor logic
+  // ✅ NEW: Floor fill color
   const getFloorFillColor = (floor) => {
-    const isSelected = selectedFloorsArray.some(f => f.id === floor.id);
-    const isCompareSelected = selectedFloorsForCompare.some(f => f.id === floor.id);
+    const isSelected = selectedFloors.some(f => f.id === floor.id);
     const isHovered = hoveredFloor === floor.id;
-    const apartmentType = floor.info.bhk;
-    const isLocked = lockedFloor && lockedFloor.id === floor.id; // ✅ FIXED: Proper isLocked detection
+    const isLocked = lockedFloor && lockedFloor.id === floor.id;
 
-    // ✅ Locked floor - always golden and prominent
+    // Locked floor - always golden and prominent
     if (isLocked) {
-      return "rgba(208, 170, 45, 0.7)"; // Bright golden for locked floor
+      return "rgba(208, 170, 45, 0.7)";
     }
     
-    // ✅ If there's a locked floor, apply selective highlighting
-    if (lockedFloor) {
-      const oppositeType = getOppositeType(lockedFloor.info.bhk);
-      
-      // Highlight only opposite type floors
-      if (apartmentType === oppositeType) {
-        if (isSelected) {
-          return "rgba(59, 130, 246, 0.7)"; // Blue for selected opposite type
-        }
-        if (isHovered) {
-          return "rgba(59, 130, 246, 0.4)"; // Light blue on hover
-        }
-        return "rgba(59, 130, 246, 0.3)"; // Available for selection
-      } else {
-        // Dim same type floors (not selectable)
-        return "rgba(0, 0, 0, 0.15)"; // Very dim black
-      }
-    }
-
-    // Default coloring (when no locked floor)
-    const getTypeColor = (type, opacity = 0.4) => {
-      if (type === 'Duplex') {
-        return `rgba(102,153,204, ${opacity})`;
-      }
-      if (type === 'Duplex-R') {
-        return `rgba(245,245,245, ${opacity})`;
-      }
-      return `rgba(0, 0, 0, 0.22)`;
-    };
-    
-    // Hover effect (highest priority)
-    if (isHovered && !isSelected) {
-      return getTypeColor(apartmentType, 0.3); // Lighter on hover
-    }
-    
-    // Selected floors
+    // Selected floor
     if (isSelected) {
-      return "rgba(208, 170, 45, 0.8)"; // Golden when selected
+      return "rgba(59, 130, 246, 0.7)"; // Blue for selected
     }
     
-    // Compare selection
-    if (isCompareSelected) {
-      return "rgba(59, 130, 246, 0.6)"; // Blue for compare selection
+    // Hovered floor
+    if (isHovered && selectedFloors.length < 2) {
+      return "rgba(59, 130, 246, 0.4)"; // Light blue on hover
     }
     
-    // Default state - show apartment type color
-    return getTypeColor(apartmentType, 0.4);
+    // Available for selection
+    if (selectedFloors.length < 2) {
+      return "rgba(0, 0, 0, 0.22)"; // Default semi-transparent
+    }
+    
+    // Not available (already 2 selected)
+    return "rgba(0, 0, 0, 0.10)"; // Very dim
   };
 
   // Render category overlays
@@ -220,19 +172,14 @@ export default function FloorSelectionModal({
     });
   };
 
-  // ✅ Updated to return multiple images per apartment type
-  const getFloorPlanImages = (apartmentType) => {
-    const floorPlans = {
-      'Duplex': ['/floor-plans/Duplex1.webp', '/floor-plans/Duplex2.webp'],
-      'Duplex-R': ['/floor-plans/DuplexR1.webp', '/floor-plans/DuplexR2.webp']
-    };
-    return floorPlans[apartmentType] || ['/floor-plans/default-plan.webp'];
+  // ✅ NEW: Get floor plan images (using DEFAULT_PLAN_IMAGES)
+  const getFloorPlanImages = () => {
+    return DEFAULT_PLAN_IMAGES || ['/floor-plans/default-plan.webp'];
   };
 
   if (!show) return null;
 
-  const selectedTypes = Object.keys(selectedFloorsByType);
-  const hasSelections = selectedTypes.length > 0;
+  const hasSelections = selectedFloors.length > 0;
 
   return createPortal(
     <div className="fixed inset-0 bg-transparent backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50" style={{ fontFamily: 'Zap, sans-serif' }}>
@@ -282,9 +229,9 @@ export default function FloorSelectionModal({
                 <h3 className="text-2xl font-bold text-gray-900">Floor Plan Comparison</h3>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-gray-600">
-                    {selectedTypes.length}/2 apartment types
+                    {selectedFloors.length}/2 floors selected
                   </span>
-                  {hasSelections && (
+                  {hasSelections && selectedFloors.length > 1 && (
                     <button
                       onClick={clearAllSelections}
                       className="text-sm cursor-pointer text-red-600 hover:text-red-800 font-medium"
@@ -295,28 +242,24 @@ export default function FloorSelectionModal({
                 </div>
               </div>
 
-              {/* ✅ NEW: Locked Comparison Info */}
-              
-
               {hasSelections ? (
                 <div className="min-h-0">
-                  {/* Floor Plans Grid - ✅ Responsive: vertical on small screens */}
-                  <div className={`grid gap-6 h-full ${selectedTypes.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
-                    {selectedTypes.map(apartmentType => {
-                      const floor = selectedFloorsByType[apartmentType];
-                      const images = getFloorPlanImages(apartmentType);
-                      const currentIndex = currentImageIndex[apartmentType] || 0;
+                  {/* Floor Plans Grid */}
+                  <div className={`grid gap-6 h-full ${selectedFloors.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+                    {selectedFloors.map((floor, index) => {
+                      const images = getFloorPlanImages();
+                      const currentIndex = currentImageIndex[floor.id] || 0;
                       const isLockedFloor = lockedFloor && lockedFloor.id === floor.id;
                       
                       return (
-                        <div key={apartmentType} className={`bg-[#d9d4c7] shadow-sm relative overflow-hidden flex flex-col `}>
+                        <div key={floor.id} className="bg-[#d9d4c7] shadow-sm relative overflow-hidden flex flex-col">
                           
-                          {/* ✅ UPDATED: Remove Button - disabled for locked floor */}
-                          {!isLockedFloor ? (
+                          {/* Remove Button */}
+                          {!isLockedFloor && (
                             <button
-                              onClick={() => removeApartmentType(apartmentType)}
+                              onClick={() => removeFloor(floor.id)}
                               className="absolute top-2 right-2 w-6 h-6 hover:opacity-75 transition-opacity cursor-pointer z-10"
-                              aria-label={`Remove ${apartmentType}`}
+                              aria-label={`Remove Floor ${floor.id}`}
                             >
                               <svg 
                                 className="w-full h-full"
@@ -325,42 +268,34 @@ export default function FloorSelectionModal({
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <g clipPath="url(#clip0_1461_82)">
-                                  <path d="M17.0973 16.0673L17.43 16.2742L17.4968 16.3391L18.1604 16.9249L19.2386 17.9315L19.5791 18.2794L19.9117 18.627L20.5783 19.2988L20.9275 19.6314L21.2762 19.9718L21.9875 20.6843L22.3197 21.0397L22.6602 21.3876L23.2847 21.972L24.0325 22.592L24.8145 23.2991L25.1554 23.6392L25.5041 23.9796L26.201 24.6681L26.8828 25.3483L27.5651 26.0207L28.2625 26.7015C28.4999 26.9332 28.7356 27.1673 28.9664 27.4059L29.3064 27.7616L29.6391 28.1092L30.2996 28.7496L30.6488 29.0822L31.0057 29.415L31.7118 30.0804L32.0688 30.4133L32.4179 30.7458C32.643 30.9583 32.8763 31.1687 33.1105 31.3717L33.8418 32.0067C34.108 32.2374 34.3626 32.4834 34.6069 32.7367L34.9473 33.0846L35.28 33.4323L35.9605 34.1359L36.2931 34.4835L36.6336 34.8314L37.2794 35.4556L37.6372 35.7729L38.0024 36.0982L38.7523 36.8198L39.0928 37.1677L39.4254 37.5154L40.0925 38.1794L40.4416 38.512L40.7903 38.8524L41.4678 39.4699L42.1991 40.1049L42.9576 40.8112L43.3063 41.1516L43.6472 41.4917L44.3364 42.18L44.6851 42.5203L45.026 42.8604C45.2506 43.0839 45.4352 43.2669 45.5825 43.4034L45.8206 43.6227L46.2226 43.9884L46.2374 44.0045L46.3115 44.0774L46.5284 44.3976C46.6788 44.754 46.6097 45.1831 46.3192 45.4845C46.0273 47.7861 45.5966 45.8737 45.2334 45.7359L44.9007 45.529L44.8491 45.4725L44.4475 45.099L44.4397 45.0987L44.2016 44.8794C44.0326 44.7228 43.8325 44.5266 43.6005 44.2958L43.2522 43.9477L42.9113 43.6076L42.2217 42.9271L41.8808 42.587L41.5321 42.2466L40.8702 41.6296L40.5046 41.3121L40.1394 40.9868L39.38 40.2961L39.0308 39.9635L38.6821 39.6232L37.9782 38.9187L37.6377 38.5708L37.3051 38.2232L36.6515 37.5987L36.2859 37.2812L35.9285 36.9561L35.1708 36.2342L34.8381 35.8866L34.4981 35.5309L33.825 34.8354L33.4923 34.4877L33.1518 34.1398C32.9479 33.9282 32.7353 33.7242 32.513 33.5315L31.7817 32.8964C31.5268 32.6755 31.2747 32.4451 31.0297 32.2138L30.6727 31.881L30.3236 31.5484L29.6175 30.883L29.2679 30.5582L28.911 30.2254L28.184 29.5123L27.8514 29.1647L27.5114 28.809C27.2937 28.5839 27.0683 28.3635 26.8443 28.1449L26.5034 27.8048L26.1547 27.4645L25.4577 26.7759L25.109 26.4356L24.0863 25.4153L23.7376 25.0749L23.3967 24.7348L22.7336 24.1412L21.9858 23.5212L21.1978 22.7826L20.8573 22.4347L20.5251 22.0793L19.8658 21.4155L19.5167 21.083L19.168 20.7426L18.4641 20.0382L18.1236 19.6903L17.7909 19.3426L16.809 18.4332L16.1233 17.8232L16.0938 17.7909L16.0192 17.7258L15.8024 17.4056C15.6509 17.0483 15.7199 16.6128 16.012 16.3109C16.304 16.0105 16.7347 15.9295 17.0973 16.0673Z" fill="black"/>
+                                  <path d="M17.0973 16.0673L17.43 16.2742L17.4968 16.3391L18.1604 16.9249L19.2386 17.9315L19.5791 18.2794L19.9117 18.627L20.5783 19.2988L20.9275 19.6314L21.2762 19.9718L21.9875 20.6843L22.3197 21.0397L22.6602 21.3876L23.2847 21.972L24.0325 22.592L24.8145 23.2991L25.1554 23.6392L25.5041 23.9796L26.201 24.6681L26.8828 25.3483L27.5651 26.0207L28.2625 26.7015C28.4999 26.9332 28.7356 27.1673 28.9664 27.4059L29.3064 27.7616L29.6391 28.1092L30.2996 28.7496L30.6488 29.0822L31.0057 29.415L31.7118 30.0804L32.0688 30.4133L32.4179 30.7458C32.643 30.9583 32.8763 31.1687 33.1105 31.3717L33.8418 32.0067C34.108 32.2374 34.3626 32.4834 34.6069 32.7367L34.9473 33.0846L35.28 33.4323L35.9605 34.1359L36.2931 34.4835L36.6336 34.8314L37.2794 35.4556L37.6372 35.7729L38.0024 36.0982L38.7523 36.8198L39.0928 37.1677L39.4254 37.5154L40.0925 38.1794L40.4416 38.512L40.7903 38.8524L41.4678 39.4699L42.1991 40.1049L42.9576 40.8112L43.3063 41.1516L43.6472 41.4917L44.3364 42.18L44.6851 42.5203L45.026 42.8604C45.2506 43.0839 45.4352 43.2669 45.5825 43.4034L45.8206 43.6227L46.2226 43.9884L46.2374 44.0045L46.3115 44.0774L46.5284 44.3976C46.6788 44.754 46.6097 45.1831 46.3192 45.4845C46.0273 45.7861 45.5966 45.8737 45.2334 45.7359L44.9007 45.529L44.8491 45.4725L44.4475 45.099L44.4397 45.0987L44.2016 44.8794C44.0326 44.7228 43.8325 44.5266 43.6005 44.2958L43.2522 43.9477L42.9113 43.6076L42.2217 42.9271L41.8808 42.587L41.5321 42.2466L40.8702 41.6296L40.5046 41.3121L40.1394 40.9868L39.38 40.2961L39.0308 39.9635L38.6821 39.6232L37.9782 38.9187L37.6377 38.5708L37.3051 38.2232L36.6515 37.5987L36.2859 37.2812L35.9285 36.9561L35.1708 36.2342L34.8381 35.8866L34.4981 35.5309L33.825 34.8354L33.4923 34.4877L33.1518 34.1398C32.9479 33.9282 32.7353 33.7242 32.513 33.5315L31.7817 32.8964C31.5268 32.6755 31.2747 32.4451 31.0297 32.2138L30.6727 31.881L30.3236 31.5484L29.6175 30.883L29.2679 30.5582L28.911 30.2254L28.184 29.5123L27.8514 29.1647L27.5114 28.809C27.2937 28.5839 27.0683 28.3635 26.8443 28.1449L26.5034 27.8048L26.1547 27.4645L25.4577 26.7759L25.109 26.4356L24.0863 25.4153L23.7376 25.0749L23.3967 24.7348L22.7336 24.1412L21.9858 23.5212L21.1978 22.7826L20.8573 22.4347L20.5251 22.0793L19.8658 21.4155L19.5167 21.083L19.168 20.7426L18.4641 20.0382L18.1236 19.6903L17.7909 19.3426L16.809 18.4332L16.1233 17.8232L16.0938 17.7909L16.0192 17.7258L15.8024 17.4056C15.6509 17.0483 15.7199 16.6128 16.012 16.3109C16.304 16.0105 16.7347 15.9295 17.0973 16.0673Z" fill="black"/>
                                 </g>
                               </svg>
                             </button>
-                          ) : (
-                            // ✅ NEW: Locked indicator
-                            <div className="">
-                             
-                            </div>
                           )}
 
-                          {/* ✅ UPDATED: Floor Plan Header */}
+                          {/* Floor Plan Header */}
                           <div className={`p-4 border-b ${isLockedFloor ? 'bg-amber-50 border-amber-200' : 'border-gray-200'} flex-shrink-0`}>
                             <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-[#d0aa2d] text-xl uppercase tracking-wide">{apartmentType}</h4>
-                              
+                              <h4 className="font-bold text-[#d0aa2d] text-xl uppercase tracking-wide">
+                                {floor.id}
+                              </h4>
+                              {isLockedFloor && (
+                                <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+                                  🔒 Locked
+                                </span>
+                              )}
                             </div>
-                            <p className="text-sm text-gray-600 mt-1">Floor {floor.info.floorNumber}</p>
-                            <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                              <span>{floor.info.price}</span>
-                              <span>{floor.info.area}</span>
-                              <span className={`px-2 py-1 rounded-full ${
-                                String(floor.info.availability || '').toLowerCase() === "true" || floor.info.availability === true
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {String(floor.info.availability || '').toLowerCase() === "true" || floor.info.availability === true ? 'Available' : 'Sold'}
-                              </span>
-                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {floor.bhk || 'Standard Floor Plan'}
+                            </p>
                           </div>
 
-                          {/* Floor Plan Image Carousel - ✅ Fixed spacing, full container fit */}
+                          {/* Floor Plan Image Carousel */}
                           <div className="relative bg-gray-100 flex-1 min-h-0">
                             <img
                               src={images[currentIndex]}
-                              alt={`${apartmentType} Floor Plan - Image ${currentIndex + 1}`}
+                              alt={`Floor ${floor.id} Plan - Image ${currentIndex + 1}`}
                               className="w-full h-full object-contain"
                               loading="lazy"
                               onError={(e) => {
@@ -368,42 +303,39 @@ export default function FloorSelectionModal({
                               }}
                             />
                             
-                            {/* Carousel Controls - Only show if multiple images */}
+                            {/* Carousel Controls */}
                             {images.length > 1 && (
                               <>
-                                {/* Previous Button */}
                                 <button
                                   onClick={() => setCurrentImageIndex(prev => ({
                                     ...prev,
-                                    [apartmentType]: currentIndex > 0 ? currentIndex - 1 : images.length - 1
+                                    [floor.id]: currentIndex > 0 ? currentIndex - 1 : images.length - 1
                                   }))}
                                   className="absolute left-2 top-1/2 transform -translate-y-1/2 backdrop-blur-md bg-opacity-50 text-[#d0aa2d] w-8 h-8 rounded-full flex items-center justify-center hover:bg-opacity-75 transition-opacity cursor-pointer"
                                 >
                                   <span className="text-lg">‹</span>
                                 </button>
                                 
-                                {/* Next Button */}
                                 <button
                                   onClick={() => setCurrentImageIndex(prev => ({
                                     ...prev,
-                                    [apartmentType]: currentIndex < images.length - 1 ? currentIndex + 1 : 0
+                                    [floor.id]: currentIndex < images.length - 1 ? currentIndex + 1 : 0
                                   }))}
                                   className="absolute right-2 top-1/2 transform -translate-y-1/2 backdrop-blur-md bg-opacity-50 text-[#d0aa2d] w-8 h-8 rounded-full flex items-center justify-center hover:bg-opacity-75 transition-opacity cursor-pointer"
                                 >
                                   <span className="text-lg">›</span>
                                 </button>
                                 
-                                {/* Dot Indicators */}
                                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                                  {images.map((_, index) => (
+                                  {images.map((_, idx) => (
                                     <button
-                                      key={index}
+                                      key={idx}
                                       onClick={() => setCurrentImageIndex(prev => ({
                                         ...prev,
-                                        [apartmentType]: index
+                                        [floor.id]: idx
                                       }))}
                                       className={`w-3 h-3 rounded-full transition-colors ${
-                                        index === currentIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                                        idx === currentIndex ? 'bg-white' : 'bg-white bg-opacity-50'
                                       }`}
                                     />
                                   ))}
@@ -419,12 +351,12 @@ export default function FloorSelectionModal({
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <h4 className="text-xl font-semibold text-gray-700 mb-2">
-                    {lockedFloor ? 'Select Comparison Floor' : 'Select Apartment Types to Compare'}
+                    {lockedFloor ? 'Select Another Floor to Compare' : 'Select Floors to Compare'}
                   </h4>
                   <p className="text-gray-500 max-w-md">
                     {lockedFloor 
-                      ? `Select a ${getOppositeType(lockedFloor.info.bhk)} floor to compare with your locked ${lockedFloor.info.bhk} selection.`
-                      : 'Click on floors in the building to view their apartment types. You can compare up to 2 different apartment types (Duplex vs Duplex-R).'
+                      ? 'Click on any floor in the building to compare with your selected floor.'
+                      : 'Click on any two floors in the building to view their floor plans side by side.'
                     }
                   </p>
                 </div>
@@ -437,9 +369,6 @@ export default function FloorSelectionModal({
             <div className="h-full p-4">
               <div className="h-full flex flex-col">
                 
-                {/* ✅ NEW: Building Header with locked floor info */}
-                
-
                 {/* Building SVG */}
                 <div className="flex-1 flex items-center justify-center min-h-0">
                   <svg
@@ -471,11 +400,7 @@ export default function FloorSelectionModal({
                           id={floor.id}
                           d={floor.d}
                           fill={getFloorFillColor(floor)}
-                          className={`transition-colors duration-200 ${
-                            lockedFloor && floor.info.bhk === lockedFloor.info.bhk && floor.id !== lockedFloor.id 
-                              ? '' 
-                              : 'cursor-pointer'
-                          }`}
+                          className="transition-colors duration-200 cursor-pointer"
                           onMouseEnter={() => {
                             const isMobile = window.matchMedia('(hover:none)').matches;
                             if (!isMobile) setHoveredFloor(floor.id);

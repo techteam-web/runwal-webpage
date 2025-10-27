@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
+
 /**
  * Updated FloorPlanModal with zoom functionality
  * Props:
@@ -15,15 +16,18 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
   const overlayRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+
   // ✅ UPDATED: Use plans array from floor or planImages from highlight
   const isHighlight = !!highlight && !floor;
   const images = isHighlight
     ? (highlight?.planImages || [])
     : (floor?.plans || []);
 
+
   const titlePrefix = isHighlight
     ? (highlight?.name || "Plans")
     : (floor?.id ? `Floor Plan` : "Plans");
+
 
   useEffect(() => {
     if (modalRef.current && overlayRef.current) {
@@ -33,6 +37,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
       gsap.to(modalRef.current, { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" });
     }
   }, []);
+
 
   const handleClose = () => {
     gsap.to(modalRef.current, {
@@ -44,6 +49,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.2 });
   };
 
+
   // ✅ Handle opening comparison modal
   const handleOpenComparison = () => {
     gsap.to(modalRef.current, {
@@ -54,6 +60,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     });
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.2 });
   };
+
 
   if (!images || images.length === 0) {
     return (
@@ -80,6 +87,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     );
   }
 
+
   return (
     <div
       ref={overlayRef}
@@ -101,6 +109,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
+
 
         {/* Main Image area with Zoom */}
         <div className="relative h-[70vh] flex items-center justify-center bg-[#FFF7EA]">
@@ -146,6 +155,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
                   </button>
                 </div>
 
+
                 <TransformComponent
                   wrapperStyle={{
                     width: '100%',
@@ -174,6 +184,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
             )}
           </TransformWrapper>
 
+
           {/* Golden Level Label */}
           <div
             className="
@@ -192,6 +203,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
           >
             Level {currentImageIndex + 1}
           </div>
+
 
           {/* Arrows */}
           {images.length > 1 && (
@@ -218,11 +230,23 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
           )}
         </div>
 
-        {/* Dots */}
+
+        {/* ✅ UPDATED: Dots and Compare Button in same container */}
         {images.length > 1 && (
-          <div className="py-4 bg-[#FFF7EA] border-t border-gray-100">
+          <div className="py-4 px-6 bg-[#FFF7EA] border-t border-gray-100 flex items-center justify-between">
+            
+            {/* Compare Button on the left */}
+            {!isHighlight && onOpenComparison && (
+              <button
+                onClick={handleOpenComparison}
+                className="px-4 py-2 bg-[#d0aa2d] hover:bg-[#b8952a] text-white text-sm font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex-shrink-0"
+              >
+                Compare
+              </button>
+            )}
+
             {/* Centered Dots */}
-            <div className="flex items-center justify-center space-x-3 flex-shrink-0">
+            <div className="flex items-center justify-center space-x-3 flex-1">
               {images.map((_, index) => (
                 <button
                   key={index}
@@ -236,6 +260,23 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
                 />
               ))}
             </div>
+
+            {/* Spacer to balance layout (only when compare button exists) */}
+            {!isHighlight && onOpenComparison && (
+              <div className="w-[88px] flex-shrink-0"></div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ For single image with compare button */}
+        {images.length === 1 && !isHighlight && onOpenComparison && (
+          <div className="py-4 px-6 bg-[#FFF7EA] border-t border-gray-100 flex items-center justify-start">
+            <button
+              onClick={handleOpenComparison}
+              className="px-4 py-2 bg-[#d0aa2d] hover:bg-[#b8952a] text-white text-sm font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              Compare
+            </button>
           </div>
         )}
       </div>
