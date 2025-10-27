@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 
 // ✅ Import local data
 
-
 import FloorPlanModal from "./components/FloorPlanModal";
 import Navbar from "./components/Navbar";
 import FloorSelectionModal from "./components/FloorSelectionModal";
@@ -200,17 +199,62 @@ export default function BuildingOverlay() {
     setIsDuplexActive(false);
   } else if (type === "floor") {
     if (value === "1") {
-      setActiveHighlight(prev => prev === 'wardrobe' ? null : 'wardrobe');
+      // ✅ Exclusive Club (Wardrobe)
+      const isCurrentlyActive = activeHighlight === 'wardrobe';
+      setActiveHighlight(isCurrentlyActive ? null : 'wardrobe');
+      
+      // ✅ Open modal when activating
+      if (!isCurrentlyActive) {
+        const area = HIGHLIGHT_AREAS['wardrobe'];
+        if (area?.planImages && area.planImages.length > 0) {
+          setHighlightPlanModal({
+            id: 'wardrobe',
+            name: area.name,
+            planImages: area.planImages
+          });
+        }
+      }
+      
       setShowFloorPlans(false);
       setSelectedUnit(null);
       setIsDuplexActive(false);
     } else if (value === "4") {
-      setActiveHighlight(prev => prev === 'terrace' ? null : 'terrace');
+      // ✅ Parking Levels (Terrace)
+      const isCurrentlyActive = activeHighlight === 'terrace';
+      setActiveHighlight(isCurrentlyActive ? null : 'terrace');
+      
+      // ✅ Open modal when activating
+      if (!isCurrentlyActive) {
+        const area = HIGHLIGHT_AREAS['terrace'];
+        if (area?.planImages && area.planImages.length > 0) {
+          setHighlightPlanModal({
+            id: 'terrace',
+            name: area.name,
+            planImages: area.planImages
+          });
+        }
+      }
+      
       setShowFloorPlans(false);
       setSelectedUnit(null);
       setIsDuplexActive(false);
     } else if (value === "5") {
-      setActiveHighlight(prev => prev === 'skyclub' ? null : 'skyclub');
+      // ✅ Sky Club
+      const isCurrentlyActive = activeHighlight === 'skyclub';
+      setActiveHighlight(isCurrentlyActive ? null : 'skyclub');
+      
+      // ✅ Open modal when activating
+      if (!isCurrentlyActive) {
+        const area = HIGHLIGHT_AREAS['skyclub'];
+        if (area?.planImages && area.planImages.length > 0) {
+          setHighlightPlanModal({
+            id: 'skyclub',
+            name: area.name,
+            planImages: area.planImages
+          });
+        }
+      }
+      
       setShowFloorPlans(false);
       setSelectedUnit(null);
       setIsDuplexActive(false);
@@ -255,9 +299,13 @@ export default function BuildingOverlay() {
       const area = HIGHLIGHT_AREAS[key];
       if (!area) return null;
 
-      let fill = "rgba(0,0,0,0.10)";
-      if (activeHighlight === key) fill = area.activeFill;
-      else if (hoverHighlight === key) fill = area.hoverFill;
+      // Determine fill based on state priority: active > hover > default
+      let fill = "rgba(0,0,0,0.10)"; // default transparent
+      if (activeHighlight === key) {
+        fill = area.activeFill; // when clicked/active
+      } else if (hoverHighlight === key) {
+        fill = area.hoverFill; // when hovered
+      }
 
       const hasFloorPlan = area.planImages && Array.isArray(area.planImages) && area.planImages.length > 0;
 
@@ -276,6 +324,8 @@ export default function BuildingOverlay() {
                 : "none",
             pointerEvents: hasFloorPlan ? "auto" : "none"
           }}
+          onMouseEnter={() => setHoverHighlight(key)}
+          onMouseLeave={() => setHoverHighlight(null)}
           onClick={hasFloorPlan ? (e) => {
             e.stopPropagation();
             const isMobile = window.matchMedia('(hover: none)').matches;
@@ -378,31 +428,29 @@ export default function BuildingOverlay() {
           </div>
 
           {floorPlanModal && (
-  <FloorPlanModal
-    floor={floorPlanModal}
-    onClose={() => {
-      // ✅ Reset duplex state if closing duplex modal
-      if (floorPlanModal.id === 'duplex') {
-        // ✅ Reset floor fill colors to default
-        if (svgRef.current) {
-          const allFloorPaths = svgRef.current.querySelectorAll('path[id^="floor"]');
-          allFloorPaths.forEach(path => {
-            path.style.fill = "rgba(0, 0, 0, 0.22)";
-          });
-        }
-        
-        // ✅ Reset duplex state
-        setIsDuplexActive(false);
-      }
-      
-      // ✅ Close modal
-      setFloorPlanModal(null);
-    }}
-    onOpenComparison={handleOpenComparison}
-  />
-)}
-
-
+            <FloorPlanModal
+              floor={floorPlanModal}
+              onClose={() => {
+                // ✅ Reset duplex state if closing duplex modal
+                if (floorPlanModal.id === 'duplex') {
+                  // ✅ Reset floor fill colors to default
+                  if (svgRef.current) {
+                    const allFloorPaths = svgRef.current.querySelectorAll('path[id^="floor"]');
+                    allFloorPaths.forEach(path => {
+                      path.style.fill = "rgba(0, 0, 0, 0.22)";
+                    });
+                  }
+                  
+                  // ✅ Reset duplex state
+                  setIsDuplexActive(false);
+                }
+                
+                // ✅ Close modal
+                setFloorPlanModal(null);
+              }}
+              onOpenComparison={handleOpenComparison}
+            />
+          )}
 
           {highlightPlanModal && (
             <FloorPlanModal

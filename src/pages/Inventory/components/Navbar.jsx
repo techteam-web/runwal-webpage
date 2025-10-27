@@ -74,7 +74,7 @@ export default function Navbar({ onSelect, selectedUnit, showFloorPlans, selecte
               cursor: 'pointer',
               textTransform: 'uppercase',
               fontSize: '20px',
-              fontWeight: ((floor.id === "2" && showFloorPlans) || 
+              fontWeight: ((floor.id === "1" && showFloorPlans) || 
                            (floor.id === "duplex" && isDuplexActive) ||
                            selectedFloor === floor.id) ? 'bold' : 'normal',
             }}
