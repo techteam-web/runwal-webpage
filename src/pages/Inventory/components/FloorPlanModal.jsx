@@ -88,7 +88,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     >
       <div
         ref={modalRef}
-        className="relative bg-[#FFF7EA] rounded-2xl shadow-2xl max-w-4xl max-h-[95vh] w-full overflow-hidden"
+        className="relative bg-[#FFF7EA] rounded-2xl shadow-2xl max-w-6xl max-h-[100vh] w-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
