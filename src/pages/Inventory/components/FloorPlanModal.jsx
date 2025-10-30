@@ -15,6 +15,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false); // Track zoom state
 
 
   // ✅ UPDATED: Use plans array from floor or planImages from highlight
@@ -59,6 +60,12 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
       onComplete: () => onOpenComparison?.(floor)
     });
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.2 });
+  };
+
+  // ✅ Track zoom state changes
+  const handleTransform = (ref) => {
+    const scale = ref.instance.transformState.scale;
+    setIsZoomed(scale > 1);
   };
 
 
@@ -121,6 +128,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
             wheel={{ step: 0.1 }}
             doubleClick={{ mode: "reset" }}
             panning={{ velocityDisabled: true }}
+            onTransformed={handleTransform}
           >
             {({ zoomIn, zoomOut, resetTransform }) => (
               <>
@@ -185,24 +193,27 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
           </TransformWrapper>
 
 
-          {/* Golden Level Label */}
-          <div
-            className="
-              absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-20 select-none pointer-events-none
-              text-transparent bg-clip-text
-              font-extrabold leading-tight
-              px-2 md:px-3
-            "
-            style={{
-              fontSize: 'clamp(1.125rem, 2.5vw, 2.125rem)',
-              letterSpacing: '0.06em',
-              backgroundImage: 'linear-gradient(90deg, #D4AF37 0%, #EBD58A 50%, #D4AF37 100%)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text'
-            }}
-          >
-            Level {currentImageIndex + 1}
-          </div>
+          {/* Golden Level Label - Only show when not zoomed in */}
+          {!isZoomed && (
+            <div
+              className="
+                absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-20 select-none pointer-events-none
+                text-transparent bg-clip-text
+                font-extrabold leading-tight
+                px-2 md:px-3
+              "
+              style={{
+                fontSize: 'clamp(1.125rem, 2.5vw, 2.125rem)',
+                letterSpacing: '0.06em',
+                backgroundImage: 'linear-gradient(90deg, #D4AF37 0%, #EBD58A 50%, #D4AF37 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                fontFamily:"Zap"
+              }}
+            >
+              Level {currentImageIndex + 1}
+            </div>
+          )}
 
 
           {/* Arrows */}
@@ -231,22 +242,11 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
         </div>
 
 
-        {/* ✅ UPDATED: Dots and Compare Button in same container */}
+        {/* Dots */}
         {images.length > 1 && (
-          <div className="py-4 px-6 bg-[#FFF7EA] border-t border-gray-100 flex items-center justify-between">
-            
-            {/* Compare Button on the left */}
-            {!isHighlight && onOpenComparison && (
-              <button
-                onClick={handleOpenComparison}
-                className="px-4 py-2 bg-[#d0aa2d] hover:bg-[#b8952a] text-white text-sm font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex-shrink-0"
-              >
-                Compare
-              </button>
-            )}
-
+          <div className="py-4 bg-[#FFF7EA] border-t border-gray-100">
             {/* Centered Dots */}
-            <div className="flex items-center justify-center space-x-3 flex-1">
+            <div className="flex items-center justify-center space-x-3 flex-shrink-0">
               {images.map((_, index) => (
                 <button
                   key={index}
@@ -260,23 +260,6 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
                 />
               ))}
             </div>
-
-            {/* Spacer to balance layout (only when compare button exists) */}
-            {!isHighlight && onOpenComparison && (
-              <div className="w-[88px] flex-shrink-0"></div>
-            )}
-          </div>
-        )}
-
-        {/* ✅ For single image with compare button */}
-        {images.length === 1 && !isHighlight && onOpenComparison && (
-          <div className="py-4 px-6 bg-[#FFF7EA] border-t border-gray-100 flex items-center justify-start">
-            <button
-              onClick={handleOpenComparison}
-              className="px-4 py-2 bg-[#d0aa2d] hover:bg-[#b8952a] text-white text-sm font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              Compare
-            </button>
           </div>
         )}
       </div>
