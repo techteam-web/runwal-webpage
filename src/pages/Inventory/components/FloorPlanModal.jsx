@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
+
 /**
  * Updated FloorPlanModal with zoom functionality
  * Props:
@@ -14,6 +15,8 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false); // Track zoom state
+
 
   // ✅ UPDATED: Use plans array from floor or planImages from highlight
   const isHighlight = !!highlight && !floor;
@@ -21,9 +24,11 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     ? (highlight?.planImages || [])
     : (floor?.plans || []);
 
+
   const titlePrefix = isHighlight
     ? (highlight?.name || "Plans")
     : (floor?.id ? `Floor Plan` : "Plans");
+
 
   useEffect(() => {
     if (modalRef.current && overlayRef.current) {
@@ -33,6 +38,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
       gsap.to(modalRef.current, { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" });
     }
   }, []);
+
 
   const handleClose = () => {
     gsap.to(modalRef.current, {
@@ -44,6 +50,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.2 });
   };
 
+
   // ✅ Handle opening comparison modal
   const handleOpenComparison = () => {
     gsap.to(modalRef.current, {
@@ -54,6 +61,13 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     });
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.2 });
   };
+
+  // ✅ Track zoom state changes
+  const handleTransform = (ref) => {
+    const scale = ref.instance.transformState.scale;
+    setIsZoomed(scale > 1);
+  };
+
 
   if (!images || images.length === 0) {
     return (
@@ -80,6 +94,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
     );
   }
 
+
   return (
     <div
       ref={overlayRef}
@@ -102,6 +117,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
           </svg>
         </button>
 
+
         {/* Main Image area with Zoom */}
         <div className="relative h-[70vh] flex items-center justify-center bg-[#FFF7EA]">
           <TransformWrapper
@@ -112,6 +128,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
             wheel={{ step: 0.1 }}
             doubleClick={{ mode: "reset" }}
             panning={{ velocityDisabled: true }}
+            onTransformed={handleTransform}
           >
             {({ zoomIn, zoomOut, resetTransform }) => (
               <>
@@ -146,6 +163,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
                   </button>
                 </div>
 
+
                 <TransformComponent
                   wrapperStyle={{
                     width: '100%',
@@ -174,24 +192,29 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
             )}
           </TransformWrapper>
 
-          {/* Golden Level Label */}
-          <div
-            className="
-              absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-20 select-none pointer-events-none
-              text-transparent bg-clip-text
-              font-extrabold leading-tight
-              px-2 md:px-3
-            "
-            style={{
-              fontSize: 'clamp(1.125rem, 2.5vw, 2.125rem)',
-              letterSpacing: '0.06em',
-              backgroundImage: 'linear-gradient(90deg, #D4AF37 0%, #EBD58A 50%, #D4AF37 100%)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text'
-            }}
-          >
-            Level {currentImageIndex + 1}
-          </div>
+
+          {/* Golden Level Label - Only show when not zoomed in */}
+          {!isZoomed && (
+            <div
+              className="
+                absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-20 select-none pointer-events-none
+                text-transparent bg-clip-text
+                font-extrabold leading-tight
+                px-2 md:px-3
+              "
+              style={{
+                fontSize: 'clamp(1.125rem, 2.5vw, 2.125rem)',
+                letterSpacing: '0.06em',
+                backgroundImage: 'linear-gradient(90deg, #D4AF37 0%, #EBD58A 50%, #D4AF37 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                fontFamily:"Zap"
+              }}
+            >
+              Level {currentImageIndex + 1}
+            </div>
+          )}
+
 
           {/* Arrows */}
           {images.length > 1 && (
@@ -217,6 +240,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
             </>
           )}
         </div>
+
 
         {/* Dots */}
         {images.length > 1 && (
