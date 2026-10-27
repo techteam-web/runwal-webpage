@@ -23,6 +23,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
   const images = isHighlight
     ? (highlight?.planImages || [])
     : (floor?.plans || []);
+  const labels = (isHighlight ? highlight?.labels : floor?.labels) || [];
 
 
   const titlePrefix = isHighlight
@@ -183,7 +184,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
                   <img
                     src={images[currentImageIndex]}
                     alt={`${titlePrefix} ${currentImageIndex + 1}`}
-                    className="max-w-full max-h-full object-contain select-none"
+                    className="max-w-[calc(100%-10rem)] max-h-[calc(100%-6rem)] mt-10 object-contain select-none"
                     loading="lazy"
                     draggable={false}
                   />
@@ -211,7 +212,7 @@ export default function FloorPlanModal({ floor, highlight, onClose, onOpenCompar
                 fontFamily:"Zap"
               }}
             >
-              Level {currentImageIndex + 1}
+              {labels[currentImageIndex] || `Level ${currentImageIndex + 1}`}
             </div>
           )}
 
